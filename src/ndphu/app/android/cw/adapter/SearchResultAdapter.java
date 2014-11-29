@@ -36,7 +36,7 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			convertView = mInflater.inflate(getLayoutResId(), parent, false);
-			ViewHolder holder = addViewHolder(convertView);
+			ViewHolder holder = createViewHolder(convertView);
 			convertView.setTag(holder);
 		}
 		ViewHolder holder = (ViewHolder) convertView.getTag();
@@ -45,7 +45,7 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 		return convertView;
 	}
 
-	private ViewHolder addViewHolder(View convertView) {
+	private ViewHolder createViewHolder(View convertView) {
 		ViewHolder holder = new ViewHolder();
 		if (this.mDisplayMode == DisplayMode.GRID) {
 			holder.bookName = (TextView) convertView.findViewById(R.id.gridview_item_search_book_item_book_name);
@@ -73,6 +73,11 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 	private void fillDataToItem(final ViewHolder holder, final SearchResult item) {
 		holder.bookName.setText(item.bookName);
 		holder.bookUrl.setText(item.bookLink);
+		if (item.bookLink == null || item.bookLink.isEmpty() || item.bookLink.equals("0")) {
+			holder.bookUrl.setVisibility(View.GONE);
+		} else {
+			holder.bookUrl.setVisibility(View.VISIBLE);
+		}
 		if (mDisplayMode == DisplayMode.GRID) {
 			Picasso.with(getContext()).load(Uri.parse(item.bookCoverLink)).into(holder.cover);
 		}

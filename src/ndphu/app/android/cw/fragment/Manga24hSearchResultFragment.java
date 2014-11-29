@@ -46,7 +46,7 @@ public class Manga24hSearchResultFragment extends Fragment {
 		@Override
 		protected Book doInBackground(Void... params) {
 			try {
-				return mProcessor.prepareOnlineBook(mBookItem.get().bookSource, false);
+				return mProcessor.loadBook(mBookItem.get().bookSource, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

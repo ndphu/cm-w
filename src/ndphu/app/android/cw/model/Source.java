@@ -11,7 +11,7 @@ public class Source {
 	static {
 		synchronized (SOURCES) {
 			SOURCES.add(new Source(MANGA24H, "Manga24h", ""));
-			SOURCES.add(new Source(TRUYENHTRANHTUAN, "TruyenTranhTuan", ""));
+			// SOURCES.add(new Source(TRUYENHTRANHTUAN, "TruyenTranhTuan", ""));
 		}
 	}
 	private int id = 0;

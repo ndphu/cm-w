@@ -1,8 +1,11 @@
 package ndphu.app.android.cw;
 
-import ndphu.app.android.cw.fragment.BookSearchListFragment;
+import ndphu.app.android.cw.fragment.BookDetailsDialogFragment;
+import ndphu.app.android.cw.fragment.BookSearchResultFragment;
+import ndphu.app.android.cw.fragment.BookSearchResultFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
+import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.model.Source;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -15,14 +18,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-	public class MainActivity extends ActionBarActivity implements OnNavigationItemSelected {
+public class MainActivity extends ActionBarActivity implements OnNavigationItemSelected, OnSearchItemSelected {
 	public static final String SOURCE_TRUYENTRANHTUAN = "TRUYENTRANHTUAN";
 	public static final String SOURCE_MANGA24H = "MANGA24H";
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private Toolbar mToolbar;
 	private FragmentManager mFragmentManager;
-	private BookSearchListFragment mBookSearchFragment;
+	private BookSearchResultFragment mSearchResultFragment;
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
@@ -65,21 +68,24 @@ import android.view.MenuItem;
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 		mMenu = menu;
-		mSearchMenuItem = mMenu.findItem(R.id.action_settings);
+		mSearchMenuItem = mMenu.findItem(R.id.action_search);
 		mSearchView = (SearchView) mSearchMenuItem.getActionView();
 		customizeSearchView();
 		return true;
 	}
+	
+	public Menu getMenu() {
+		return this.mMenu;
+	}
 
 	private void customizeSearchView() {
-		mSearchView.setOnQueryTextListener(mBookSearchFragment);
 		mSearchView.setQueryHint("Search on Manga24h");
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		if (id == R.id.action_search) {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -89,17 +95,24 @@ import android.view.MenuItem;
 	public void onItemSelected(int position) {
 		if (position < Source.SOURCES.size()) {
 			// Replace with the search result fragment
-			mBookSearchFragment = new BookSearchListFragment();
-			mFragmentManager.beginTransaction().replace(R.id.content_frame, mBookSearchFragment).commit();
 			Source bookSource = Source.SOURCES.get(position);
-			mBookSearchFragment.setSource(bookSource.getId());
+			mSearchResultFragment = new BookSearchResultFragment(this);
+			mFragmentManager.beginTransaction().replace(R.id.content_frame, mSearchResultFragment).commit();
+			mSearchResultFragment.setSource(bookSource.getId());
 		}
+		mDrawerLayout.closeDrawers();
 	}
-
-
 
 	public Toolbar getToolbar() {
 		return mToolbar;
 
+	}
+
+	@Override
+	public void onSearchItemSelected(SearchResult selectedItem) {
+		if (selectedItem.bookLink != null && selectedItem.bookLink.trim().length() > 0 && !selectedItem.bookLink.trim().equals("0")) {
+			BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment(selectedItem.bookLink);
+			detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
+		}
 	}
 }
