@@ -29,21 +29,33 @@ public class Manga24hProcessor implements BookProcessor {
 	private static final String TAG = Manga24hProcessor.class.getSimpleName();
 
 	@Override
-	public Book prepareOnlineBook(String bookUrl, boolean complete) throws Exception {
+	public Book loadBook(String bookUrl, boolean complete) throws Exception {
 		URL myUrl = new URL(bookUrl);
 		String file = myUrl.getFile();
 		String bookName = file.substring(file.lastIndexOf("/") + 1);
 		String line;
 		String coverUrl = null;
 		String bookDesc = "Load later";
-		List<String> chapters = new ArrayList<String>();
+		List<String[]> chapters = new ArrayList<String[]>();
 		BufferedReader in = new BufferedReader(new InputStreamReader(myUrl.openStream()));
 		while ((line = in.readLine()) != null) {
 			if (line.contains("<img itemprop='image'")) {
 				coverUrl = line.substring(line.lastIndexOf("src=") + 5, line.lastIndexOf("class") - 2);
 			} else if (line.contains("<option value=")) {
-				String chapterUrl = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
-				chapters.add(chapterUrl);
+				String chapterUrl = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("/\">"));
+				String chapterName = line.substring(line.indexOf("\">") + 2, line.lastIndexOf("<"));
+				chapters.add(new String[] { chapterName, chapterUrl });
+			} else if (line.contains("<div class=\"noidung\" itemprop='description'>")) {
+				Log.i(TAG, "Line of book desc");
+				StringBuilder sb = new StringBuilder();
+				while ((line = in.readLine()) != null) {
+					if (line.contains("</div>")) {
+						break;
+					}
+					sb.append(line);
+					sb.append(" ");
+				}
+				bookDesc = sb.toString();
 			}
 		}
 		in.close();
@@ -56,20 +68,20 @@ public class Manga24hProcessor implements BookProcessor {
 		int len = chapters.size();
 		for (int i = 0; i < len; i++) {
 			Chapter chapter = new Chapter();
-			chapter.setChapterUrl(chapters.get(i));
-			chapter.setName(chapters.get(i));
+			chapter.setName(chapters.get(i)[0]);
+			chapter.setChapterUrl(chapters.get(i)[1]);
 			chapter.setChapterOrder(len - i);
-			chapter.setPages(complete ? getChapterPages(chapters.get(i)) : new ArrayList<Page>());
+			chapter.setPages(complete ? getPageList(chapters.get(i)[1]) : new ArrayList<Page>());
 			book.getChapters().add(chapter);
 		}
-
-		Collections.reverse(book.getChapters());
+		// don't reverse anymore
+		// Collections.reverse(book.getChapters());
 
 		return book;
 	}
 
 	@Override
-	public List<Page> getChapterPages(String chapterUrl) throws IOException {
+	public List<Page> getPageList(String chapterUrl) throws IOException {
 		List<Page> pages = new ArrayList<Page>();
 		String chapId = chapterUrl.substring(chapterUrl.indexOf("//") + 2);
 		chapId = chapId.substring(chapId.indexOf("/") + 1);
@@ -102,7 +114,7 @@ public class Manga24hProcessor implements BookProcessor {
 	}
 
 	@Override
-	public List<Book> searchOnline(String token) {
+	public List<Book> search(String token) {
 		String url = String.format(SEARCH_URL_TEMPLATE, token);
 		String response = new String(Utils.getRawDataFromURL(url));
 		List<Book> result = new ArrayList<Book>();
@@ -124,7 +136,7 @@ public class Manga24hProcessor implements BookProcessor {
 	}
 
 	@Override
-	public String getBookCoverLink(String bookUrl) throws Exception {
+	public String getCoverUrl(String bookUrl) throws Exception {
 		Log.i(TAG, "Get cover url requested");
 		URL myUrl = new URL(bookUrl);
 		BufferedReader in = new BufferedReader(new InputStreamReader(myUrl.openStream()));

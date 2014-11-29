@@ -47,7 +47,7 @@ public class TruyenTranhTuanProcessor implements BookProcessor {
 	}
 
 	@Override
-	public Book prepareOnlineBook(String bookUrl, boolean complete) throws Exception {
+	public Book loadBook(String bookUrl, boolean complete) throws Exception {
 		URL myUrl = new URL(bookUrl);
 		String file = myUrl.getFile();
 		String bookName = file.substring(file.lastIndexOf("/") + 1);
@@ -82,7 +82,7 @@ public class TruyenTranhTuanProcessor implements BookProcessor {
 			chapter.setChapterUrl(chapters.get(i));
 			chapter.setName(chapters.get(i));
 			chapter.setChapterOrder(len - i);
-			chapter.setPages(complete ? getChapterPages(chapters.get(i)) : new ArrayList<Page>());
+			chapter.setPages(complete ? getPageList(chapters.get(i)) : new ArrayList<Page>());
 			book.getChapters().add(chapter);
 		}
 
@@ -92,7 +92,7 @@ public class TruyenTranhTuanProcessor implements BookProcessor {
 	}
 
 	@Override
-	public List<Page> getChapterPages(String chapterUrl) throws IOException {
+	public List<Page> getPageList(String chapterUrl) throws IOException {
 		List<Page> pages = new ArrayList<Page>();
 		URL myUrl = new URL(chapterUrl);
 		BufferedReader in = new BufferedReader(new InputStreamReader(myUrl.openStream()));
@@ -133,7 +133,7 @@ public class TruyenTranhTuanProcessor implements BookProcessor {
 	}
 
 	@Override
-	public String getBookCoverLink(String bookUrl) throws Exception {
+	public String getCoverUrl(String bookUrl) throws Exception {
 		URL myUrl = new URL(bookUrl);
 		String line;
 		String coverUrl = null;
@@ -152,7 +152,7 @@ public class TruyenTranhTuanProcessor implements BookProcessor {
 	}
 
 	@Override
-	public List<Book> searchOnline(String token) {
+	public List<Book> search(String token) {
 		// TODO Auto-generated method stub
 		return null;
 	}

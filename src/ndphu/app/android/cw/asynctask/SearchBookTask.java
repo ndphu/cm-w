@@ -51,7 +51,7 @@ public class SearchBookTask extends AsyncTask<Void, Void, List<SearchResult>> {
 
 	@Override
 	protected List<SearchResult> doInBackground(Void... params) {
-		List<Book> bookResult = mBookProcessor.searchOnline(this.mSearchString);
+		List<Book> bookResult = mBookProcessor.search(this.mSearchString);
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		for (Book book : bookResult) {
 			result.add(new SearchResult(book.getName(), book.getBookDesc(), book.getBookUrl(), book.getCover(), Source.SOURCE_MANGA24H));
