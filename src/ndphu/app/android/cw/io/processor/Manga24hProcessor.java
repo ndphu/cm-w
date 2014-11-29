@@ -1,0 +1,145 @@
+package ndphu.app.android.cw.io.processor;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import ndphu.app.android.cw.io.Utils;
+import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Chapter;
+import ndphu.app.android.cw.model.Page;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
+public class Manga24hProcessor implements BookProcessor {
+	private static final String SEARCH_URL_TEMPLATE = "http://manga24h.com/index.php?module=user&act=ajax&feed_truyen2&q=%s";
+	private static final String CHAPTER_PAGE_TEMPLATE = "http://manga24h.com/index.php?module=anime&act=ajax&resource=1&id=%s";
+	private static final String TAG = Manga24hProcessor.class.getSimpleName();
+
+	@Override
+	public Book prepareOnlineBook(String bookUrl, boolean complete) throws Exception {
+		URL myUrl = new URL(bookUrl);
+		String file = myUrl.getFile();
+		String bookName = file.substring(file.lastIndexOf("/") + 1);
+		String line;
+		String coverUrl = null;
+		String bookDesc = "Load later";
+		List<String> chapters = new ArrayList<String>();
+		BufferedReader in = new BufferedReader(new InputStreamReader(myUrl.openStream()));
+		while ((line = in.readLine()) != null) {
+			if (line.contains("<img itemprop='image'")) {
+				coverUrl = line.substring(line.lastIndexOf("src=") + 5, line.lastIndexOf("class") - 2);
+			} else if (line.contains("<option value=")) {
+				String chapterUrl = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""));
+				chapters.add(chapterUrl);
+			}
+		}
+		in.close();
+
+		Book book = new Book();
+		book.setBookUrl(bookUrl);
+		book.setName(bookName);
+		book.setCover(coverUrl);
+		book.setBookDesc(bookDesc);
+		int len = chapters.size();
+		for (int i = 0; i < len; i++) {
+			Chapter chapter = new Chapter();
+			chapter.setChapterUrl(chapters.get(i));
+			chapter.setName(chapters.get(i));
+			chapter.setChapterOrder(len - i);
+			chapter.setPages(complete ? getChapterPages(chapters.get(i)) : new ArrayList<Page>());
+			book.getChapters().add(chapter);
+		}
+
+		Collections.reverse(book.getChapters());
+
+		return book;
+	}
+
+	@Override
+	public List<Page> getChapterPages(String chapterUrl) throws IOException {
+		List<Page> pages = new ArrayList<Page>();
+		String chapId = chapterUrl.substring(chapterUrl.indexOf("//") + 2);
+		chapId = chapId.substring(chapId.indexOf("/") + 1);
+		chapId = chapId.substring(0, chapId.indexOf("/"));
+		Log.e(TAG, chapId);
+		String data = null;
+		String url = String.format(CHAPTER_PAGE_TEMPLATE, chapId);
+		DefaultHttpClient client = new DefaultHttpClient();
+		try {
+			HttpGet get = new HttpGet(url);
+			get.addHeader("X-Requested-With", "XMLHttpRequest");
+			HttpResponse execute = client.execute(get);
+			data = IOUtils.toString(execute.getEntity().getContent());
+			String[] split = data.split("\\|");
+			Log.i(TAG, split.length + " pages");
+			for (String line : split) {
+				if (line == null || line.isEmpty()) {
+					continue;
+				}
+				Page page = new Page();
+				page.setLink(line);
+				page.setPageOrder(0);
+				pages.add(page);
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return pages;
+	}
+
+	@Override
+	public List<Book> searchOnline(String token) {
+		String url = String.format(SEARCH_URL_TEMPLATE, token);
+		String response = new String(Utils.getRawDataFromURL(url));
+		List<Book> result = new ArrayList<Book>();
+		try {
+			JSONArray arr = new JSONArray(response);
+			Log.i(TAG, arr.toString());
+			for (int i = 0; i < arr.length(); ++i) {
+				JSONObject bookJson = arr.getJSONObject(i);
+				Book book = new Book();
+				book.setName(bookJson.getString("text"));
+				book.setBookUrl(bookJson.getString("id"));
+				book.setCover("");
+				result.add(book);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public String getBookCoverLink(String bookUrl) throws Exception {
+		Log.i(TAG, "Get cover url requested");
+		URL myUrl = new URL(bookUrl);
+		BufferedReader in = new BufferedReader(new InputStreamReader(myUrl.openStream()));
+		String line = null;
+		while ((line = in.readLine()) != null) {
+			if (line.contains("<img itemprop='image'")) {
+				in.close();
+				String coverUrl = line.substring(line.lastIndexOf("src=") + 5, line.lastIndexOf("class") - 2);
+				Log.i(TAG, "Got cover url:" + coverUrl);
+				return coverUrl;
+			}
+		}
+		in.close();
+		Log.i(TAG, "Cannot get cover url");
+		return null;
+	}
+
+}
