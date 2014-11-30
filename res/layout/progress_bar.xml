@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/activity_reading_page_loader_indicator_container"
+<ndphu.app.android.cw.customview.LoadingProgressIndicator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cv_loading_progress_indicator_container"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="8dp"
@@ -9,27 +9,29 @@
     android:background="@drawable/shadow" >
 
     <TextView
-        android:id="@+id/activity_reading_page_loader_indicator_textview_progress"
+        android:id="@+id/cv_loading_progress_indicator_textview_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/activity_reading_page_loader_indicator_btn_cancel"
-        android:layout_toStartOf="@+id/activity_reading_page_loader_indicator_btn_cancel" >
+        android:layout_toLeftOf="@+id/cv_loading_progress_indicator_btn_cancel"
+        android:layout_toStartOf="@+id/cv_loading_progress_indicator_btn_cancel" >
     </TextView>
 
     <ProgressBar
-        android:id="@+id/activity_reading_page_loader_indicator_progress_bar"
+        android:id="@+id/cv_loading_progress_indicator_progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/activity_reading_page_loader_indicator_btn_cancel"
-        android:layout_toStartOf="@+id/activity_reading_page_loader_indicator_btn_cancel" />
+        android:layout_toLeftOf="@+id/cv_loading_progress_indicator_btn_cancel"
+        android:layout_toStartOf="@+id/cv_loading_progress_indicator_btn_cancel" 
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"/>
 
     <ImageView
-        android:id="@+id/activity_reading_page_loader_indicator_btn_cancel"
+        android:id="@+id/cv_loading_progress_indicator_btn_cancel"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentEnd="true"
@@ -38,6 +40,7 @@
         android:clickable="true"
         android:contentDescription="@string/cancel_current_progress"
         android:focusable="true"
-        android:src="@drawable/ic_btn_close" android:padding="8dp"/>
+        android:padding="8dp"
+        android:src="@drawable/ic_btn_close" />
 
-</RelativeLayout>
+</ndphu.app.android.cw.customview.LoadingProgressIndicator>

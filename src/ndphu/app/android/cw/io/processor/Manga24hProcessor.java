@@ -98,11 +98,13 @@ public class Manga24hProcessor implements BookProcessor {
 			String[] split = data.split("\\|");
 			Log.i(TAG, split.length + " pages");
 			for (String line : split) {
+				line = line.trim();
 				if (line == null || line.isEmpty()) {
 					continue;
 				}
 				Page page = new Page();
 				page.setLink(line);
+				page.setHashedUrl(ndphu.app.android.cw.util.Utils.getMD5Hash(line));
 				page.setPageOrder(0);
 				pages.add(page);
 			}

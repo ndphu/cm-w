@@ -35,7 +35,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener, OnItemClickListener {
+public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener,
+		OnItemClickListener {
 	private static final String TAG = BookDetailsDialogFragment.class.getSimpleName();
 	private ListView mChapterList;
 	private ChapterAdapter mAdapter;
@@ -46,7 +47,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	private Toolbar mToolbar;
 	private ViewGroup mParentContainer = null;
 
-	public BookDetailsDialogFragment(String bookUrl) {
+	public void setBookUrl(String bookUrl) {
 		mBookUrl = bookUrl;
 	}
 

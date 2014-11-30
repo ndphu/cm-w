@@ -23,7 +23,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class BookSearchResultFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener, OnItemClickListener {
+public class BookSearchResultFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener,
+		OnItemClickListener {
 
 	private int mSourceId;
 	private ListView mListView;
@@ -34,13 +35,9 @@ public class BookSearchResultFragment extends Fragment implements SearchBookTask
 	public void setSource(int id) {
 		this.mSourceId = id;
 	}
-	
+
 	public static interface OnSearchItemSelected {
 		public void onSearchItemSelected(SearchResult selectedItem);
-	}
-	
-	public BookSearchResultFragment(OnSearchItemSelected listener) {
-		mSearchItemSelectedListener = new WeakReference<OnSearchItemSelected>(listener);
 	}
 
 	public void executeSearch(String searchString) {
@@ -65,14 +62,14 @@ public class BookSearchResultFragment extends Fragment implements SearchBookTask
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 	}
-	
+
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		mSearchView = (SearchView)((MainActivity)getActivity()).getMenu().findItem(R.id.action_search).getActionView();
+		mSearchView = (SearchView) ((MainActivity) getActivity()).getMenu().findItem(R.id.action_search)
+				.getActionView();
 		mSearchView.setOnQueryTextListener(this);
 	}
-	
 
 	@Override
 	public void onStart(String searchString) {
@@ -115,5 +112,10 @@ public class BookSearchResultFragment extends Fragment implements SearchBookTask
 		if (mSearchItemSelectedListener.get() != null) {
 			mSearchItemSelectedListener.get().onSearchItemSelected(selectedItem);
 		}
+		((MainActivity) getActivity()).getMenu().findItem(R.id.action_search).collapseActionView();
+	}
+
+	public void setBookSearchListener(OnSearchItemSelected listener) {
+		mSearchItemSelectedListener = new WeakReference<OnSearchItemSelected>(listener);
 	}
 }
