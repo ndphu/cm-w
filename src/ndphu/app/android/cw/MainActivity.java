@@ -7,6 +7,7 @@ import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.model.Source;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -61,6 +62,10 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	protected void onResume() {
 		super.onResume();
+	}
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 
 	@Override

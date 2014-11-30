@@ -15,14 +15,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class LoadingProgressIndicator extends RelativeLayout implements OnClickListener {
-
 	private static final String TAG = LoadingProgressIndicator.class.getSimpleName();
 	private ProgressBar mProgressBar;
 	private TextView mProgressText;
 	private ImageView mCancelBtn;
 
 	private WeakReference<LoadingProgressIndicatorListener> mListener;
-	private int mMax;
 
 	public LoadingProgressIndicator(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -79,10 +77,16 @@ public class LoadingProgressIndicator extends RelativeLayout implements OnClickL
 
 	public void setProgressBarMax(int max) {
 		mProgressBar.setMax(max);
+		updateProgressText();
 	}
 
 	public void setProgressBarProgress(int progress) {
 		mProgressBar.setProgress(progress);
+		updateProgressText();
+	}
+
+	private void updateProgressText() {
+		mProgressText.setText(mProgressBar.getProgress() + "/" + mProgressBar.getMax());
 
 	}
 
