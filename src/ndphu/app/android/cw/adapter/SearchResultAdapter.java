@@ -76,7 +76,7 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 		if (item.bookLink == null || item.bookLink.isEmpty() || item.bookLink.equals("0")) {
 			holder.bookUrl.setVisibility(View.GONE);
 		} else {
-			holder.bookUrl.setVisibility(View.VISIBLE);
+			holder.bookUrl.setVisibility(View.GONE);
 		}
 		if (mDisplayMode == DisplayMode.GRID) {
 			Picasso.with(getContext()).load(Uri.parse(item.bookCoverLink)).into(holder.cover);
