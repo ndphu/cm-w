@@ -27,28 +27,37 @@
         android:orientation="vertical"
         android:padding="4dp" >
 
-        <ImageView
-            android:id="@+id/fragment_book_details_cover_image"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="3"
-            android:contentDescription="@string/book_cover_background"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher" />
+            android:layout_weight="4"
+            android:background="@drawable/shadow"
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/fragment_book_details_textview_summary"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:padding="4dp"
-            android:scrollbars="vertical" />
+            <ImageView
+                android:id="@+id/fragment_book_details_cover_image"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                android:contentDescription="@string/book_cover_background"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_launcher" />
+
+            <TextView
+                android:id="@+id/fragment_book_details_textview_summary"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:scrollbars="vertical" />
+        </LinearLayout>
 
         <ListView
             android:id="@+id/fragment_book_details_listview_chapters"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="5" >
+            android:layout_weight="6"
+            android:clipToPadding="false"
+            android:padding="4dp" >
         </ListView>
     </LinearLayout>
 

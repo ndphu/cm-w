@@ -4,9 +4,9 @@ import java.util.List;
 
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.SearchResultAdapter;
-import ndphu.app.android.cw.asynctask.SearchBookTask;
-import ndphu.app.android.cw.asynctask.SearchBookTask.SearchBookTaskListener;
 import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.task.SearchBookTask;
+import ndphu.app.android.cw.task.SearchBookTask.SearchBookTaskListener;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

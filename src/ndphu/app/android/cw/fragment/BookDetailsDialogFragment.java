@@ -1,15 +1,18 @@
 package ndphu.app.android.cw.fragment;
 
 import ndphu.app.android.cw.R;
+import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
-import ndphu.app.android.cw.asynctask.LoadBookTask;
-import ndphu.app.android.cw.asynctask.LoadBookTask.LoadBookListener;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Chapter;
+import ndphu.app.android.cw.task.LoadBookTask;
+import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnShowListener;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,18 +21,22 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener {
+public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener, OnItemClickListener {
+	private static final String TAG = BookDetailsDialogFragment.class.getSimpleName();
 	private ListView mChapterList;
 	private ChapterAdapter mAdapter;
 	private TextView mBookSummary;
@@ -55,6 +62,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		mChapterList = (ListView) view.findViewById(R.id.fragment_book_details_listview_chapters);
 		mAdapter = new ChapterAdapter(getActivity(), 0);
 		mChapterList.setAdapter(mAdapter);
+		mChapterList.setOnItemClickListener(this);
 		mBookSummary = (TextView) view.findViewById(R.id.fragment_book_details_textview_summary);
 		mBookSummary.setMovementMethod(new ScrollingMovementMethod());
 		mBookCover = (ImageView) view.findViewById(R.id.fragment_book_details_cover_image);
@@ -136,5 +144,15 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		if (mLoadBookDetailsClass != null) {
 			mLoadBookDetailsClass.cancel(true);
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		Chapter chapter = mAdapter.getItem(position);
+		String chapterUrl = chapter.getChapterUrl();
+		Log.i(TAG, "Select chapter: " + chapterUrl);
+		Intent intent = new Intent(getActivity(), ReadingActivity.class);
+		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
+		startActivity(intent);
 	}
 }

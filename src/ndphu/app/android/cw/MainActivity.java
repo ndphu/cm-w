@@ -29,7 +29,6 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
-	private String mCurrentSearchString;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +72,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		customizeSearchView();
 		return true;
 	}
-	
+
 	public Menu getMenu() {
 		return this.mMenu;
 	}
