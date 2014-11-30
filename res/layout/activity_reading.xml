@@ -17,4 +17,13 @@
         layout="@layout/progress_bar"
         android:background="@drawable/shadow" />
 
+    <include
+        android:layout_gravity="bottom"
+        android:id="@+id/activity_reading_chapter_navigation_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        layout="@layout/cv_chapter_navigation"
+        android:background="@drawable/shadow" android:layout_marginBottom="4dp"/>
+
 </FrameLayout>

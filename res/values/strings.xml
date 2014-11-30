@@ -10,5 +10,7 @@
     <string name="book_cover_background">Book cover background</string>
     <string name="action_close">Close</string>
     <string name="cancel_current_progress">cancel current progress</string>
+    <string name="go_to_the_previous_chapter">Go to the previous chapter</string>
+    <string name="go_to_the_next_chapter">Go to the next chapter</string>
 
 </resources>

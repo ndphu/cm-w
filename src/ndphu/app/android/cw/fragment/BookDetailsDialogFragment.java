@@ -1,5 +1,7 @@
 package ndphu.app.android.cw.fragment;
 
+import java.util.ArrayList;
+
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
@@ -46,6 +48,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	private AsyncTask<Void, Void, Object> mLoadBookDetailsClass;
 	private Toolbar mToolbar;
 	private ViewGroup mParentContainer = null;
+	private Book mBook;
 
 	public void setBookUrl(String bookUrl) {
 		mBookUrl = bookUrl;
@@ -99,6 +102,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 
 	@Override
 	public void onComplete(Book book) {
+		mBook = book;
 		mToolbar.setTitle(book.getName());
 		if (getDialog() != null) {
 			getDialog().setTitle(book.getName());
@@ -153,6 +157,11 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		String chapterUrl = chapter.getChapterUrl();
 		Log.i(TAG, "Select chapter: " + chapterUrl);
 		Intent intent = new Intent(getActivity(), ReadingActivity.class);
+		ArrayList<CharSequence> chapterUrlList = new ArrayList<CharSequence>();
+		for (Chapter __chapter : mBook.getChapters()) {
+			chapterUrlList.add(__chapter.getChapterUrl());
+		}
+		intent.putCharSequenceArrayListExtra(ReadingActivity.EXTRA_CHAPTER_ARRAY, chapterUrlList);
 		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
 		startActivity(intent);
 	}

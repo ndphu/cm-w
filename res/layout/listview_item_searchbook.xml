@@ -2,14 +2,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:padding="8dp" >
+    android:padding="8dp" android:layout_gravity="center_vertical">
 
     <TextView
         android:id="@+id/listview_item_searchbook_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         android:maxLines="1"
-        android:textSize="14sp"
+        android:textSize="20sp"
         android:textStyle="bold" />
 
     <TextView
