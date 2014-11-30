@@ -95,7 +95,8 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		if (position < Source.SOURCES.size()) {
 			// Replace with the search result fragment
 			Source bookSource = Source.SOURCES.get(position);
-			mSearchResultFragment = new BookSearchResultFragment(this);
+			mSearchResultFragment = new BookSearchResultFragment();
+			mSearchResultFragment.setBookSearchListener(this);
 			mFragmentManager.beginTransaction().replace(R.id.content_frame, mSearchResultFragment).commit();
 			mSearchResultFragment.setSource(bookSource.getId());
 		}
@@ -110,7 +111,8 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
 		if (selectedItem.bookLink != null && selectedItem.bookLink.trim().length() > 0 && !selectedItem.bookLink.trim().equals("0")) {
-			BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment(selectedItem.bookLink);
+			BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
+			detailFragment.setBookUrl(selectedItem.bookLink);
 			detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
 		}
 	}

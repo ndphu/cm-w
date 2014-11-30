@@ -28,7 +28,8 @@
         <activity
             android:name="ndphu.app.android.cw.ReadingActivity"
             android:label="@string/app_name"
-            android:launchMode="singleInstance" >
+            android:launchMode="singleInstance"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
     </application>
 
