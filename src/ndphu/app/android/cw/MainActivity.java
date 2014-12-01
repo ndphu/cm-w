@@ -1,8 +1,8 @@
 package ndphu.app.android.cw;
 
 import ndphu.app.android.cw.fragment.BookDetailsDialogFragment;
-import ndphu.app.android.cw.fragment.BookSearchResultFragment;
 import ndphu.app.android.cw.fragment.BookSearchResultFragment.OnSearchItemSelected;
+import ndphu.app.android.cw.fragment.HomePageFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.model.SearchResult;
@@ -26,7 +26,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	private ActionBarDrawerToggle mDrawerToggle;
 	private Toolbar mToolbar;
 	private FragmentManager mFragmentManager;
-	private BookSearchResultFragment mSearchResultFragment;
+	// private BookSearchResultFragment mSearchResultFragment;
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
@@ -47,8 +47,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
-				.findFragmentById(R.id.fragment_drawer);
+		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		onItemSelected(0);
 	}
@@ -62,7 +61,10 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	protected void onResume() {
 		super.onResume();
+		HomePageFragment home = new HomePageFragment();
+		getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, home).commit();
 	}
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -100,10 +102,11 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		if (position < Source.SOURCES.size()) {
 			// Replace with the search result fragment
 			Source bookSource = Source.SOURCES.get(position);
-			mSearchResultFragment = new BookSearchResultFragment();
-			mSearchResultFragment.setBookSearchListener(this);
-			mFragmentManager.beginTransaction().replace(R.id.content_frame, mSearchResultFragment).commit();
-			mSearchResultFragment.setSource(bookSource.getId());
+			// TODO: try to load Homepage
+			// mSearchResultFragment = new BookSearchResultFragment();
+			// mSearchResultFragment.setBookSearchListener(this);
+			// mFragmentManager.beginTransaction().replace(R.id.content_frame, mSearchResultFragment).commit();
+			// mSearchResultFragment.setSource(bookSource.getId());
 		}
 		mDrawerLayout.closeDrawers();
 	}
@@ -116,9 +119,13 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
 		if (selectedItem.bookLink != null && selectedItem.bookLink.trim().length() > 0 && !selectedItem.bookLink.trim().equals("0")) {
-			BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
-			detailFragment.setBookUrl(selectedItem.bookLink);
-			detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
+			showBookDetails(selectedItem.bookLink);
 		}
+	}
+
+	public void showBookDetails(String bookLink) {
+		BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
+		detailFragment.setBookUrl(bookLink);
+		detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
 	}
 }
