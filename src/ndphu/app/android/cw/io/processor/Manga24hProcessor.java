@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import ndphu.app.android.cw.io.Utils;
+import ndphu.app.android.cw.io.parser.BasicParser;
+import ndphu.app.android.cw.io.parser.BasicParser.LineHandler;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
+import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
 
 import org.apache.commons.io.IOUtils;
@@ -154,6 +156,39 @@ public class Manga24hProcessor implements BookProcessor {
 		in.close();
 		Log.i(TAG, "Cannot get cover url");
 		return null;
+	}
+
+	@Override
+	public List<HomePageItem> getHomePages() {
+		final List<HomePageItem> result = new ArrayList<HomePageItem>();
+		try {
+			BasicParser.processLineByLine("http://manga24h.com/", new LineHandler() {
+				HomePageItem item = null;
+
+				@Override
+				public void processLine(String line) {
+					line = line.trim();
+					if (line.length() == 0) {
+						return;
+					}
+					if (line.contains("item_anime_box")) {
+						item = new HomePageItem();
+					} else if (line.contains("lazy img-responsive")) {
+						item.mCoverUrl = line.substring(line.lastIndexOf("http"), line.lastIndexOf("\" style"));
+					} else if (line.contains("<div class=\"title\">")) {
+						item.mBookUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
+						item.mBookName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
+					} else if (line.contains("<div class=\"title2\">")) {
+						item.mChapterUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
+						item.mChapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
+						result.add(item);
+					}
+				}
+			});
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return result;
 	}
 
 }
