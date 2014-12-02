@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,9 +7,7 @@
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentTop="true" >
+        android:layout_height="match_parent" >
 
         <RelativeLayout
             android:layout_width="fill_parent"
@@ -27,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true" 
+                android:layout_centerHorizontal="true"
                 layout="@layout/toolbar" />
         </RelativeLayout>
         <!-- Nav drawer -->
@@ -40,4 +38,13 @@
             android:layout_gravity="start" />
     </android.support.v4.widget.DrawerLayout>
 
-</RelativeLayout>
+    <FrameLayout
+        android:id="@+id/fragment_search_result"
+        android:layout_width="fill_parent"
+        android:layout_marginTop="@dimen/padding_top_for_toolbar"
+        android:layout_height="fill_parent"
+        android:background="#FFFF"
+        android:visibility="gone" >
+    </FrameLayout>
+
+</FrameLayout>

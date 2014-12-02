@@ -6,10 +6,9 @@ import java.util.List;
 import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.SearchResultAdapter;
-import ndphu.app.android.cw.adapter.SearchResultAdapter.DisplayMode;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.task.SearchBookTask;
-import ndphu.app.android.cw.task.SearchBookTask.SearchBookTaskListener;
+import ndphu.app.android.cw.task.SearchBook;
+import ndphu.app.android.cw.task.SearchBook.SearchBookTaskListener;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.SearchView;
@@ -23,25 +22,20 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class BookSearchResultFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener,
+public class SearchFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener,
 		OnItemClickListener {
 
-	private int mSourceId;
 	private ListView mListView;
 	private SearchResultAdapter mAdapter;
 	private SearchView mSearchView;
 	private WeakReference<OnSearchItemSelected> mSearchItemSelectedListener;
-
-	public void setSource(int id) {
-		this.mSourceId = id;
-	}
 
 	public static interface OnSearchItemSelected {
 		public void onSearchItemSelected(SearchResult selectedItem);
 	}
 
 	public void executeSearch(String searchString) {
-		SearchBookTask task = new SearchBookTask(searchString, mSourceId);
+		SearchBook task = new SearchBook(searchString);
 		task.setSearchBookTaskListener(this);
 		task.execute();
 	}
@@ -52,7 +46,6 @@ public class BookSearchResultFragment extends Fragment implements SearchBookTask
 		View view = inflater.inflate(R.layout.fragment_book_search_listview, container, false);
 		mListView = (ListView) view.findViewById(R.id.fragment_book_search_listview);
 		mAdapter = new SearchResultAdapter(getActivity(), 0);
-		mAdapter.setDisplayMode(DisplayMode.LIST);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(this);
 		return view;

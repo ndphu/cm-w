@@ -2,17 +2,20 @@ package ndphu.app.android.cw.task;
 
 import java.lang.ref.WeakReference;
 
+import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
+import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.SearchResult;
 import android.os.AsyncTask;
 
 public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 
 	private WeakReference<LoadBookListener> mListener;
-	private String mBookUrl;
+	private SearchResult mSearchResult;
 
-	public LoadBookTask(String bookUrl, LoadBookListener listener) {
-		mBookUrl = bookUrl;
+	public LoadBookTask(SearchResult searchResult, LoadBookListener listener) {
+		mSearchResult = searchResult;
 		mListener = new WeakReference<LoadBookTask.LoadBookListener>(listener);
 	}
 
@@ -23,20 +26,28 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 
 		public void onError(Exception ex);
 	}
-	
+
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
 		if (mListener.get() != null) {
-			mListener.get().onStart(mBookUrl);
+			mListener.get().onStart(mSearchResult.bookName);
 		}
 	}
-	
 
 	@Override
 	protected Object doInBackground(Void... params) {
 		try {
-			return new Manga24hProcessor().loadBook(this.mBookUrl, false);
+			BookProcessor processor = null;
+			switch (this.mSearchResult.bookSource) {
+			case BLOGTRUYEN:
+				processor = new BlogTruyenProcessor();
+				break;
+			case MANGA24H:
+				processor = new Manga24hProcessor();
+				break;
+			}
+			return processor.loadBook(this.mSearchResult.bookUrl, false);
 		} catch (Exception ex) {
 			return ex;
 		}

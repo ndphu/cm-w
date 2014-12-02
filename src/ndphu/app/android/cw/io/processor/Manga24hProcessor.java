@@ -14,6 +14,8 @@ import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
+import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.model.SearchResult.Source;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -73,6 +75,7 @@ public class Manga24hProcessor implements BookProcessor {
 			chapter.setName(chapters.get(i)[0]);
 			chapter.setChapterUrl(chapters.get(i)[1]);
 			chapter.setChapterOrder(len - i);
+			chapter.setChapterSource(Source.MANGA24H);
 			chapter.setPages(complete ? getPageList(chapters.get(i)[1]) : new ArrayList<Page>());
 			book.getChapters().add(chapter);
 		}
@@ -118,19 +121,16 @@ public class Manga24hProcessor implements BookProcessor {
 	}
 
 	@Override
-	public List<Book> search(String token) {
+	public List<SearchResult> search(String token) {
 		String url = String.format(SEARCH_URL_TEMPLATE, token);
 		String response = new String(Utils.getRawDataFromURL(url));
-		List<Book> result = new ArrayList<Book>();
+		List<SearchResult> result = new ArrayList<SearchResult>();
 		try {
 			JSONArray arr = new JSONArray(response);
 			Log.i(TAG, arr.toString());
 			for (int i = 0; i < arr.length(); ++i) {
 				JSONObject bookJson = arr.getJSONObject(i);
-				Book book = new Book();
-				book.setName(bookJson.getString("text"));
-				book.setBookUrl(bookJson.getString("id"));
-				book.setCover("");
+				SearchResult book = new SearchResult(bookJson.getString("text"), bookJson.getString("id"), SearchResult.Source.MANGA24H);
 				result.add(book);
 			}
 		} catch (JSONException e) {

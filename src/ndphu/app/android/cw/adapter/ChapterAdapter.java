@@ -3,6 +3,7 @@ package ndphu.app.android.cw.adapter;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.model.Chapter;
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ public class ChapterAdapter extends ArrayAdapter<Chapter> {
 		}
 		Chapter chapter = getItem(position);
 		ViewHolder holder = (ViewHolder) convertView.getTag();
-		holder.title.setText(chapter.getName());
+		holder.title.setText(Html.fromHtml(chapter.getName()));
 		return convertView;
 	}
 

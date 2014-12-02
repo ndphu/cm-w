@@ -7,6 +7,8 @@ import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
+import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.model.SearchResult.Source;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
@@ -37,21 +39,20 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener,
-		OnItemClickListener {
+public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener, OnItemClickListener {
 	private static final String TAG = BookDetailsDialogFragment.class.getSimpleName();
 	private ListView mChapterList;
 	private ChapterAdapter mAdapter;
 	private TextView mBookSummary;
 	private ImageView mBookCover;
-	private String mBookUrl;
 	private AsyncTask<Void, Void, Object> mLoadBookDetailsClass;
 	private Toolbar mToolbar;
 	private ViewGroup mParentContainer = null;
 	private Book mBook;
+	private SearchResult mTarget;
 
-	public void setBookUrl(String bookUrl) {
-		mBookUrl = bookUrl;
+	public void setTarget(SearchResult target) {
+		mTarget = target;
 	}
 
 	@Override
@@ -78,16 +79,9 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 
 			@Override
 			public void onShow(DialogInterface dialog) {
-				mLoadBookDetailsClass = new LoadBookTask(mBookUrl, BookDetailsDialogFragment.this).execute();
+				mLoadBookDetailsClass = new LoadBookTask(mTarget, BookDetailsDialogFragment.this).execute();
 			}
 		});
-		// .setPositiveButton("Close", new OnClickListener() {
-		//
-		// @Override
-		// public void onClick(DialogInterface dialog, int which) {
-		// dialog.dismiss();
-		// }
-		// })
 		dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 		return dialog;
 
@@ -103,12 +97,16 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	@Override
 	public void onComplete(Book book) {
 		mBook = book;
-		mToolbar.setTitle(book.getName());
+		mToolbar.setTitle(Html.fromHtml(book.getName()));
 		if (getDialog() != null) {
 			getDialog().setTitle(book.getName());
 		}
 		Picasso.with(getActivity()).load(Uri.parse(book.getCover())).into(mBookCover);
-		mBookSummary.setText(Html.fromHtml(book.getBookDesc()));
+		if (book.getBookDesc() != null && !book.getBookDesc().trim().isEmpty()) {
+			mBookSummary.setText(Html.fromHtml(book.getBookDesc()));
+		} else {
+			mBookSummary.setVisibility(View.GONE);
+		}
 		mAdapter.clear();
 		mAdapter.addAll(book.getChapters());
 	}
@@ -116,8 +114,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	@Override
 	public void onError(Exception ex) {
 		if (getActivity() != null) {
-			new AlertDialog.Builder(getActivity()).setTitle("Error")
-					.setMessage("Cannot load book details. Error: " + ex.getMessage())
+			new AlertDialog.Builder(getActivity()).setTitle("Error").setMessage("Cannot load book details. Error: " + ex.getMessage())
 					.setPositiveButton("Close", new OnClickListener() {
 
 						@Override
@@ -154,6 +151,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Chapter chapter = mAdapter.getItem(position);
+		Source chapterSource = chapter.getChapterSource();
 		String chapterUrl = chapter.getChapterUrl();
 		Log.i(TAG, "Select chapter: " + chapterUrl);
 		Intent intent = new Intent(getActivity(), ReadingActivity.class);
@@ -163,6 +161,7 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		}
 		intent.putCharSequenceArrayListExtra(ReadingActivity.EXTRA_CHAPTER_ARRAY, chapterUrlList);
 		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
+		intent.putExtra(ReadingActivity.EXTRA_SOURCE, chapterSource.name());
 		startActivity(intent);
 	}
 }
