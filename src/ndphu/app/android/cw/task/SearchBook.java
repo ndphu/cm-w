@@ -4,18 +4,17 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
-import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.Source;
 import android.os.AsyncTask;
 
-public class SearchBookTask extends AsyncTask<Void, Void, List<SearchResult>> {
+public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 
 	private String mSearchString;
 	private WeakReference<SearchBookTaskListener> mListener;
-	private BookProcessor mBookProcessor;
+	private List<BookProcessor> mBookProcessors;
 
 	public interface SearchBookTaskListener {
 		void onStart(String searchString);
@@ -29,16 +28,11 @@ public class SearchBookTask extends AsyncTask<Void, Void, List<SearchResult>> {
 		mListener = new WeakReference<SearchBookTaskListener>(listener);
 	}
 
-	public SearchBookTask(String searchString, int sourceType) {
+	public SearchBook(String searchString) {
 		this.mSearchString = searchString;
-		switch (sourceType) {
-		case Source.MANGA24H:
-			mBookProcessor = new Manga24hProcessor();
-			break;
-
-		default:
-			break;
-		}
+		mBookProcessors = new ArrayList<BookProcessor>();
+		mBookProcessors.add(new Manga24hProcessor());
+		mBookProcessors.add(new BlogTruyenProcessor());
 	}
 
 	@Override
@@ -51,10 +45,10 @@ public class SearchBookTask extends AsyncTask<Void, Void, List<SearchResult>> {
 
 	@Override
 	protected List<SearchResult> doInBackground(Void... params) {
-		List<Book> bookResult = mBookProcessor.search(this.mSearchString);
 		List<SearchResult> result = new ArrayList<SearchResult>();
-		for (Book book : bookResult) {
-			result.add(new SearchResult(book.getName(), book.getBookDesc(), book.getBookUrl(), book.getCover(), Source.SOURCE_MANGA24H));
+		for (BookProcessor processor : mBookProcessors) {
+			List<SearchResult> bookResult = processor.search(this.mSearchString);
+			result.addAll(bookResult);
 		}
 		return result;
 	}

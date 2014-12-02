@@ -17,13 +17,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.squareup.picasso.Picasso;
 
 public class Manga24hSearchResultFragment extends Fragment {
 	private ImageView mBookCover;
-	private ListView mChapterList;
 	private BookProcessor mProcessor;
 	private ProgressDialog mProgressDialog;
 	private Book mBook;
@@ -36,6 +34,7 @@ public class Manga24hSearchResultFragment extends Fragment {
 
 	private AsyncTask<Void, Void, Book> mLoadingTask = new AsyncTask<Void, Void, Book>() {
 
+		@Override
 		protected void onPreExecute() {
 			mProgressDialog = new ProgressDialog(getActivity());
 			mProgressDialog.setTitle("Loading");
@@ -46,13 +45,14 @@ public class Manga24hSearchResultFragment extends Fragment {
 		@Override
 		protected Book doInBackground(Void... params) {
 			try {
-				return mProcessor.loadBook(mBookItem.get().bookSource, false);
+				return mProcessor.loadBook(mBookItem.get().bookUrl, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			return null;
 		}
 
+		@Override
 		protected void onPostExecute(Book result) {
 			mProgressDialog.dismiss();
 			if (result == null) {
@@ -68,7 +68,6 @@ public class Manga24hSearchResultFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_manga24h, container, false);
 		mBookCover = (ImageView) view.findViewById(R.id.fragment_manga24h_book_cover);
-		mChapterList = (ListView) view.findViewById(R.id.fragment_manga24h_listview_chapter);
 		mProcessor = new Manga24hProcessor();
 		return view;
 	}

@@ -17,8 +17,11 @@ import ndphu.app.android.cw.customview.ExtendedViewPager;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressIndicatorListener;
 import ndphu.app.android.cw.customview.TouchImageView;
+import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
+import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Page;
+import ndphu.app.android.cw.model.SearchResult.Source;
 import ndphu.app.android.cw.runable.DownloadFileRunnable;
 import ndphu.app.android.cw.runable.DownloadFileRunnable.DownloadFileListener;
 import ndphu.app.android.cw.util.Utils;
@@ -45,6 +48,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	protected static final String TAG = ReadingActivity.class.getSimpleName();
 	public static String EXTRA_CHAPTER_ARRAY = "chapter_array";
 	public static String EXTRA_CHAPTER_URL = "chapter_url";
+	public static String EXTRA_SOURCE = "chapter_source";
 
 	// GUI elements
 	private ExtendedViewPager mViewPager;
@@ -56,6 +60,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	private List<Page> mPages;
 	private List<CharSequence> mChapterUrlList;
 	private int mCurrentChapterIndex = -1;
+	private Source mChapterSource;
 
 	// Caching params
 	private final Object mDiskCacheLock = new Object();
@@ -82,6 +87,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		// Read from intent
 		mChapterUrl = getIntent().getStringExtra(EXTRA_CHAPTER_URL);
 		mChapterUrlList = getIntent().getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
+		mChapterSource = Source.valueOf(getIntent().getStringExtra(EXTRA_SOURCE));
 		mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
 
 		// Init layout
@@ -146,7 +152,17 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 		@Override
 		protected Object doInBackground(Void... params) {
-			Manga24hProcessor processor = new Manga24hProcessor();
+			BookProcessor processor = null;
+			switch (mChapterSource) {
+			case MANGA24H:
+				processor = new Manga24hProcessor();
+				break;
+			case BLOGTRUYEN:
+				processor = new BlogTruyenProcessor();
+				break;
+			default:
+				break;
+			}
 			try {
 				return processor.getPageList(mChapterUrl);
 			} catch (IOException e) {

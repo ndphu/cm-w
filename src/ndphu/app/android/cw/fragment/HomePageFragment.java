@@ -7,7 +7,8 @@ import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.HomePageItemAdapter;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.HomePageItem;
-import android.app.ProgressDialog;
+import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.model.SearchResult.Source;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,7 +23,6 @@ public class HomePageFragment extends Fragment implements OnItemClickListener {
 
 	private GridView mGridView;
 	private HomePageItemAdapter mGridAdapter;
-	private ProgressDialog mProgressDialog;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,6 +58,8 @@ public class HomePageFragment extends Fragment implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		((MainActivity)getActivity()).showBookDetails(mGridAdapter.getItem(position).mBookUrl);
+		HomePageItem item = mGridAdapter.getItem(position);
+		SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, Source.MANGA24H);
+		((MainActivity) getActivity()).showBookDetails(result);
 	}
 }

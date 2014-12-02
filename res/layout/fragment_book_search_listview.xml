@@ -9,10 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:clipToPadding="false"
-        android:horizontalSpacing="10dp"
-        android:paddingTop="@dimen/padding_top_for_toolbar"
-        android:verticalSpacing="10dp" >
+        android:clipToPadding="false" >
     </ListView>
 
 </RelativeLayout>
