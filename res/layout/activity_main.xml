@@ -38,13 +38,5 @@
             android:layout_gravity="start" />
     </android.support.v4.widget.DrawerLayout>
 
-    <FrameLayout
-        android:id="@+id/fragment_search_result"
-        android:layout_width="fill_parent"
-        android:layout_marginTop="@dimen/padding_top_for_toolbar"
-        android:layout_height="fill_parent"
-        android:background="#FFFF"
-        android:visibility="gone" >
-    </FrameLayout>
 
 </FrameLayout>

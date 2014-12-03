@@ -16,6 +16,7 @@ import android.support.v7.widget.SearchView.OnQueryTextListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -43,6 +44,8 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
+		MainActivity activty = ((MainActivity) getActivity());
+		activty.getToolbar().setTitle("Search");
 		View view = inflater.inflate(R.layout.fragment_book_search_listview, container, false);
 		mListView = (ListView) view.findViewById(R.id.fragment_book_search_listview);
 		mAdapter = new SearchResultAdapter(getActivity(), 0);
@@ -59,13 +62,15 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		mSearchView = (SearchView) ((MainActivity) getActivity()).getMenu().findItem(R.id.action_search)
-				.getActionView();
+		MenuItem searchMenuItem = ((MainActivity) getActivity()).getMenu().findItem(R.id.action_search);
+		mSearchView = (SearchView) searchMenuItem.getActionView();
 		mSearchView.setOnQueryTextListener(this);
+		searchMenuItem.setVisible(true);
+		searchMenuItem.expandActionView();
 	}
 
 	@Override
-	public void onStart(String searchString) {
+	public void onStartSearching(String searchString) {
 		mSearchView.setEnabled(false);
 	}
 

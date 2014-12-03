@@ -2,10 +2,6 @@ package ndphu.app.android.cw.model;
 
 public class SearchResult {
 
-	public static enum Source {
-		MANGA24H, BLOGTRUYEN
-	}
-
 	public String bookName;
 	public String bookUrl;
 	public Source bookSource;

@@ -33,7 +33,7 @@
             android:layout_centerVertical="true"
             android:layout_toEndOf="@+id/fragment_navigation_drawer_app_icon"
             android:layout_toRightOf="@+id/fragment_navigation_drawer_app_icon"
-            android:text="@string/select_source"
+            android:text="@string/app_name"
             android:textSize="22sp" android:textStyle="bold"/>
     </RelativeLayout>
 

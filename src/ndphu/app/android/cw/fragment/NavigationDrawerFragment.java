@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 public class NavigationDrawerFragment extends Fragment implements OnItemClickListener {
 	private ListView mListView;
-	private String[] mSupportedSources;
+	private String[] mNavigationMenuItem;
 
 	public interface OnNavigationItemSelected {
 		public void onItemSelected(int position);
@@ -32,10 +32,16 @@ public class NavigationDrawerFragment extends Fragment implements OnItemClickLis
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 		mListView = (ListView) view.findViewById(R.id.fragment_navigation_drawer_listview);
-		mSupportedSources = new String[Source.SOURCES.size()];
-		for (int i = 0; i <Source.SOURCES.size(); ++i) {
-			mSupportedSources[i] = Source.SOURCES.get(i).getName();
-		}
+//		mSupportedSources = new String[Source.SOURCES.size()];
+//		for (int i = 0; i <Source.SOURCES.size(); ++i) {
+//			mSupportedSources[i] = Source.SOURCES.get(i).getName();
+//		}
+		mNavigationMenuItem = new String[]{
+				"Home",
+				"My Books",
+				"Search",
+				"Settings"
+		};
 		return view;
 	}
 
@@ -43,7 +49,7 @@ public class NavigationDrawerFragment extends Fragment implements OnItemClickLis
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		mListView.setAdapter(new ArrayAdapter<String>(getActivity(), R.layout.listview_item_drawer_item,
-				mSupportedSources));
+				mNavigationMenuItem));
 		mListView.setItemChecked(0, true);
 		mListView.setOnItemClickListener(this);
 		if (mListener != null && mListener.get() != null) {

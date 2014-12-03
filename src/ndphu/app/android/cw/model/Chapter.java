@@ -3,8 +3,6 @@ package ndphu.app.android.cw.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import ndphu.app.android.cw.model.SearchResult.Source;
-
 public class Chapter {
 		private String name;
 		private int chapterOrder;

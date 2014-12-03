@@ -12,7 +12,7 @@ import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.SearchResult.Source;
+import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.util.Utils;
 
 import org.apache.http.HttpResponse;
@@ -63,7 +63,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 							String bookName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
 							String bookUrl = line.substring(line.indexOf("\"") + 1, line.indexOf("\">"));
 							bookUrl = PREFIX + bookUrl;
-							SearchResult searchResult = new SearchResult(bookName, bookUrl, SearchResult.Source.BLOGTRUYEN);
+							SearchResult searchResult = new SearchResult(bookName, bookUrl, Source.BLOGTRUYEN);
 							result.add(searchResult);
 						}
 					}
