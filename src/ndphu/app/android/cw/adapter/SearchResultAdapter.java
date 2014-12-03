@@ -2,6 +2,7 @@ package ndphu.app.android.cw.adapter;
 
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.model.Source;
 import android.content.Context;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -44,7 +45,7 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 	}
 
 	private void fillDataToItem(final ViewHolder holder, final SearchResult item) {
-		if (item.bookSource.equals(SearchResult.Source.BLOGTRUYEN)) {
+		if (item.bookSource.equals(Source.BLOGTRUYEN)) {
 			holder.bookName.setText(Html.fromHtml(item.bookName));
 		} else {
 			holder.bookName.setText(item.bookName);

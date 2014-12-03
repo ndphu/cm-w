@@ -17,7 +17,7 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	private List<BookProcessor> mBookProcessors;
 
 	public interface SearchBookTaskListener {
-		void onStart(String searchString);
+		void onStartSearching(String searchString);
 
 		void onComplete(List<SearchResult> result);
 
@@ -39,7 +39,7 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	protected void onPreExecute() {
 		super.onPreExecute();
 		if (mListener != null && mListener.get() != null) {
-			mListener.get().onStart(this.mSearchString);
+			mListener.get().onStartSearching(this.mSearchString);
 		}
 	}
 

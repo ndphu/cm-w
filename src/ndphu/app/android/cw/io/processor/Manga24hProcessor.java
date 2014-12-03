@@ -15,7 +15,7 @@ import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.SearchResult.Source;
+import ndphu.app.android.cw.model.Source;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -130,7 +130,7 @@ public class Manga24hProcessor implements BookProcessor {
 			Log.i(TAG, arr.toString());
 			for (int i = 0; i < arr.length(); ++i) {
 				JSONObject bookJson = arr.getJSONObject(i);
-				SearchResult book = new SearchResult(bookJson.getString("text"), bookJson.getString("id"), SearchResult.Source.MANGA24H);
+				SearchResult book = new SearchResult(bookJson.getString("text"), bookJson.getString("id"), Source.MANGA24H);
 				result.add(book);
 			}
 		} catch (JSONException e) {

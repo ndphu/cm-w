@@ -8,7 +8,7 @@ import ndphu.app.android.cw.adapter.ChapterAdapter;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.SearchResult.Source;
+import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;

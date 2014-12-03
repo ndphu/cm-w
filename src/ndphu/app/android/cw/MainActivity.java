@@ -1,7 +1,7 @@
 package ndphu.app.android.cw;
 
 import ndphu.app.android.cw.fragment.BookDetailsDialogFragment;
-import ndphu.app.android.cw.fragment.HomePageFragment;
+import ndphu.app.android.cw.fragment.HomeFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.fragment.SearchFragment;
@@ -31,11 +31,9 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	private FragmentManager mFragmentManager;
 
 	// For search fragment
-	private SearchFragment mSearchResultFragment;
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
-	private View mFragmentResultContainer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +51,10 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
+		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
+				.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		onItemSelected(0);
-
-		// Search
-		mFragmentResultContainer = MainActivity.this.findViewById(R.id.fragment_search_result);
-		mSearchResultFragment = new SearchFragment();
-		mSearchResultFragment.setBookSearchListener(this);
-		mFragmentManager.beginTransaction().replace(R.id.fragment_search_result, mSearchResultFragment).commit();
 	}
 
 	@Override
@@ -73,8 +66,6 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	protected void onResume() {
 		super.onResume();
-		HomePageFragment home = new HomePageFragment();
-		getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, home).commit();
 	}
 
 	@Override
@@ -88,32 +79,12 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		mMenu = menu;
 		mSearchMenuItem = mMenu.findItem(R.id.action_search);
 		mSearchView = (SearchView) mSearchMenuItem.getActionView();
-		customizeSearchMenuItem();
 		customizeSearchView();
 		return true;
 	}
 
 	public Menu getMenu() {
 		return this.mMenu;
-	}
-
-	private void customizeSearchMenuItem() {
-		MenuItemCompat.setOnActionExpandListener(mSearchMenuItem, new MenuItemCompat.OnActionExpandListener() {
-
-
-
-			@Override
-			public boolean onMenuItemActionExpand(MenuItem item) {
-				mFragmentResultContainer.setVisibility(View.VISIBLE);
-				return true;
-			}
-
-			@Override
-			public boolean onMenuItemActionCollapse(MenuItem item) {
-				mFragmentResultContainer.setVisibility(View.GONE);
-				return true;
-			}
-		});
 	}
 
 	private void customizeSearchView() {
@@ -131,6 +102,27 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 
 	@Override
 	public void onItemSelected(int position) {
+		if (mSearchMenuItem != null) {
+			mSearchMenuItem.setVisible(false);
+		}
+		switch (position) {
+		case 0:
+			// Home
+			HomeFragment home = new HomeFragment();
+			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, home).commit();
+			break;
+		case 1:
+			// My Books
+			break;
+		case 2:
+			SearchFragment searchFragment = new SearchFragment();
+			searchFragment.setBookSearchListener(this);
+			mFragmentManager.beginTransaction().replace(R.id.content_frame, searchFragment).commit();
+			break;
+		default:
+			// Function not implements
+			break;
+		}
 		mDrawerLayout.closeDrawers();
 	}
 
@@ -141,7 +133,8 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
-		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
+		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0
+				&& !selectedItem.bookUrl.trim().equals("0")) {
 			showBookDetails(selectedItem);
 		}
 	}

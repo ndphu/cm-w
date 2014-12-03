@@ -8,7 +8,7 @@ import ndphu.app.android.cw.adapter.HomePageItemAdapter;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.SearchResult.Source;
+import ndphu.app.android.cw.model.Source;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,7 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
-public class HomePageFragment extends Fragment implements OnItemClickListener {
+public class HomeFragment extends Fragment implements OnItemClickListener {
 
 	private GridView mGridView;
 	private HomePageItemAdapter mGridAdapter;
@@ -53,7 +53,13 @@ public class HomePageFragment extends Fragment implements OnItemClickListener {
 			mGridAdapter.clear();
 			mGridAdapter.addAll(result);
 		}
-
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		MainActivity activty = ((MainActivity)getActivity());
+		activty.getToolbar().setTitle("Home");
 	}
 
 	@Override

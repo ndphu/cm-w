@@ -21,7 +21,7 @@ import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Page;
-import ndphu.app.android.cw.model.SearchResult.Source;
+import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.runable.DownloadFileRunnable;
 import ndphu.app.android.cw.runable.DownloadFileRunnable.DownloadFileListener;
 import ndphu.app.android.cw.util.Utils;

@@ -4,10 +4,16 @@
     tools:context="ndphu.app.android.cw.MainActivity" >
 
     <item
+        android:id="@+id/action_add_to_favorite"
+        android:icon="@android:drawable/ic_menu_add"
+        android:orderInCategory="100"
+        android:title="@string/add_to_favirite_books"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_close"
         android:icon="@drawable/ic_action_close"
-        android:orderInCategory="100"
+        android:orderInCategory="200"
         android:title="@string/action_close"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 
 </menu>
