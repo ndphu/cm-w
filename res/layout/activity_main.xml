@@ -18,7 +18,9 @@
             <FrameLayout
                 android:id="@+id/content_frame"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/toolbar" />
 
             <include
                 android:id="@+id/toolbar"
@@ -37,6 +39,5 @@
             android:layout_height="match_parent"
             android:layout_gravity="start" />
     </android.support.v4.widget.DrawerLayout>
-
 
 </FrameLayout>

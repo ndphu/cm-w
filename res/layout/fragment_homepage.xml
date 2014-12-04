@@ -14,7 +14,6 @@
         android:numColumns="@integer/int_grid_column"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:paddingTop="70dp"
         android:verticalSpacing="5dp" >
     </GridView>
 
