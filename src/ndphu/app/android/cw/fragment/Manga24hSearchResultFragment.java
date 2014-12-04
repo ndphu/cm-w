@@ -2,7 +2,6 @@ package ndphu.app.android.cw.fragment;
 
 import java.lang.ref.WeakReference;
 
-import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
@@ -79,7 +78,6 @@ public class Manga24hSearchResultFragment extends Fragment {
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		((MainActivity) getActivity()).getToolbar().setTitle(mBookItem.get().bookName);
 		mLoadingTask.execute();
 	}
 

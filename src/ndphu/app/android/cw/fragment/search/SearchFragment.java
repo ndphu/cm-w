@@ -1,4 +1,4 @@
-package ndphu.app.android.cw.fragment;
+package ndphu.app.android.cw.fragment.search;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -30,6 +30,7 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 	private SearchResultAdapter mAdapter;
 	private SearchView mSearchView;
 	private WeakReference<OnSearchItemSelected> mSearchItemSelectedListener;
+	private MenuItem mSearchMenuItem;
 
 	public static interface OnSearchItemSelected {
 		public void onSearchItemSelected(SearchResult selectedItem);
@@ -44,8 +45,6 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
-		MainActivity activty = ((MainActivity) getActivity());
-		activty.getToolbar().setTitle("Search");
 		View view = inflater.inflate(R.layout.fragment_book_search_listview, container, false);
 		mListView = (ListView) view.findViewById(R.id.fragment_book_search_listview);
 		mAdapter = new SearchResultAdapter(getActivity(), 0);
@@ -62,11 +61,20 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		MenuItem searchMenuItem = ((MainActivity) getActivity()).getMenu().findItem(R.id.action_search);
-		mSearchView = (SearchView) searchMenuItem.getActionView();
+		mSearchMenuItem = menu.findItem(R.id.action_search);
+		mSearchView = (SearchView) mSearchMenuItem.getActionView();
 		mSearchView.setOnQueryTextListener(this);
-		searchMenuItem.setVisible(true);
-		searchMenuItem.expandActionView();
+		mSearchMenuItem.setVisible(true);
+		mSearchMenuItem.expandActionView();
+	}
+
+	@Override
+	public void onDestroy() {
+		if (mSearchMenuItem != null) {
+			mSearchMenuItem.collapseActionView();
+			mSearchMenuItem.setVisible(false);
+		}
+		super.onDestroy();
 	}
 
 	@Override

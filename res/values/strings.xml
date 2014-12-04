@@ -13,5 +13,6 @@
     <string name="go_to_the_previous_chapter">Go to the previous chapter</string>
     <string name="go_to_the_next_chapter">Go to the next chapter</string>
     <string name="add_to_favirite_books">Add to favirite books</string>
+    <string name="action_select_category">Select category</string>
 
 </resources>

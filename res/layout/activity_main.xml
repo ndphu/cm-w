@@ -9,11 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
+        <!--
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" >
-
-            <!-- Main layout -->
 
             <FrameLayout
                 android:id="@+id/content_frame"
@@ -21,7 +20,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_below="@+id/toolbar" />
-
             <include
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -30,6 +28,12 @@
                 android:layout_centerHorizontal="true"
                 layout="@layout/toolbar" />
         </RelativeLayout>
+        -->
+
+        <FrameLayout
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
         <!-- Nav drawer -->
 
         <fragment

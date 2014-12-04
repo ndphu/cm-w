@@ -3,7 +3,7 @@
 
     <color name="colorPrimary">#2196F3</color>
     <color name="colorPrimaryDark">#2196F3</color>
-    <color name="toolbar_color">#222</color>
+    <color name="toolbar_color">@color/colorPrimary</color>
     <color name="colorSecondary">@color/material_deep_teal_200</color>
     <color name="colorSecondaryDark">@color/material_deep_teal_500</color>
     <color name="windowBackgroundColor">#333333</color>
