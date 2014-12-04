@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,9 @@ public class HomeFragment extends Fragment {
 		mViewPager.setAdapter(mPagerAdapter);
 		PagerTabStrip pagerStrip = (PagerTabStrip) view.findViewById(R.id.pager_strip);
 		pagerStrip.setTextColor(Color.WHITE);
-		pagerStrip.setTabIndicatorColorResource(R.color.background_material_light);
+		pagerStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+		//pagerStrip.setTabIndicatorColorResource(R.color.homepage_background_color);
+		pagerStrip.setTabIndicatorColorResource(R.color.colorPrimaryDark);
 		return view;
 	}
 
