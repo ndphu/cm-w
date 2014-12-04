@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@color/homepage_background_color" >
 
     <GridView
         android:id="@+id/fragment_homepage_gridview"
@@ -9,12 +10,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:clipToPadding="false"
-        android:horizontalSpacing="5dp"
+        android:horizontalSpacing="4dp"
         android:numColumns="@integer/int_grid_column"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:verticalSpacing="5dp" >
+        android:verticalSpacing="4dp" >
     </GridView>
 
 </RelativeLayout>
