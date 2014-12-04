@@ -3,29 +3,27 @@ package ndphu.app.android.cw;
 import ndphu.app.android.cw.fragment.BookDetailsDialogFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
-import ndphu.app.android.cw.fragment.SearchFragment;
-import ndphu.app.android.cw.fragment.SearchFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.fragment.home.HomeFragment;
+import ndphu.app.android.cw.fragment.search.SearchFragment;
+import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.model.SearchResult;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity implements OnNavigationItemSelected, OnSearchItemSelected {
-	public static final String SOURCE_TRUYENTRANHTUAN = "TRUYENTRANHTUAN";
-	public static final String SOURCE_MANGA24H = "MANGA24H";
 	protected static final String TAG = MainActivity.class.getSimpleName();
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private Toolbar mToolbar;
+	// private Toolbar mToolbar;
 	private FragmentManager mFragmentManager;
 
 	// For search fragment
@@ -37,20 +35,24 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mToolbar = (Toolbar) findViewById(R.id.toolbar);
-		setSupportActionBar(mToolbar);
-
+		// mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		// setSupportActionBar(mToolbar);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowHomeEnabled(true);
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setTitle("Category");
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.app_name, R.string.app_name);
+		// mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.app_name, R.string.app_name);
+		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.app_name, R.string.app_name);
 		mDrawerToggle.setDrawerIndicatorEnabled(true);
 		mDrawerToggle.setHomeAsUpIndicator(R.drawable.ic_drawer);
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
-				.findFragmentById(R.id.fragment_drawer);
+		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		onItemSelected(0);
 	}
@@ -92,8 +94,18 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_search) {
+		switch (id) {
+		case R.id.action_search: {
 			return true;
+		}
+		case android.R.id.home: {
+			if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+				mDrawerLayout.closeDrawers();
+			} else {
+				mDrawerLayout.openDrawer(GravityCompat.START);
+			}
+			return true;
+		}
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -124,15 +136,15 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		mDrawerLayout.closeDrawers();
 	}
 
-	public Toolbar getToolbar() {
-		return mToolbar;
-
-	}
+	//
+	// public Toolbar getToolbar() {
+	// return mToolbar;
+	//
+	// }
 
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
-		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0
-				&& !selectedItem.bookUrl.trim().equals("0")) {
+		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
 			showBookDetails(selectedItem);
 		}
 	}

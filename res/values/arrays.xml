@@ -1,0 +1,16 @@
+<resources>
+    <string-array name="categories">
+        <item>New</item>
+        <item>Hot</item>
+        <item>Action</item>
+        <item>Supernatural</item>
+        <item>Sports</item>
+        <item>Romance</item>
+        <item>One Shot</item>
+        <item>Horror</item>
+        <item>Magic</item>
+        <item>Adult</item>
+        <item>Ecchi</item>
+    </string-array>
+
+</resources>
