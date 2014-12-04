@@ -1,11 +1,12 @@
-package ndphu.app.android.cw.fragment;
+package ndphu.app.android.cw.fragment.home;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.HomePageItemAdapter;
-import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.model.Source;
@@ -19,8 +20,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 
-public class HomeFragment extends Fragment implements OnItemClickListener {
-
+public class HomeDetailsFragment extends Fragment implements OnItemClickListener {
 	private GridView mGridView;
 	private HomePageItemAdapter mGridAdapter;
 
@@ -37,14 +37,24 @@ public class HomeFragment extends Fragment implements OnItemClickListener {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		mGridView.setAdapter(mGridAdapter);
-		new LoadHomePage().execute();
+		new LoadDataTask().execute();
 	}
 
-	private class LoadHomePage extends AsyncTask<Void, Void, List<HomePageItem>> {
+	private WeakReference<HomeLoader> mHomeLoader = null;
+
+	public void setHomeLoader(HomeLoader loader) {
+		mHomeLoader = new WeakReference<HomeLoader>(loader);
+	}
+
+	private class LoadDataTask extends AsyncTask<Void, Void, List<HomePageItem>> {
 
 		@Override
-		protected List<HomePageItem> doInBackground(Void... arg0) {
-			return new Manga24hProcessor().getHomePages();
+		protected List<HomePageItem> doInBackground(Void... params) {
+			List<HomePageItem> result =  new ArrayList<HomePageItem>();
+			if (mHomeLoader != null && mHomeLoader.get() != null) {
+				result = mHomeLoader.get().getHomePageData();
+			}
+			return result;
 		}
 
 		@Override
@@ -54,11 +64,11 @@ public class HomeFragment extends Fragment implements OnItemClickListener {
 			mGridAdapter.addAll(result);
 		}
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
-		MainActivity activty = ((MainActivity)getActivity());
+		MainActivity activty = ((MainActivity) getActivity());
 		activty.getToolbar().setTitle("Home");
 	}
 
