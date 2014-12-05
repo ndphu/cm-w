@@ -35,4 +35,20 @@ public class Utils {
 		}
 		return hexString.toString();
 	}
+
+	public static int countString(String input, String pattern) {
+		int lastIndex = 0;
+		int count = 0;
+
+		while (lastIndex != -1) {
+
+			lastIndex = input.indexOf(pattern, lastIndex);
+
+			if (lastIndex != -1) {
+				count++;
+				lastIndex += pattern.length();
+			}
+		}
+		return count;
+	}
 }

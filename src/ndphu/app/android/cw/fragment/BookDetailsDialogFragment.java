@@ -12,6 +12,7 @@ import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -54,6 +55,16 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 	private ActionBar mActionBar;
 	private FragmentManager mFragmentManager;
 	private MenuItem mMenuItemClose;
+	private ProgressDialog mProgressDialog = null;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mProgressDialog = new ProgressDialog(getActivity());
+		mProgressDialog.setTitle("Loading");
+		mProgressDialog.setMessage("Gathering information...");
+		mProgressDialog.setCancelable(false);
+	}
 
 	public void setTarget(SearchResult target) {
 		mTarget = target;
@@ -74,7 +85,7 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 		super.onViewCreated(view, savedInstanceState);
 		mActionBar.setDisplayShowCustomEnabled(false);
 		mActionBar.setDisplayShowTitleEnabled(true);
-		mLoadBookDetailsClass = new LoadBookTask(mTarget, BookDetailsDialogFragment.this).execute();
+		mLoadBookDetailsClass = new LoadBookTask(mTarget, this).execute();
 	}
 
 	private View getContainerView() {
@@ -95,10 +106,12 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 	@Override
 	public void onStart(String url) {
 		mActionBar.setTitle("Loading");
+		mProgressDialog.show();
 	}
 
 	@Override
 	public void onComplete(Book book) {
+		mProgressDialog.dismiss();
 		mBook = book;
 		if (mBook != null) {
 			mActionBar.setTitle(mBook.getName());
@@ -116,6 +129,7 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 
 	@Override
 	public void onError(Exception ex) {
+		mProgressDialog.dismiss();
 		mActionBar.setTitle("Error");
 		if (getActivity() != null) {
 			new AlertDialog.Builder(getActivity()).setTitle("Error")
@@ -136,7 +150,7 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 		mMenuItemClose = menu.findItem(R.id.action_close);
 		mMenuItemClose.setVisible(true);
 	}
-	
+
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Chapter chapter = mAdapter.getItem(position);
@@ -181,7 +195,14 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.fragment_book_details_button_show_chapters) {
-			mChapterList.setVisibility(View.VISIBLE);
+			if (mChapterList.getVisibility() == View.VISIBLE) {
+				mChapterList.setVisibility(View.GONE);
+				mShowChapters.setText(R.string.show_chapters);
+			} else {
+				mChapterList.setVisibility(View.VISIBLE);
+				mShowChapters.setText(R.string.hide_chapters);
+			}
+
 		}
 	}
 }

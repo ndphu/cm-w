@@ -16,7 +16,11 @@ public class BasicParser {
 	private static final String TAG = BasicParser.class.getSimpleName();
 
 	public static interface LineHandler {
-		void processLine(String line);
+		/**
+		 * @param line
+		 * @return true when gathering enough information
+		 */
+		boolean processLine(String line);
 	}
 
 	public static InputStream getFromUrl(String url) throws ClientProtocolException, IOException {
@@ -49,7 +53,10 @@ public class BasicParser {
 			br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			String line = null;
 			while ((line = br.readLine()) != null) {
-				handler.processLine(line);
+				boolean end = handler.processLine(line);
+				if (end) {
+					break;
+				}
 			}
 		} catch (IOException ex) {
 			throw ex;

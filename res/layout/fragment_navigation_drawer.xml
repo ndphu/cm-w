@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#555" >
+    android:background="@color/background_material_dark" >
 
     <RelativeLayout
         android:id="@+id/fragment_navigation_drawer_header"

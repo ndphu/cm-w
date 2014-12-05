@@ -36,7 +36,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	// private ScreenSlidePagerAdapter mPagerAdapter;
 
 	private Spinner mSpinner;
-	private MenuItem mDropDownItem;
 	private ActionBar mActionBar;
 	private GridView mGridView;
 	private HomePageItemAdapter mGridAdapter;
@@ -55,7 +54,10 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		mActionBar.setCustomView(mSpinner);
 		View view = inflater.inflate(R.layout.fragment_homepage, container, false);
 		mGridView = (GridView) view.findViewById(R.id.fragment_homepage_gridview);
-		mGridAdapter = new HomePageItemAdapter(getActivity(), 0);
+		if (mGridAdapter == null) {
+			mGridAdapter = new HomePageItemAdapter(getActivity(), 0);
+		}
+		mGridView.setAdapter(mGridAdapter);
 		mGridView.setOnItemClickListener(this);
 		return view;
 	}
@@ -68,17 +70,11 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
-		mDropDownItem = menu.findItem(R.id.action_select_category);
-		mDropDownItem.setVisible(true);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_select_category:
-			mSpinner.performClick();
-			break;
-
 		default:
 			break;
 		}
@@ -87,7 +83,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 	@Override
 	public void onDestroy() {
-		mDropDownItem.setVisible(false);
 		mActionBar.setDisplayShowTitleEnabled(true);
 		mActionBar.setDisplayShowCustomEnabled(false);
 		super.onDestroy();
@@ -97,8 +92,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		TextView selectedTextView = (TextView) mSpinner.getSelectedView();
 		selectedTextView.setTextSize(20);
-		selectedTextView.setTextColor(getResources().getColor(R.color.abc_primary_text_material_dark));
-		mGridView.setAdapter(mGridAdapter);
+		// selectedTextView.setTextColor(getResources().getColor(R.color.abc_primary_text_material_dark));
 		mHomeLoader = new HotLoader();
 		new LoadDataTask().execute();
 	}

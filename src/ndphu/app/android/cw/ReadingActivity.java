@@ -19,6 +19,7 @@ import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressI
 import ndphu.app.android.cw.customview.TouchImageView;
 import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
+import ndphu.app.android.cw.io.processor.IZMangaProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Page;
 import ndphu.app.android.cw.model.Source;
@@ -160,6 +161,8 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 			case BLOGTRUYEN:
 				processor = new BlogTruyenProcessor();
 				break;
+			case IZMANGA:
+				processor = new IZMangaProcessor();
 			default:
 				break;
 			}

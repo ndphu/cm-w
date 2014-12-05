@@ -23,8 +23,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class SearchFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener,
-		OnItemClickListener {
+public class SearchFragment extends Fragment implements SearchBookTaskListener, OnQueryTextListener, OnItemClickListener {
 
 	private ListView mListView;
 	private SearchResultAdapter mAdapter;
@@ -47,7 +46,9 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 		setHasOptionsMenu(true);
 		View view = inflater.inflate(R.layout.fragment_book_search_listview, container, false);
 		mListView = (ListView) view.findViewById(R.id.fragment_book_search_listview);
-		mAdapter = new SearchResultAdapter(getActivity(), 0);
+		if (mAdapter == null) {
+			mAdapter = new SearchResultAdapter(getActivity(), 0);
+		}
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(this);
 		return view;
