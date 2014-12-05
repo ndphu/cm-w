@@ -14,5 +14,7 @@
     <string name="go_to_the_next_chapter">Go to the next chapter</string>
     <string name="add_to_favirite_books">Add to favirite books</string>
     <string name="action_select_category">Select category</string>
+    <string name="close">Close</string>
+    <string name="show_chapter">Show Chapter</string>
 
 </resources>

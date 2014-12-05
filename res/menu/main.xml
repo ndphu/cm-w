@@ -10,6 +10,12 @@
         android:visible="false"
         app:showAsAction="ifRoom"/>
     <item
+        android:id="@+id/action_close"
+        android:icon="@drawable/ic_action_close"
+        android:title="@string/close"
+        android:visible="false"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_search"
         android:icon="@android:drawable/ic_menu_search"
         android:orderInCategory="100"

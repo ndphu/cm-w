@@ -152,6 +152,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	public void showBookDetails(SearchResult target) {
 		BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
 		detailFragment.setTarget(target);
-		detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
+		//detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
+		mFragmentManager.beginTransaction().replace(R.id.content_frame, detailFragment).addToBackStack(null).commit();
 	}
 }
