@@ -1,58 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="fill_parent"
+    android:layout_centerHorizontal="true"
+    android:orientation="vertical"
+    android:padding="4dp" >
 
-    <include
-        android:id="@+id/toolbar"
+    <ndphu.app.android.cw.customview.TouchImageView
+        android:id="@+id/fragment_book_details_cover_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fragment_book_details_textview_summary"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="4dp"
+        android:contentDescription="@string/book_cover_background"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_launcher" />
+
+    <TextView
+        android:id="@+id/fragment_book_details_textview_summary"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerVertical="true"
-        layout="@layout/toolbar"
-        android:background="@color/background_floating_material_light" />
+        android:layout_above="@+id/fragment_book_details_button_show_chapters"
+        android:background="@drawable/cv_book_desc"
+        android:maxHeight="260dp"
+        android:padding="5dp"
+        android:scrollbars="vertical"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/fragment_book_details_button_show_chapters"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/show_chapter" />
+
+    <ListView
+        android:id="@+id/fragment_book_details_listview_chapters"
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/toolbar"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical"
-        android:padding="4dp" >
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="4"
-            android:background="@drawable/shadow"
-            android:orientation="vertical" >
-
-            <ImageView
-                android:id="@+id/fragment_book_details_cover_image"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                android:contentDescription="@string/book_cover_background"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_launcher" />
-
-            <TextView
-                android:id="@+id/fragment_book_details_textview_summary"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="2"
-                android:scrollbars="vertical" />
-        </LinearLayout>
-
-        <ListView
-            android:id="@+id/fragment_book_details_listview_chapters"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="6"
-            android:clipToPadding="false"
-            android:padding="4dp" >
-        </ListView>
-    </LinearLayout>
+        android:clipToPadding="false"
+        android:padding="4dp"
+        android:background="@color/background_material_light"
+        android:visibility="gone" >
+    </ListView>
 
 </RelativeLayout>

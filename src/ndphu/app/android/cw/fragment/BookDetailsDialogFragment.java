@@ -12,44 +12,48 @@ import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-public class BookDetailsDialogFragment extends DialogFragment implements LoadBookListener, OnMenuItemClickListener, OnItemClickListener {
+public class BookDetailsDialogFragment extends Fragment implements LoadBookListener, OnItemClickListener, android.view.View.OnClickListener {
 	private static final String TAG = BookDetailsDialogFragment.class.getSimpleName();
 	private ListView mChapterList;
 	private ChapterAdapter mAdapter;
 	private TextView mBookSummary;
+	private Button mShowChapters;
 	private ImageView mBookCover;
 	private AsyncTask<Void, Void, Object> mLoadBookDetailsClass;
-	private Toolbar mToolbar;
 	private ViewGroup mParentContainer = null;
 	private Book mBook;
 	private SearchResult mTarget;
+	private ActionBar mActionBar;
+	private FragmentManager mFragmentManager;
+	private MenuItem mMenuItemClose;
 
 	public void setTarget(SearchResult target) {
 		mTarget = target;
@@ -58,11 +62,22 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		mParentContainer = container;
-		return super.onCreateView(inflater, container, savedInstanceState);
+		setHasOptionsMenu(true);
+		mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(false);
+		mFragmentManager = ((ActionBarActivity) getActivity()).getSupportFragmentManager();
+		return getContainerView();
 	}
 
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		mActionBar.setDisplayShowCustomEnabled(false);
+		mActionBar.setDisplayShowTitleEnabled(true);
+		mLoadBookDetailsClass = new LoadBookTask(mTarget, BookDetailsDialogFragment.this).execute();
+	}
+
+	private View getContainerView() {
 		View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_book_details, mParentContainer, false);
 		mChapterList = (ListView) view.findViewById(R.id.fragment_book_details_listview_chapters);
 		mAdapter = new ChapterAdapter(getActivity(), 0);
@@ -71,38 +86,26 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		mBookSummary = (TextView) view.findViewById(R.id.fragment_book_details_textview_summary);
 		mBookSummary.setMovementMethod(new ScrollingMovementMethod());
 		mBookCover = (ImageView) view.findViewById(R.id.fragment_book_details_cover_image);
-		mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
-		mToolbar.setOnMenuItemClickListener(this);
-		mToolbar.inflateMenu(R.menu.book_details_menu);
-		AlertDialog dialog = new AlertDialog.Builder(getActivity()).setView(view).create();
-		dialog.setOnShowListener(new OnShowListener() {
-
-			@Override
-			public void onShow(DialogInterface dialog) {
-				mLoadBookDetailsClass = new LoadBookTask(mTarget, BookDetailsDialogFragment.this).execute();
-			}
-		});
-		dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-		return dialog;
-
+		mShowChapters = (Button) view.findViewById(R.id.fragment_book_details_button_show_chapters);
+		mShowChapters.setOnClickListener(this);
+		return view;
 	}
 
+	// Loading callback
 	@Override
 	public void onStart(String url) {
-		if (getActivity() != null) {
-
-		}
+		mActionBar.setTitle("Loading");
 	}
 
 	@Override
 	public void onComplete(Book book) {
 		mBook = book;
-		mToolbar.setTitle(Html.fromHtml(book.getName()));
-		if (getDialog() != null) {
-			getDialog().setTitle(book.getName());
+		if (mBook != null) {
+			mActionBar.setTitle(mBook.getName());
 		}
 		Picasso.with(getActivity()).load(Uri.parse(book.getCover())).into(mBookCover);
 		if (book.getBookDesc() != null && !book.getBookDesc().trim().isEmpty()) {
+			mBookSummary.setVisibility(View.VISIBLE);
 			mBookSummary.setText(Html.fromHtml(book.getBookDesc()));
 		} else {
 			mBookSummary.setVisibility(View.GONE);
@@ -113,41 +116,27 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 
 	@Override
 	public void onError(Exception ex) {
+		mActionBar.setTitle("Error");
 		if (getActivity() != null) {
-			new AlertDialog.Builder(getActivity()).setTitle("Error").setMessage("Cannot load book details. Error: " + ex.getMessage())
+			new AlertDialog.Builder(getActivity()).setTitle("Error")
+					.setMessage("Cannot load book details. Error: " + ex.getMessage())
 					.setPositiveButton("Close", new OnClickListener() {
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();
-							if (getDialog() != null) {
-								getDialog().dismiss();
-							}
 						}
 					}).create().show();
 		}
 	}
 
 	@Override
-	public boolean onMenuItemClick(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_close:
-			getDialog().dismiss();
-			break;
-		default:
-			break;
-		}
-		return false;
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		mMenuItemClose = menu.findItem(R.id.action_close);
+		mMenuItemClose.setVisible(true);
 	}
-
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		if (mLoadBookDetailsClass != null) {
-			mLoadBookDetailsClass.cancel(true);
-		}
-	}
-
+	
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Chapter chapter = mAdapter.getItem(position);
@@ -163,5 +152,36 @@ public class BookDetailsDialogFragment extends DialogFragment implements LoadBoo
 		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
 		intent.putExtra(ReadingActivity.EXTRA_SOURCE, chapterSource.name());
 		startActivity(intent);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_close:
+			mFragmentManager.popBackStack();
+			return true;
+		default:
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onDestroyView() {
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		if (mMenuItemClose != null) {
+			mMenuItemClose.setVisible(false);
+		}
+		if (mLoadBookDetailsClass != null) {
+			mLoadBookDetailsClass.cancel(true);
+		}
+		super.onDestroyView();
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (v.getId() == R.id.fragment_book_details_button_show_chapters) {
+			mChapterList.setVisibility(View.VISIBLE);
+		}
 	}
 }
