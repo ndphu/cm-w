@@ -3,7 +3,9 @@ package ndphu.app.android.cw.io.processor;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,18 +124,25 @@ public class Manga24hProcessor implements BookProcessor {
 
 	@Override
 	public List<SearchResult> search(String token) {
-		String url = String.format(SEARCH_URL_TEMPLATE, token);
-		String response = new String(Utils.getRawDataFromURL(url));
+
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		try {
+			String url = String.format(SEARCH_URL_TEMPLATE, URLEncoder.encode(token, "UTF-8"));
+			String response = new String(Utils.getRawDataFromURL(url));
 			JSONArray arr = new JSONArray(response);
 			Log.i(TAG, arr.toString());
 			for (int i = 0; i < arr.length(); ++i) {
 				JSONObject bookJson = arr.getJSONObject(i);
-				SearchResult book = new SearchResult(bookJson.getString("text"), bookJson.getString("id"), Source.MANGA24H);
+				String bookUrl = bookJson.getString("id");
+				if (bookUrl.equals("0")) {
+					continue;
+				}
+				SearchResult book = new SearchResult(bookJson.getString("text"), bookUrl, Source.MANGA24H);
 				result.add(book);
 			}
 		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		return result;
@@ -166,10 +175,10 @@ public class Manga24hProcessor implements BookProcessor {
 				HomePageItem item = null;
 
 				@Override
-				public void processLine(String line) {
+				public boolean processLine(String line) {
 					line = line.trim();
 					if (line.length() == 0) {
-						return;
+						return false;
 					}
 					if (line.contains("item_anime_box")) {
 						item = new HomePageItem();
@@ -183,6 +192,7 @@ public class Manga24hProcessor implements BookProcessor {
 						item.mChapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
 						result.add(item);
 					}
+					return false;
 				}
 			});
 		} catch (Exception ex) {

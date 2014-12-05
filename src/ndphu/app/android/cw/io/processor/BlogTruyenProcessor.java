@@ -56,7 +56,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 				BasicParser.processLineByLine(response.getEntity().getContent(), new LineHandler() {
 
 					@Override
-					public void processLine(String line) {
+					public boolean processLine(String line) {
 						line = line.trim();
 						if (line.contains("href=")) {
 							Log.d(TAG, "Got book: " + line);
@@ -66,6 +66,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 							SearchResult searchResult = new SearchResult(bookName, bookUrl, Source.BLOGTRUYEN);
 							result.add(searchResult);
 						}
+						return false;
 					}
 				});
 			} catch (IllegalStateException | IOException e) {
@@ -85,13 +86,13 @@ public class BlogTruyenProcessor implements BookProcessor {
 			boolean isInContentPart = false;
 
 			@Override
-			public void processLine(String line) {
+			public boolean processLine(String line) {
 				line = line.trim();
 				if (isInContentPart) {
 					content.append(line);
 					String currentContent = content.toString();
-					isInContentPart = !(countString(currentContent, "<div") == countString(currentContent, "</div>"));
-					return;
+					isInContentPart = !(Utils.countString(currentContent, "<div") == Utils.countString(currentContent, "</div>"));
+					return false;
 				}
 				if (line.startsWith("<title>")) {
 					// Title
@@ -110,22 +111,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 					chapter.setChapterSource(Source.BLOGTRUYEN);
 					book.getChapters().add(chapter);
 				}
-			}
-
-			private int countString(String input, String pattern) {
-				int lastIndex = 0;
-				int count = 0;
-
-				while (lastIndex != -1) {
-
-					lastIndex = input.indexOf(pattern, lastIndex);
-
-					if (lastIndex != -1) {
-						count++;
-						lastIndex += pattern.length();
-					}
-				}
-				return count;
+				return false;
 			}
 		});
 		book.setBookDesc(content.toString());
@@ -140,7 +126,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 			boolean isPagePart = false;
 
 			@Override
-			public void processLine(String line) {
+			public boolean processLine(String line) {
 				line = line.trim();
 				if (isPagePart) {
 					sb.append(line);
@@ -150,6 +136,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 				} else if (line.contains("</article>")) {
 					isPagePart = false;
 				}
+				return false;
 			}
 		});
 		String imgs = sb.toString();

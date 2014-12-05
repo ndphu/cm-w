@@ -30,6 +30,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
+	private HomeFragment mHomeFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,9 +118,10 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		}
 		switch (position) {
 		case 0:
-			// Home
-			HomeFragment home = new HomeFragment();
-			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, home).commit();
+			if (mHomeFragment == null) {
+				mHomeFragment = new HomeFragment();
+			}
+			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mHomeFragment).commit();
 			break;
 		case 1:
 			// My Books

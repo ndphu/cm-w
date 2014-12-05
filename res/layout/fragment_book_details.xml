@@ -35,15 +35,15 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="@string/show_chapter" />
+        android:text="@string/show_chapters" />
 
     <ListView
         android:id="@+id/fragment_book_details_listview_chapters"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_above="@+id/fragment_book_details_button_show_chapters"
+        android:background="@color/background_material_dark"
         android:clipToPadding="false"
-        android:padding="4dp"
-        android:background="@color/background_material_light"
         android:visibility="gone" >
     </ListView>
 
