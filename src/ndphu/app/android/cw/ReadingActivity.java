@@ -29,6 +29,7 @@ import ndphu.app.android.cw.util.Utils;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -78,6 +79,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_reading);
@@ -85,11 +87,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		// Init thread pool
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), this);
 
-		// Read from intent
-		mChapterUrl = getIntent().getStringExtra(EXTRA_CHAPTER_URL);
-		mChapterUrlList = getIntent().getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
-		mChapterSource = Source.valueOf(getIntent().getStringExtra(EXTRA_SOURCE));
-		mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
+		readFromIntent(getIntent());
 
 		// Init layout
 		// Init view pager
@@ -103,6 +101,21 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		mChapterNavigationBar.setVisibility(View.GONE);
 		mChapterNavigationBar.setChapterNavigationBarListener(this);
 
+		refresh();
+	}
+
+	private void readFromIntent(Intent intent) {
+		// Read from intent
+		mChapterUrl = intent.getStringExtra(EXTRA_CHAPTER_URL);
+		mChapterUrlList = intent.getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
+		mChapterSource = Source.valueOf(intent.getStringExtra(EXTRA_SOURCE));
+		mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		readFromIntent(intent);
 		refresh();
 	}
 

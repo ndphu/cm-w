@@ -19,5 +19,6 @@
     <string name="hide_chapters">Hide Chapters</string>
     <string name="book_name">Book name</string>
     <string name="category_">Category:</string>
+    <string name="chapter">Chapter</string>
 
 </resources>
