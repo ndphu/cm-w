@@ -150,7 +150,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 			showBookDetails(selectedItem);
 		}
 	}
-
+	
 	public void showBookDetails(SearchResult target) {
 		BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
 		detailFragment.setTarget(target);

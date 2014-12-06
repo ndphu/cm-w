@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import ndphu.app.android.cw.io.parser.BasicParser;
 import ndphu.app.android.cw.io.parser.BasicParser.LineHandler;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Category;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
@@ -27,8 +30,39 @@ import android.util.Log;
 public class IZMangaProcessor implements BookProcessor {
 
 	private static final String SEARCH_URL = "http://izmanga.com/home/getjsonsearchstory?searchword=%s&search_style=tentruyen";
-	private static final String BASE_URL = "http://izmanga.com/";
+	private static final String BASE_URL = "http://izmanga.com";
 	private static final String TAG = IZMangaProcessor.class.getSimpleName();
+	private static final String CATEGORY_URL = "http://izmanga.com/danh_sach_truyen?type=new&category=%s&alpha=all&page=%s&state=all&group=all";
+	private static final Map<Category, String> CATEGORY_MAP = new LinkedHashMap<Category, String>();
+
+	static {
+		CATEGORY_MAP.put(Category.NEW, "all");
+		CATEGORY_MAP.put(Category.ACTION, "39");
+		CATEGORY_MAP.put(Category.ADULT, "40");
+		CATEGORY_MAP.put(Category.ADVENTURE, "41");
+		CATEGORY_MAP.put(Category.COMEDY, "45");
+		CATEGORY_MAP.put(Category.DEMONS, "47");
+		CATEGORY_MAP.put(Category.DRAMA, "49");
+		CATEGORY_MAP.put(Category.FANTASY, "51");
+		CATEGORY_MAP.put(Category.HISTORICAL, "55");
+		CATEGORY_MAP.put(Category.HORROR, "56");
+		CATEGORY_MAP.put(Category.MAGIC, "59");
+		CATEGORY_MAP.put(Category.MARTIAL_ARTS, "62");
+		CATEGORY_MAP.put(Category.MATURE, "63");
+		CATEGORY_MAP.put(Category.MUSIC, "67");
+		CATEGORY_MAP.put(Category.MYSTERY, "68");
+		CATEGORY_MAP.put(Category.ONESHOT, "70");
+		CATEGORY_MAP.put(Category.ROMANCE, "73");
+		CATEGORY_MAP.put(Category.SCHOOL_LIFE, "74");
+		CATEGORY_MAP.put(Category.SPORTS, "98");
+		CATEGORY_MAP.put(Category.SUPER_POWER, "99");
+		CATEGORY_MAP.put(Category.SUPERNATURAL, "101");
+		CATEGORY_MAP.put(Category.TRAGEDY, "102");
+		CATEGORY_MAP.put(Category.VAMPIRE, "103");
+		CATEGORY_MAP.put(Category.WEBTOONS, "104");
+		CATEGORY_MAP.put(Category.COMIC, "108");
+		CATEGORY_MAP.put(Category.SCAN, "110");
+	}
 
 	@Override
 	public List<SearchResult> search(String token) {
@@ -40,10 +74,10 @@ public class IZMangaProcessor implements BookProcessor {
 			for (int idx = 0; idx < arr.length(); ++idx) {
 				JSONObject entry = arr.getJSONObject(idx);
 				String bookName = entry.getString("name");
-				Log.i(TAG, "Got book name: " + bookName);
+				Log.d(TAG, "Got book name: " + bookName);
 				String alias = changeAlias(bookName);
-				String bookUrl = BASE_URL + alias + "-" + entry.getString("id");
-				Log.i(TAG, "Got book url: " + bookUrl);
+				String bookUrl = BASE_URL + "/" + alias + "-" + entry.getString("id");
+				Log.d(TAG, "Got book url: " + bookUrl);
 				SearchResult item = new SearchResult(bookName, bookUrl, Source.IZMANGA);
 				result.add(item);
 			}
@@ -66,7 +100,8 @@ public class IZMangaProcessor implements BookProcessor {
 		str = str.replaceAll("ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ", "u");
 		str = str.replaceAll("ỳ|ý|ỵ|ỷ|ỹ", "y");
 		str = str.replaceAll("đ/g", "d");
-		str = str.replaceAll("!|@|%|\\^|\\*|\\(|\\)|\\+|\\=|\\<|\\>|\\?|\\/|,|\\.|\\:|\\;|\\'| |\\\"|\\&|\\#|\\[|\\]|~|-|$", "_");
+		str = str.replaceAll(
+				"!|@|%|\\^|\\*|\\(|\\)|\\+|\\=|\\<|\\>|\\?|\\/|,|\\.|\\:|\\;|\\'| |\\\"|\\&|\\#|\\[|\\]|~|-|$", "_");
 		/* tìm và thay thế các kí tự đặc biệt trong chuỗi sang kí tự - */
 		str = str.replaceAll("_+", "_"); // thay thế 2- thành 1-
 		str = str.replaceAll("^\\_+|\\_+$", "");
@@ -76,7 +111,7 @@ public class IZMangaProcessor implements BookProcessor {
 
 	@Override
 	public Book loadBook(String bookUrl, boolean complete) throws Exception {
-		Log.i(TAG, "Load book: " + bookUrl);
+		Log.d(TAG, "Load book: " + bookUrl);
 		final Book book = new Book();
 		final StringBuilder content = new StringBuilder();
 		BasicParser.processLineByLine(bookUrl, new LineHandler() {
@@ -94,19 +129,20 @@ public class IZMangaProcessor implements BookProcessor {
 						content.append(line);
 					}
 				} else if (isChapterPart) {
-					if (Utils.countString(chapterCheck.toString(), "<div") <= Utils.countString(chapterCheck.toString(), "</div>")) {
+					if (Utils.countString(chapterCheck.toString(), "<div") <= Utils.countString(
+							chapterCheck.toString(), "</div>")) {
 						isChapterPart = false;
 					} else {
 						chapterCheck.append(line);
 						if (line.contains("http")) {
-							Log.i(TAG, "Chapter line:" + line);
+							Log.d(TAG, "Chapter line:" + line);
 							Chapter chapter = new Chapter();
 							chapter.setChapterSource(Source.IZMANGA);
 							String chapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
-							Log.i(TAG, "Chapter name:" + chapterName);
+							Log.d(TAG, "Chapter name:" + chapterName);
 							chapter.setName(chapterName);
 							String chapterUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\" title"));
-							Log.i(TAG, "Chapter url:" + chapterUrl);
+							Log.d(TAG, "Chapter url:" + chapterUrl);
 							chapter.setChapterUrl(chapterUrl);
 							book.getChapters().add(chapter);
 						}
@@ -128,7 +164,7 @@ public class IZMangaProcessor implements BookProcessor {
 				return false;
 			}
 		});
-		Log.i(TAG, "Content: " + content.toString());
+		Log.d(TAG, "Content: " + content.toString());
 		book.setBookDesc(content.toString());
 		return book;
 	}
@@ -172,4 +208,61 @@ public class IZMangaProcessor implements BookProcessor {
 		return null;
 	}
 
+	@Override
+	public List<HomePageItem> getHomePageItemByCategory(Category category, int page) {
+		final List<HomePageItem> result = new ArrayList<HomePageItem>();
+		Log.d(TAG, "Category: " + category);
+		Log.d(TAG, "Page: " + page);
+		// because the site use 1 by the first index
+		page++;
+		String requestUrl = String.format(CATEGORY_URL, CATEGORY_MAP.get(category), page);
+		Log.d(TAG, "reuqest url: " + requestUrl);
+		try {
+			BasicParser.processLineByLine(requestUrl, new LineHandler() {
+
+				private HomePageItem homePageItem = null;
+
+				@Override
+				public boolean processLine(String line) {
+					line = line.trim();
+					if (line.contains("<div class=\"phan-trang\">")) {
+						// end
+						return true;
+					}
+					if (homePageItem != null) {
+						if (line.contains("title=\"\"")) {
+							Log.d(TAG, "Debug: Line: " + line);
+							String tmp = line.substring(line.indexOf("http"));
+							homePageItem.mBookUrl = tmp.substring(0, tmp.indexOf("\""));
+						} else if (line.contains("<img")) {
+							String tmp = line.substring(line.lastIndexOf("src"), line.lastIndexOf("alt"));
+							String coverPath = tmp.substring(tmp.indexOf("\"") + 1, tmp.lastIndexOf("\""));
+							if (coverPath.startsWith("http")) {
+								homePageItem.mCoverUrl = coverPath;
+							} else {
+								homePageItem.mCoverUrl = BASE_URL + coverPath;
+							}
+							tmp = line.substring(line.lastIndexOf("alt"));
+							homePageItem.mBookName = tmp.substring(tmp.indexOf("\"") + 1, tmp.lastIndexOf("\""));
+							Log.d(TAG, "Name: " + homePageItem.mBookName);
+							Log.d(TAG, "Url: " + homePageItem.mBookUrl);
+							Log.d(TAG, "Cover: " + homePageItem.mCoverUrl);
+							result.add(homePageItem);
+							homePageItem = null;
+						}
+					}
+					if (line.contains("<div class=\"list-truyen-item-wrap\">")) {
+						homePageItem = new HomePageItem();
+						homePageItem.mSource = Source.IZMANGA;
+					}
+					return false;
+				}
+			});
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return result;
+
+	}
 }

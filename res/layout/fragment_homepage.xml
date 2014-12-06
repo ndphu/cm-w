@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/fragment_homepage_textview_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/category_"
+        android:gravity="center"
+        android:padding="4dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_alignBottom="@+id/fragment_homepage_spinner_category" />
+
+    <Spinner
+        android:id="@+id/fragment_homepage_spinner_category"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/fragment_homepage_textview_category"
+        android:layout_toRightOf="@+id/fragment_homepage_textview_category" />
 
     <GridView
         android:id="@+id/fragment_homepage_gridview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/fragment_homepage_spinner_category"
         android:layout_centerHorizontal="true"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
         android:clipToPadding="false"
         android:horizontalSpacing="4dp"
         android:numColumns="@integer/int_grid_column"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
         android:verticalSpacing="4dp" >
     </GridView>
 

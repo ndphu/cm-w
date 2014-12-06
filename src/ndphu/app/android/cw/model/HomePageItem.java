@@ -6,4 +6,5 @@ public class HomePageItem {
 	public String mCoverUrl;
 	public String mChapterName;
 	public String mChapterUrl;
+	public Source mSource;
 }
