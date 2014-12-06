@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -46,7 +45,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	private int mCurrentSpinnerPosition = 0;
 	private ProgressDialog mProgressDialog;
 	public boolean mIsLoading = false;
-	private boolean mIngored = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -58,18 +56,28 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mCategories[i] = categories[i].getDisplayName();
 		}
 		setHasOptionsMenu(true);
-		mSpinnerAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
-				mCategories);
+		mSpinnerAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, mCategories);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_homepage, container, false);
 		// Spinner
+		Log.i(TAG, "Init Spinner");
 		mSpinner = (Spinner) view.findViewById(R.id.fragment_homepage_spinner_category);
-		mSpinner.setOnItemSelectedListener(this);
 		mSpinner.setAdapter(mSpinnerAdapter);
+		mSpinner.setSelection(mCurrentSpinnerPosition);
+		mSpinner.post(new Runnable() {
+			@Override
+			public void run() {
+				mSpinner.setOnItemSelectedListener(HomeFragment.this);
+				if (mGridAdapter.getCount() == 0) {
+					new LoadDataTask().execute();
+				}
+			}
+		});
 		// Grid view
+		Log.i(TAG, "Init Gridview");
 		mGridView = (GridView) view.findViewById(R.id.fragment_homepage_gridview);
 		if (mGridAdapter == null) {
 			mGridAdapter = new HomePageItemAdapter(getActivity(), 0);
@@ -83,9 +91,11 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		mIngored = true;
-		mSpinner.setSelection(mCurrentSpinnerPosition);
-		mIngored = false;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 	}
 
 	@Override
@@ -95,18 +105,12 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		Log.i(TAG,"On item selected");
-		if (mIngored) {
-			Log.w(TAG, "Ingore event...");
-			return;
-		}
 		mCurrentCategory = Category.values()[position];
 		if (position != mCurrentSpinnerPosition) {
 			mCurrentSpinnerPosition = position;
 			mGridAdapter.clear();
 			mPage = 0;
 		}
-		mIsLoading = true;
 		new LoadDataTask().execute();
 	}
 
@@ -114,6 +118,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 		@Override
 		protected void onPreExecute() {
+			Log.i(TAG, "Start loading");
 			super.onPreExecute();
 			mProgressDialog = new ProgressDialog(getActivity());
 			mProgressDialog.setTitle("Loading");
@@ -129,7 +134,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		@Override
 		protected void onPostExecute(List<HomePageItem> result) {
 			super.onPostExecute(result);
-			mPage ++;
+			mPage++;
 			mIsLoading = false;
 			mGridAdapter.addAll(result);
 			mProgressDialog.dismiss();
@@ -150,17 +155,17 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
-		
+
 	}
 
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-		if(totalItemCount > 0 && firstVisibleItem + visibleItemCount >= totalItemCount){
+		if (totalItemCount > 0 && firstVisibleItem + visibleItemCount >= totalItemCount) {
 			if (!mIsLoading) {
 				Log.i(TAG, "Loading when scolling to end");
 				mIsLoading = true;
 				new LoadDataTask().execute();
 			}
-        }
+		}
 	}
 }
