@@ -13,6 +13,7 @@ import ndphu.app.android.cw.io.Utils;
 import ndphu.app.android.cw.io.parser.BasicParser;
 import ndphu.app.android.cw.io.parser.BasicParser.LineHandler;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Category;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
@@ -199,6 +200,11 @@ public class Manga24hProcessor implements BookProcessor {
 			ex.printStackTrace();
 		}
 		return result;
+	}
+
+	@Override
+	public List<HomePageItem> getHomePageItemByCategory(Category category, int page) {
+		return null;
 	}
 
 }

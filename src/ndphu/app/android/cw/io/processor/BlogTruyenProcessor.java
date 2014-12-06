@@ -8,6 +8,7 @@ import java.util.List;
 import ndphu.app.android.cw.io.parser.BasicParser;
 import ndphu.app.android.cw.io.parser.BasicParser.LineHandler;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Category;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.Page;
@@ -165,6 +166,12 @@ public class BlogTruyenProcessor implements BookProcessor {
 
 	@Override
 	public List<HomePageItem> getHomePages() {
+		return null;
+	}
+
+	@Override
+	public List<HomePageItem> getHomePageItemByCategory(Category category, int page) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
