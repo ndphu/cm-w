@@ -1,14 +1,10 @@
 package ndphu.app.android.cw.fragment;
 
-import java.util.ArrayList;
-
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
 import ndphu.app.android.cw.model.Book;
-import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
@@ -32,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -39,10 +36,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-public class BookDetailsDialogFragment extends Fragment implements LoadBookListener, OnItemClickListener, android.view.View.OnClickListener {
-	private static final String TAG = BookDetailsDialogFragment.class.getSimpleName();
+public class BookDetailsFragment extends Fragment implements LoadBookListener, OnItemClickListener, android.view.View.OnClickListener {
+	private static final String TAG = BookDetailsFragment.class.getSimpleName();
 	private ListView mChapterList;
 	private ChapterAdapter mAdapter;
 	private TextView mBookSummary;
@@ -75,7 +73,7 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 		mParentContainer = container;
 		setHasOptionsMenu(true);
 		mActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-		mActionBar.setDisplayHomeAsUpEnabled(false);
+		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mFragmentManager = ((ActionBarActivity) getActivity()).getSupportFragmentManager();
 		return getContainerView();
 	}
@@ -132,8 +130,7 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 		mProgressDialog.dismiss();
 		mActionBar.setTitle("Error");
 		if (getActivity() != null) {
-			new AlertDialog.Builder(getActivity()).setTitle("Error")
-					.setMessage("Cannot load book details. Error: " + ex.getMessage())
+			new AlertDialog.Builder(getActivity()).setTitle("Error").setMessage("Cannot load book details. Error: " + ex.getMessage())
 					.setPositiveButton("Close", new OnClickListener() {
 
 						@Override
@@ -153,18 +150,25 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Chapter chapter = mAdapter.getItem(position);
-		Source chapterSource = chapter.getChapterSource();
-		String chapterUrl = chapter.getChapterUrl();
-		Log.i(TAG, "Select chapter: " + chapterUrl);
+		//Chapter chapter = mAdapter.getItem(position);
+		//Source chapterSource = chapter.getChapterSource();
+		//String chapterUrl = chapter.getChapterUrl();
+		//Log.i(TAG, "Select chapter: " + chapterUrl);
 		Intent intent = new Intent(getActivity(), ReadingActivity.class);
-		ArrayList<CharSequence> chapterUrlList = new ArrayList<CharSequence>();
-		for (Chapter __chapter : mBook.getChapters()) {
-			chapterUrlList.add(__chapter.getChapterUrl());
-		}
-		intent.putCharSequenceArrayListExtra(ReadingActivity.EXTRA_CHAPTER_ARRAY, chapterUrlList);
-		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
-		intent.putExtra(ReadingActivity.EXTRA_SOURCE, chapterSource.name());
+		//ArrayList<CharSequence> chapterUrlList = new ArrayList<CharSequence>();
+		//for (Chapter __chapter : mBook.getChapters()) {
+		//	chapterUrlList.add(__chapter.getChapterUrl());
+		//}
+		//
+		//intent.putCharSequenceArrayListExtra(ReadingActivity.EXTRA_CHAPTER_ARRAY, chapterUrlList);
+		//intent.putExtra(ReadingActivity.EXTRA_CHAPTER_URL, chapterUrl);
+		//intent.putExtra(ReadingActivity.EXTRA_SOURCE, chapterSource.name());
+		//
+		Gson gson = new Gson();
+		String json = gson.toJson(mBook);
+		Log.i(TAG, json);
+		intent.putExtra(ReadingActivity.EXTRA_BOOK_JSON, json);
+		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, position);
 		startActivity(intent);
 	}
 
@@ -196,9 +200,13 @@ public class BookDetailsDialogFragment extends Fragment implements LoadBookListe
 	public void onClick(View v) {
 		if (v.getId() == R.id.fragment_book_details_button_show_chapters) {
 			if (mChapterList.getVisibility() == View.VISIBLE) {
+				mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(),
+						R.anim.slide_out_bottom));
 				mChapterList.setVisibility(View.GONE);
 				mShowChapters.setText(R.string.show_chapters);
 			} else {
+				mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(),
+						R.anim.slide_in_bottom));
 				mChapterList.setVisibility(View.VISIBLE);
 				mShowChapters.setText(R.string.hide_chapters);
 			}
