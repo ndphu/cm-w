@@ -8,7 +8,6 @@ import ndphu.app.android.cw.adapter.HomePageItemAdapter;
 import ndphu.app.android.cw.model.Category;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -25,12 +24,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
 public class HomeFragment extends Fragment implements OnItemSelectedListener, OnItemClickListener, OnScrollListener {
 
 	private static final String TAG = HomeFragment.class.getSimpleName();
+	private static final int MAX_ITEMS_PER_PAGE = 16;
 	// private ViewPager mViewPager = null;
 	//
 	// private ScreenSlidePagerAdapter mPagerAdapter;
@@ -43,8 +44,10 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public int mPage = 0;
 	private SpinnerAdapter mSpinnerAdapter;
 	private int mCurrentSpinnerPosition = 0;
-	private ProgressDialog mProgressDialog;
+	//private ProgressDialog mProgressDialog;
+	private ProgressBar mProgressIndicator;
 	public boolean mIsLoading = false;
+	public boolean mEndCategory = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,8 +86,16 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mGridAdapter = new HomePageItemAdapter(getActivity(), 0);
 		}
 		mGridView.setAdapter(mGridAdapter);
-		mGridView.setOnItemClickListener(this);
-		mGridView.setOnScrollListener(this);
+		mGridView.post(new Runnable() {
+			@Override
+			public void run() {
+				mGridView.setOnItemClickListener(HomeFragment.this);
+				mGridView.setOnScrollListener(HomeFragment.this);
+			}
+		});
+		// Progressbar indicator
+		mProgressIndicator = (ProgressBar) view.findViewById(R.id.fragment_homepage_preogressbar_loading_indicator);
+		mProgressIndicator.setVisibility(View.GONE);
 		return view;
 	}
 
@@ -110,6 +121,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mCurrentSpinnerPosition = position;
 			mGridAdapter.clear();
 			mPage = 0;
+			mEndCategory = false;
 		}
 		new LoadDataTask().execute();
 	}
@@ -120,10 +132,11 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		protected void onPreExecute() {
 			Log.i(TAG, "Start loading");
 			super.onPreExecute();
-			mProgressDialog = new ProgressDialog(getActivity());
-			mProgressDialog.setTitle("Loading");
-			mProgressDialog.setMessage("Preparing " + mCurrentCategory.getDisplayName() + "...");
-			mProgressDialog.show();
+			mProgressIndicator.setVisibility(View.VISIBLE);
+//			mProgressDialog = new ProgressDialog(getActivity());
+//			mProgressDialog.setTitle("Loading");
+//			mProgressDialog.setMessage("Preparing " + mCurrentCategory.getDisplayName() + "...");
+//			mProgressDialog.show();
 		}
 
 		@Override
@@ -134,10 +147,15 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		@Override
 		protected void onPostExecute(List<HomePageItem> result) {
 			super.onPostExecute(result);
+			mProgressIndicator.setVisibility(View.GONE);
 			mPage++;
 			mIsLoading = false;
 			mGridAdapter.addAll(result);
-			mProgressDialog.dismiss();
+//			mProgressDialog.dismiss();
+			if (result.size() < MAX_ITEMS_PER_PAGE) {
+				// reach all books on this category
+				mEndCategory = true;
+			}
 		}
 	}
 
@@ -161,7 +179,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 		if (totalItemCount > 0 && firstVisibleItem + visibleItemCount >= totalItemCount) {
-			if (!mIsLoading) {
+			if (!mIsLoading && !mEndCategory) {
 				Log.i(TAG, "Loading when scolling to end");
 				mIsLoading = true;
 				new LoadDataTask().execute();

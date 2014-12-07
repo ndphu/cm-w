@@ -1,6 +1,6 @@
 package ndphu.app.android.cw;
 
-import ndphu.app.android.cw.fragment.BookDetailsDialogFragment;
+import ndphu.app.android.cw.fragment.BookDetailsFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.fragment.home.HomeFragment;
@@ -138,23 +138,23 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		mDrawerLayout.closeDrawers();
 	}
 
-	//
-	// public Toolbar getToolbar() {
-	// return mToolbar;
-	//
-	// }
-
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
 		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
 			showBookDetails(selectedItem);
 		}
 	}
-	
+
 	public void showBookDetails(SearchResult target) {
-		BookDetailsDialogFragment detailFragment = new BookDetailsDialogFragment();
+		BookDetailsFragment detailFragment = new BookDetailsFragment();
 		detailFragment.setTarget(target);
-		//detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
-		mFragmentManager.beginTransaction().replace(R.id.content_frame, detailFragment).addToBackStack(null).commit();
+		// detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
+		mFragmentManager.beginTransaction()
+			.setCustomAnimations(
+					R.anim.slide_in_bottom,
+					R.anim.fade_out,
+					R.anim.fade_in,
+					R.anim.slide_out_bottom)
+			.replace(R.id.content_frame, detailFragment).addToBackStack(null).commit();
 	}
 }

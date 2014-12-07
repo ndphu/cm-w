@@ -11,8 +11,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import ndphu.app.android.cw.customview.ChapterNavigationBar;
-import ndphu.app.android.cw.customview.ChapterNavigationBar.ChapterNavigationBarListener;
 import ndphu.app.android.cw.customview.ExtendedViewPager;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressIndicatorListener;
@@ -21,8 +19,9 @@ import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.IZMangaProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
+import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.Page;
-import ndphu.app.android.cw.model.Source;
 import ndphu.app.android.cw.runable.DownloadFileRunnable;
 import ndphu.app.android.cw.runable.DownloadFileRunnable.DownloadFileListener;
 import ndphu.app.android.cw.util.Utils;
@@ -35,34 +34,43 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
-public class ReadingActivity extends Activity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, ChapterNavigationBarListener {
-	protected static final String TAG = ReadingActivity.class.getSimpleName();
-	public static String EXTRA_CHAPTER_ARRAY = "chapter_array";
-	public static String EXTRA_CHAPTER_URL = "chapter_url";
-	public static String EXTRA_SOURCE = "chapter_source";
+import com.google.gson.Gson;
+
+public class ReadingActivity extends Activity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, DrawerListener, OnItemClickListener {
+	public static final String TAG = ReadingActivity.class.getSimpleName();
+	public static final String EXTRA_BOOK_JSON = "book_in_json";
+	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
+	// public static String EXTRA_CHAPTER_ARRAY = "chapter_array";
+	// public static String EXTRA_CHAPTER_URL = "chapter_url";
+	// public static String EXTRA_SOURCE = "chapter_source";
 
 	// GUI elements
 	private ExtendedViewPager mViewPager;
 	private LoadingProgressIndicator mLoadingIndicator;
-	private ChapterNavigationBar mChapterNavigationBar;
+	private ListView mChapterListView;
 
 	// Activity data
-	private String mChapterUrl;
 	private List<Page> mPages;
-	private List<CharSequence> mChapterUrlList;
-	private int mCurrentChapterIndex = -1;
-	private Source mChapterSource;
+	private int mCurrentChapterIndex = 0;
+	private Chapter mCurrentChapter;
 
 	// Caching params
 	private final Object mDiskCacheLock = new Object();
@@ -75,6 +83,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	private int mMaximumPoolSize = 24;
 	private long mKeepAlive = 10000;
 	private ThreadPoolExecutor mExecutor;
+	private DrawerLayout mDrawerLayout;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -87,7 +96,10 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		// Init thread pool
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), this);
 
-		readFromIntent(getIntent());
+		// Init drawer
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		mDrawerLayout.setDrawerListener(this);
 
 		// Init layout
 		// Init view pager
@@ -96,20 +108,45 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		mLoadingIndicator.setLoadingProgressIndicatorListener(this);
 		mLoadingIndicator.setAlpha(0.8f);
 
-		// Init chapter navigation
-		mChapterNavigationBar = (ChapterNavigationBar) findViewById(R.id.activity_reading_chapter_navigation_bar);
-		mChapterNavigationBar.setVisibility(View.GONE);
-		mChapterNavigationBar.setChapterNavigationBarListener(this);
+		// Get the listview
+		mChapterListView = (ListView) findViewById(R.id.activity_reading_listview_chapter);
+		mChapterListView.post(new Runnable() {
 
+			@Override
+			public void run() {
+				mChapterListView.setOnItemClickListener(ReadingActivity.this);
+			}
+		});
+
+		// Init chapter navigation
+		// mChapterNavigationBar = (ChapterNavigationBar) findViewById(R.id.activity_reading_chapter_navigation_bar);
+		// mChapterNavigationBar.setVisibility(View.GONE);
+		// mChapterNavigationBar.setChapterNavigationBarListener(this);
+
+		// Read book information from intent
+		readFromIntent(getIntent());
 		refresh();
 	}
 
 	private void readFromIntent(Intent intent) {
 		// Read from intent
-		mChapterUrl = intent.getStringExtra(EXTRA_CHAPTER_URL);
-		mChapterUrlList = intent.getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
-		mChapterSource = Source.valueOf(intent.getStringExtra(EXTRA_SOURCE));
-		mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
+		// mChapterUrl = intent.getStringExtra(EXTRA_CHAPTER_URL);
+		// mChapterUrlList = intent.getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
+		// mChapterSource = Source.valueOf(intent.getStringExtra(EXTRA_SOURCE));
+		// mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
+		Gson gson = new Gson();
+		mBook = gson.fromJson(intent.getStringExtra(EXTRA_BOOK_JSON), Book.class);
+		Log.i(TAG, mBook.getName());
+		mCurrentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, 0);
+		mCurrentChapter = mBook.getChapters().get(mCurrentChapterIndex);
+		String[] chapterArr = new String[mBook.getChapters().size()];
+		for (int i = 0; i < mBook.getChapters().size(); ++i) {
+			chapterArr[i] = mBook.getChapters().get(i).getName();
+		}
+		mChapterAdapter = new ArrayAdapter<String>(this, R.layout.listview_item_drawer_item, chapterArr);
+		mChapterListView.setAdapter(mChapterAdapter);
+		mChapterListView.setItemChecked(mCurrentChapterIndex, true);
+		mChapterListView.smoothScrollToPosition(mCurrentChapterIndex);
 	}
 
 	@Override
@@ -121,7 +158,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 	private void refresh() {
 		// Init cache dir
-		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mChapterUrl));
+		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getChapterUrl()));
 		new InitCacheTask().execute(mCacheDir);
 		// Execute task
 		new LoadChapterDataTask().execute();
@@ -155,19 +192,19 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		WeakReference<ProgressDialog> mProgressDialog = null;
 
 		@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				ProgressDialog pd = new ProgressDialog(new WeakReference<Activity>(ReadingActivity.this).get());
-				mProgressDialog = new WeakReference<ProgressDialog>(pd);
-				pd.setTitle("Loading");
-				pd.setMessage("Preparing book data. It may take one minute or two.");
-				pd.show();
-			}
+		protected void onPreExecute() {
+			super.onPreExecute();
+			ProgressDialog pd = new ProgressDialog(new WeakReference<Activity>(ReadingActivity.this).get());
+			mProgressDialog = new WeakReference<ProgressDialog>(pd);
+			pd.setTitle("Loading");
+			pd.setMessage("Preparing book data. It may take one minute or two.");
+			pd.show();
+		}
 
 		@Override
 		protected Object doInBackground(Void... params) {
 			BookProcessor processor = null;
-			switch (mChapterSource) {
+			switch (mCurrentChapter.getChapterSource()) {
 			case MANGA24H:
 				processor = new Manga24hProcessor();
 				break;
@@ -180,7 +217,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 				break;
 			}
 			try {
-				return processor.getPageList(mChapterUrl);
+				return processor.getPageList(mCurrentChapter.getChapterUrl());
 			} catch (IOException e) {
 				e.printStackTrace();
 				return e;
@@ -232,18 +269,18 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 		@Override
 		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			if ((position == mPages.size() - 2 && positionOffset > 0)) {
-				mChapterNavigationBar.setVisibility(View.VISIBLE);
-				mChapterNavigationBar.setAlpha(positionOffset);
-			} else if (position == mPages.size() - 1) {
-				mChapterNavigationBar.setVisibility(View.VISIBLE);
-				mChapterNavigationBar.setAlpha(1);
-			} else if (position == 0) {
-				mChapterNavigationBar.setVisibility(View.VISIBLE);
-				mChapterNavigationBar.setAlpha(1 - positionOffset);
-			} else {
-				mChapterNavigationBar.setVisibility(View.GONE);
-			}
+			// if ((position == mPages.size() - 2 && positionOffset > 0)) {
+			// mChapterNavigationBar.setVisibility(View.VISIBLE);
+			// mChapterNavigationBar.setAlpha(positionOffset);
+			// } else if (position == mPages.size() - 1) {
+			// mChapterNavigationBar.setVisibility(View.VISIBLE);
+			// mChapterNavigationBar.setAlpha(1);
+			// } else if (position == 0) {
+			// mChapterNavigationBar.setVisibility(View.VISIBLE);
+			// mChapterNavigationBar.setAlpha(1 - positionOffset);
+			// } else {
+			// mChapterNavigationBar.setVisibility(View.GONE);
+			// }
 		}
 
 		@Override
@@ -297,6 +334,8 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 			return view == object;
 		}
 	};
+	private Book mBook;
+	private ArrayAdapter<String> mChapterAdapter;
 
 	private void updateScaleTypeFromOrientation(final TouchImageView img) {
 		if (isLandScape()) {
@@ -466,26 +505,53 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 	}
 
+	// @Override
+	// public void onNextClick() {
+	// mCurrentChapterIndex = mCurrentChapterIndex - 1;
+	// if (mCurrentChapterIndex >= 0) {
+	// mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
+	// refresh();
+	// } else {
+	// mCurrentChapterIndex = mCurrentChapterIndex + 1;
+	// }
+	// }
+	//
+	// @Override
+	// public void onPrevClick() {
+	// mCurrentChapterIndex = mCurrentChapterIndex + 1;
+	// if (mCurrentChapterIndex < mChapterUrlList.size()) {
+	// mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
+	// refresh();
+	// } else {
+	// mCurrentChapterIndex = mCurrentChapterIndex - 1;
+	// }
+	// }
+
 	@Override
-	public void onNextClick() {
-		mCurrentChapterIndex = mCurrentChapterIndex - 1;
-		if (mCurrentChapterIndex >= 0) {
-			mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
-			refresh();
-		} else {
-			mCurrentChapterIndex = mCurrentChapterIndex + 1;
-		}
+	public void onDrawerClosed(View arg0) {
+
 	}
 
 	@Override
-	public void onPrevClick() {
-		mCurrentChapterIndex = mCurrentChapterIndex + 1;
-		if (mCurrentChapterIndex < mChapterUrlList.size()) {
-			mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
-			refresh();
-		} else {
-			mCurrentChapterIndex = mCurrentChapterIndex - 1;
-		}
+	public void onDrawerOpened(View arg0) {
+
+	}
+
+	@Override
+	public void onDrawerSlide(View arg0, float arg1) {
+
+	}
+
+	@Override
+	public void onDrawerStateChanged(int arg0) {
+
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		mCurrentChapterIndex = position;
+		mCurrentChapter = mBook.getChapters().get(position);
+		refresh();
 	}
 
 }

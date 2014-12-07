@@ -1,29 +1,42 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <!-- ExtendedViewPager is a custom view and must be referred to by its full package name in XML -->
-
-    <ndphu.app.android.cw.customview.ExtendedViewPager
-        android:id="@+id/view_pager"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
 
-    <include
-        android:id="@+id/activity_reading_progress_bar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        layout="@layout/progress_bar"
-        android:background="@drawable/shadow" />
+        <!-- ExtendedViewPager is a custom view and must be referred to by its full package name in XML -->
 
-    <include
-        android:layout_gravity="bottom"
-        android:id="@+id/activity_reading_chapter_navigation_bar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        layout="@layout/cv_chapter_navigation"
-        android:background="@drawable/shadow" android:layout_marginBottom="4dp"/>
+        <ndphu.app.android.cw.customview.ExtendedViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-</FrameLayout>
+        <include
+            android:id="@+id/activity_reading_progress_bar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            layout="@layout/progress_bar"
+            android:background="@drawable/shadow" />
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/fragment_drawer"
+        android:layout_width="@dimen/drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/background_material_dark" >
+
+        <ListView
+            android:id="@+id/activity_reading_listview_chapter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
+            android:dividerHeight="0dp" />
+    </RelativeLayout>
+
+</android.support.v4.widget.DrawerLayout>
