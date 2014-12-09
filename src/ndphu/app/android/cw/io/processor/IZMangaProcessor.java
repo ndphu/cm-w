@@ -134,7 +134,7 @@ public class IZMangaProcessor implements BookProcessor {
 						isChapterPart = false;
 					} else {
 						chapterCheck.append(line);
-						if (line.contains("http")) {
+						if (line.contains("http") && !line.contains("class=\"row\"")) {
 							Log.d(TAG, "Chapter line:" + line);
 							Chapter chapter = new Chapter();
 							chapter.setChapterSource(Source.IZMANGA);

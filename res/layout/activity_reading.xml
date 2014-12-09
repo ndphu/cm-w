@@ -21,22 +21,15 @@
             android:layout_margin="8dp"
             layout="@layout/progress_bar"
             android:background="@drawable/shadow" />
-
     </FrameLayout>
 
-    <RelativeLayout
+    <fragment
         android:id="@+id/fragment_drawer"
-        android:layout_width="@dimen/drawer_width"
+        android:name="ndphu.app.android.cw.fragment.BookDetailsFragment"
+        android:layout_width="@dimen/drawer_width_larger"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/background_material_dark" >
-
-        <ListView
-            android:id="@+id/activity_reading_listview_chapter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:choiceMode="singleChoice"
-            android:dividerHeight="0dp" />
-    </RelativeLayout>
+        android:background="@color/background_material_light" >
+    </fragment>
 
 </android.support.v4.widget.DrawerLayout>

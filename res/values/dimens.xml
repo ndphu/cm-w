@@ -4,6 +4,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="drawer_width">240dp</dimen>
+    <dimen name="drawer_width_larger">320dp</dimen>
     <dimen name="online_book_search_item_containers_margin">4dp</dimen>
 
 </resources>

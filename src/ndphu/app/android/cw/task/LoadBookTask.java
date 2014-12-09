@@ -17,6 +17,10 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 
 	public LoadBookTask(SearchResult searchResult, LoadBookListener listener) {
 		mSearchResult = searchResult;
+		initListener(listener);
+	}
+
+	private void initListener(LoadBookListener listener) {
 		mListener = new WeakReference<LoadBookTask.LoadBookListener>(listener);
 	}
 
@@ -32,7 +36,11 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 	protected void onPreExecute() {
 		super.onPreExecute();
 		if (mListener.get() != null) {
-			mListener.get().onStart(mSearchResult.bookName);
+			if (mSearchResult != null) {
+				mListener.get().onStart(mSearchResult.bookName);
+			} else {
+				mListener.get().onStart("Uknown");
+			}
 		}
 	}
 
