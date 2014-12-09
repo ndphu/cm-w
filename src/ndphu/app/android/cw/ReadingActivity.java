@@ -11,10 +11,14 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import ndphu.app.android.cw.customview.ChapterNavigationBar;
+import ndphu.app.android.cw.customview.ChapterNavigationBar.ChapterNavigationBarListener;
 import ndphu.app.android.cw.customview.ExtendedViewPager;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressIndicatorListener;
 import ndphu.app.android.cw.customview.TouchImageView;
+import ndphu.app.android.cw.fragment.BookDetailsFragment;
+import ndphu.app.android.cw.fragment.BookDetailsFragment.OnChapterSelectedListner;
 import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.IZMangaProcessor;
@@ -39,22 +43,20 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-public class ReadingActivity extends Activity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, DrawerListener, OnItemClickListener {
+public class ReadingActivity extends ActionBarActivity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, DrawerListener,
+		OnChapterSelectedListner, ChapterNavigationBarListener {
 	public static final String TAG = ReadingActivity.class.getSimpleName();
 	public static final String EXTRA_BOOK_JSON = "book_in_json";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
@@ -65,11 +67,9 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	// GUI elements
 	private ExtendedViewPager mViewPager;
 	private LoadingProgressIndicator mLoadingIndicator;
-	private ListView mChapterListView;
 
 	// Activity data
 	private List<Page> mPages;
-	private int mCurrentChapterIndex = 0;
 	private Chapter mCurrentChapter;
 
 	// Caching params
@@ -87,11 +87,14 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_reading);
+
+		// hide actionbar
+		getSupportActionBar().hide();
 
 		// Init thread pool
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), this);
@@ -108,24 +111,9 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		mLoadingIndicator.setLoadingProgressIndicatorListener(this);
 		mLoadingIndicator.setAlpha(0.8f);
 
-		// Get the listview
-		mChapterListView = (ListView) findViewById(R.id.activity_reading_listview_chapter);
-		mChapterListView.post(new Runnable() {
-
-			@Override
-			public void run() {
-				mChapterListView.setOnItemClickListener(ReadingActivity.this);
-			}
-		});
-
-		// Init chapter navigation
-		// mChapterNavigationBar = (ChapterNavigationBar) findViewById(R.id.activity_reading_chapter_navigation_bar);
-		// mChapterNavigationBar.setVisibility(View.GONE);
-		// mChapterNavigationBar.setChapterNavigationBarListener(this);
-
-		// Read book information from intent
+		mBookDetailsFragment = (BookDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_drawer);
+		mBookDetailsFragment.setOnChapterSelectedListener(this);
 		readFromIntent(getIntent());
-		refresh();
 	}
 
 	private void readFromIntent(Intent intent) {
@@ -136,27 +124,24 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		// mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
 		Gson gson = new Gson();
 		mBook = gson.fromJson(intent.getStringExtra(EXTRA_BOOK_JSON), Book.class);
+		int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, 0);
 		Log.i(TAG, mBook.getName());
-		mCurrentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, 0);
-		mCurrentChapter = mBook.getChapters().get(mCurrentChapterIndex);
-		String[] chapterArr = new String[mBook.getChapters().size()];
-		for (int i = 0; i < mBook.getChapters().size(); ++i) {
-			chapterArr[i] = mBook.getChapters().get(i).getName();
-		}
-		mChapterAdapter = new ArrayAdapter<String>(this, R.layout.listview_item_drawer_item, chapterArr);
-		mChapterListView.setAdapter(mChapterAdapter);
-		mChapterListView.setItemChecked(mCurrentChapterIndex, true);
-		mChapterListView.smoothScrollToPosition(mCurrentChapterIndex);
+		mBookDetailsFragment.setBook(mBook);
+		mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		readFromIntent(intent);
-		refresh();
 	}
 
 	private void refresh() {
+		// show navigation drawer if it is hidden
+		if (!mDrawerLayout.isShown()) {
+			mDrawerLayout.openDrawer(GravityCompat.START);
+		}
+
 		// Init cache dir
 		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getChapterUrl()));
 		new InitCacheTask().execute(mCacheDir);
@@ -248,39 +233,23 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 		@Override
 		public void onPageSelected(int position) {
-			// if (position == mPages.size() - 1) {
-			// mChapterNavigationBar.setVisibility(View.VISIBLE);
-			// } else {
-			// mChapterNavigationBar.setVisibility(View.GONE);
-			// }
-			Toast.makeText(ReadingActivity.this, (position + 1) + "/" + mPages.size(), Toast.LENGTH_SHORT).show();
-			Page page = mPages.get(position);
-			String viewTag = page.getHashedUrl();
-			TouchImageView tiv = (TouchImageView) mViewPager.findViewWithTag(viewTag);
-			if (tiv != null) {
-				if (tiv.getScaleType() == ScaleType.FIT_CENTER) {
-					// this view still not updated for new orientation, so we
-					// need to update manually
-					updateScaleTypeFromOrientation(tiv);
+			if (position < mCurrentChapter.getPages().size()) {
+				Toast.makeText(ReadingActivity.this, (position + 1) + "/" + mPages.size(), Toast.LENGTH_SHORT).show();
+				Page page = mPages.get(position);
+				String viewTag = page.getHashedUrl();
+				TouchImageView tiv = (TouchImageView) mViewPager.findViewWithTag(viewTag);
+				if (tiv != null) {
+					if (tiv.getScaleType() == ScaleType.FIT_CENTER) {
+						// this view still not updated for new orientation, so we
+						// need to update manually
+						updateScaleTypeFromOrientation(tiv);
+					}
 				}
 			}
-			// updateViewAtPosition(position);
 		}
 
 		@Override
 		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			// if ((position == mPages.size() - 2 && positionOffset > 0)) {
-			// mChapterNavigationBar.setVisibility(View.VISIBLE);
-			// mChapterNavigationBar.setAlpha(positionOffset);
-			// } else if (position == mPages.size() - 1) {
-			// mChapterNavigationBar.setVisibility(View.VISIBLE);
-			// mChapterNavigationBar.setAlpha(1);
-			// } else if (position == 0) {
-			// mChapterNavigationBar.setVisibility(View.VISIBLE);
-			// mChapterNavigationBar.setAlpha(1 - positionOffset);
-			// } else {
-			// mChapterNavigationBar.setVisibility(View.GONE);
-			// }
 		}
 
 		@Override
@@ -288,6 +257,7 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 		}
 	};
+	protected ChapterNavigationBar mChapterNavigation;
 
 	private void updateViewAtPosition(int position) {
 		Page page = mPages.get(position);
@@ -303,25 +273,38 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 		@Override
 		public int getCount() {
-			return mPages.size();
+			// Add the lastpage for navigation
+			return mPages.size() + 1;
 		}
 
 		@Override
 		public View instantiateItem(ViewGroup container, int position) {
-			final TouchImageView img = new TouchImageView(container.getContext());
-			img.setImageResource(R.drawable.ic_launcher);
-			updateScaleTypeFromOrientation(img);
-			String hasedUrl = mPages.get(position).getHashedUrl();
-			String cachedFile = getBitmapFileFromCache(hasedUrl);
-			if (cachedFile == null) {
-				Log.w(TAG, "Cached is not ready for url " + hasedUrl);
+			if (position < mPages.size()) {
+				final TouchImageView img = new TouchImageView(container.getContext());
+				img.setImageResource(R.drawable.ic_launcher);
+				updateScaleTypeFromOrientation(img);
+				String hasedUrl = mPages.get(position).getHashedUrl();
+				String cachedFile = getBitmapFileFromCache(hasedUrl);
+				if (cachedFile == null) {
+					Log.w(TAG, "Cached is not ready for url " + hasedUrl);
+				} else {
+					Log.d(TAG, "Cache hit: " + cachedFile);
+					new ImageLoader().execute(cachedFile, hasedUrl, new WeakReference<TouchImageView>(img));
+				}
+				container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				img.setTag(hasedUrl);
+				return img;
 			} else {
-				Log.d(TAG, "Cache hit: " + cachedFile);
-				new ImageLoader().execute(cachedFile, hasedUrl, new WeakReference<TouchImageView>(img));
+				if (mChapterNavigation == null) {
+					mChapterNavigation = (ChapterNavigationBar) getLayoutInflater().inflate(R.layout.cv_chapter_navigation, container, false);
+					mChapterNavigation.setChapterNavigationBarListener(ReadingActivity.this);
+				}
+				mChapterNavigation.showPrev(mHasPrev);
+				mChapterNavigation.showNext(mHasNext);
+				container.addView(mChapterNavigation, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				return mChapterNavigation;
 			}
-			container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-			img.setTag(hasedUrl);
-			return img;
+
 		}
 
 		@Override
@@ -335,7 +318,10 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 		}
 	};
 	private Book mBook;
-	private ArrayAdapter<String> mChapterAdapter;
+	private BookDetailsFragment mBookDetailsFragment;
+	private int mCurrentChapterIndex;
+	private boolean mHasNext;
+	private boolean mHasPrev;
 
 	private void updateScaleTypeFromOrientation(final TouchImageView img) {
 		if (isLandScape()) {
@@ -505,27 +491,23 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 
 	}
 
-	// @Override
-	// public void onNextClick() {
-	// mCurrentChapterIndex = mCurrentChapterIndex - 1;
-	// if (mCurrentChapterIndex >= 0) {
-	// mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
-	// refresh();
-	// } else {
-	// mCurrentChapterIndex = mCurrentChapterIndex + 1;
-	// }
-	// }
-	//
-	// @Override
-	// public void onPrevClick() {
-	// mCurrentChapterIndex = mCurrentChapterIndex + 1;
-	// if (mCurrentChapterIndex < mChapterUrlList.size()) {
-	// mChapterUrl = (String) mChapterUrlList.get(mCurrentChapterIndex);
-	// refresh();
-	// } else {
-	// mCurrentChapterIndex = mCurrentChapterIndex - 1;
-	// }
-	// }
+	@Override
+	public void onNextClick() {
+		int newChapIdx = mCurrentChapterIndex - 1;
+		goToChapter(newChapIdx);
+	}
+
+	@Override
+	public void onPrevClick() {
+		int newChapIdx = mCurrentChapterIndex + 1;
+		goToChapter(newChapIdx);
+	}
+
+	private void goToChapter(int chapterIndex) {
+		if (mBookDetailsFragment.isValidChapterIndex(chapterIndex)) {
+			mBookDetailsFragment.setSetCurrentChapterIndex(chapterIndex);
+		}
+	}
 
 	@Override
 	public void onDrawerClosed(View arg0) {
@@ -548,9 +530,11 @@ public class ReadingActivity extends Activity implements LoadingProgressIndicato
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		mCurrentChapterIndex = position;
-		mCurrentChapter = mBook.getChapters().get(position);
+	public void onChapterSelected(int chapterIndex) {
+		mCurrentChapterIndex = chapterIndex;
+		mCurrentChapter = mBook.getChapters().get(chapterIndex);
+		mHasNext = mBookDetailsFragment.isValidChapterIndex(chapterIndex - 1);
+		mHasPrev = mBookDetailsFragment.isValidChapterIndex(chapterIndex + 1);
 		refresh();
 	}
 

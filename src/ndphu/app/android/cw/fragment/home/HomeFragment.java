@@ -1,13 +1,12 @@
 package ndphu.app.android.cw.fragment.home;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.HomePageItemAdapter;
 import ndphu.app.android.cw.model.Category;
 import ndphu.app.android.cw.model.HomePageItem;
-import ndphu.app.android.cw.model.SearchResult;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -44,10 +43,11 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public int mPage = 0;
 	private SpinnerAdapter mSpinnerAdapter;
 	private int mCurrentSpinnerPosition = 0;
-	//private ProgressDialog mProgressDialog;
+	// private ProgressDialog mProgressDialog;
 	private ProgressBar mProgressIndicator;
 	public boolean mIsLoading = false;
 	public boolean mEndCategory = false;
+	private WeakReference<HomeFragmentListener> mHomeFragmentListenerRef;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -133,10 +133,10 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			Log.i(TAG, "Start loading");
 			super.onPreExecute();
 			mProgressIndicator.setVisibility(View.VISIBLE);
-//			mProgressDialog = new ProgressDialog(getActivity());
-//			mProgressDialog.setTitle("Loading");
-//			mProgressDialog.setMessage("Preparing " + mCurrentCategory.getDisplayName() + "...");
-//			mProgressDialog.show();
+			// mProgressDialog = new ProgressDialog(getActivity());
+			// mProgressDialog.setTitle("Loading");
+			// mProgressDialog.setMessage("Preparing " + mCurrentCategory.getDisplayName() + "...");
+			// mProgressDialog.show();
 		}
 
 		@Override
@@ -151,7 +151,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mPage++;
 			mIsLoading = false;
 			mGridAdapter.addAll(result);
-//			mProgressDialog.dismiss();
+			// mProgressDialog.dismiss();
 			if (result.size() < MAX_ITEMS_PER_PAGE) {
 				// reach all books on this category
 				mEndCategory = true;
@@ -166,9 +166,12 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		HomePageItem item = mGridAdapter.getItem(position);
+		/*HomePageItem item = mGridAdapter.getItem(position);
 		SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
-		((MainActivity) getActivity()).showBookDetails(result);
+		((MainActivity) getActivity()).showBookDetails(result);*/
+		if (mHomeFragmentListenerRef != null && mHomeFragmentListenerRef.get() != null) {
+			mHomeFragmentListenerRef.get().onHomePageItemSelected(mGridAdapter.getItem(position));
+		}
 	}
 
 	@Override
@@ -185,5 +188,13 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 				new LoadDataTask().execute();
 			}
 		}
+	}
+
+	public static interface HomeFragmentListener {
+		public void onHomePageItemSelected(HomePageItem item);
+	}
+
+	public void setHomeFragmentListener(HomeFragmentListener listener) {
+		mHomeFragmentListenerRef = new WeakReference<HomeFragmentListener>(listener);
 	}
 }

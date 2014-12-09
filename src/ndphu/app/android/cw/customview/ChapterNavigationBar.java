@@ -8,9 +8,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
-public class ChapterNavigationBar extends RelativeLayout implements OnClickListener {
+public class ChapterNavigationBar extends LinearLayout implements OnClickListener {
 
 	private ImageView mNextButton;
 	private ImageView mPrevButton;
@@ -24,6 +24,10 @@ public class ChapterNavigationBar extends RelativeLayout implements OnClickListe
 
 	public void setChapterNavigationBarListener(ChapterNavigationBarListener listener) {
 		mListener = new WeakReference<ChapterNavigationBarListener>(listener);
+	}
+
+	public ChapterNavigationBar(Context context) {
+		super(context);
 	}
 
 	public ChapterNavigationBar(Context context, AttributeSet attrs) {
@@ -55,6 +59,22 @@ public class ChapterNavigationBar extends RelativeLayout implements OnClickListe
 			default:
 				break;
 			}
+		}
+	}
+
+	public void showNext(boolean b) {
+		if (b) {
+			mNextButton.setVisibility(View.VISIBLE);
+		} else {
+			mNextButton.setVisibility(View.GONE);
+		}
+	}
+
+	public void showPrev(boolean b) {
+		if (b) {
+			mPrevButton.setVisibility(View.VISIBLE);
+		} else {
+			mPrevButton.setVisibility(View.GONE);
 		}
 	}
 

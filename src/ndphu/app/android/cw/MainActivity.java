@@ -1,12 +1,20 @@
 package ndphu.app.android.cw;
 
-import ndphu.app.android.cw.fragment.BookDetailsFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.fragment.home.HomeFragment;
+import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
 import ndphu.app.android.cw.fragment.search.SearchFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
+import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.task.LoadBookTask;
+import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +27,9 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity implements OnNavigationItemSelected, OnSearchItemSelected {
+import com.google.gson.Gson;
+
+public class MainActivity extends ActionBarActivity implements OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -31,6 +41,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
 	private HomeFragment mHomeFragment;
+	private ProgressDialog mProgressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +131,7 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 		case 0:
 			if (mHomeFragment == null) {
 				mHomeFragment = new HomeFragment();
+				mHomeFragment.setHomeFragmentListener(this);
 			}
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mHomeFragment).commit();
 			break;
@@ -141,20 +153,55 @@ public class MainActivity extends ActionBarActivity implements OnNavigationItemS
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
 		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
-			showBookDetails(selectedItem);
+			// showBookDetails(selectedItem);
+			openBookFromSearch(selectedItem);
 		}
 	}
 
-	public void showBookDetails(SearchResult target) {
-		BookDetailsFragment detailFragment = new BookDetailsFragment();
-		detailFragment.setTarget(target);
-		// detailFragment.show(mFragmentManager, "BOOK_DETAILS_FRAGMENT");
-		mFragmentManager.beginTransaction()
-			.setCustomAnimations(
-					R.anim.slide_in_bottom,
-					R.anim.fade_out,
-					R.anim.fade_in,
-					R.anim.slide_out_bottom)
-			.replace(R.id.content_frame, detailFragment).addToBackStack(null).commit();
+	public void openBookFromSearch(SearchResult selectedItem) {
+		new LoadBookTask(selectedItem, this).execute();
+	}
+
+	public void startReadingActivity(Book book) {
+		Intent intent = new Intent(this, ReadingActivity.class);
+		Gson gson = new Gson();
+		String json = gson.toJson(book);
+		intent.putExtra(ReadingActivity.EXTRA_BOOK_JSON, json);
+		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, 0);
+		startActivity(intent);
+	}
+
+	@Override
+	public void onHomePageItemSelected(HomePageItem item) {
+		SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
+		new LoadBookTask(result, this).execute();
+	}
+
+	@Override
+	public void onStart(String url) {
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setCancelable(false);
+		mProgressDialog.setTitle("Loading");
+		mProgressDialog.setMessage("Please wait...");
+		mProgressDialog.show();
+	}
+
+	@Override
+	public void onComplete(Book book) {
+		mProgressDialog.dismiss();
+		startReadingActivity(book);
+	}
+
+	@Override
+	public void onError(Exception ex) {
+		mProgressDialog.dismiss();
+		ex.printStackTrace();
+		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage()).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).show();
 	}
 }
