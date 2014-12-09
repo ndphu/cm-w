@@ -536,6 +536,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		mHasNext = mBookDetailsFragment.isValidChapterIndex(chapterIndex - 1);
 		mHasPrev = mBookDetailsFragment.isValidChapterIndex(chapterIndex + 1);
 		refresh();
+		mDrawerLayout.closeDrawers();
 	}
 
 }
