@@ -32,6 +32,7 @@ import ndphu.app.android.cw.util.Utils;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -60,17 +61,17 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	public static final String TAG = ReadingActivity.class.getSimpleName();
 	public static final String EXTRA_BOOK_JSON = "book_in_json";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
-	// public static String EXTRA_CHAPTER_ARRAY = "chapter_array";
-	// public static String EXTRA_CHAPTER_URL = "chapter_url";
-	// public static String EXTRA_SOURCE = "chapter_source";
 
 	// GUI elements
 	private ExtendedViewPager mViewPager;
 	private LoadingProgressIndicator mLoadingIndicator;
+	private BookDetailsFragment mBookDetailsFragment;
 
 	// Activity data
+	private Book mBook;
 	private List<Page> mPages;
 	private Chapter mCurrentChapter;
+	private int mCurrentChapterIndex;
 
 	// Caching params
 	private final Object mDiskCacheLock = new Object();
@@ -84,6 +85,10 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	private long mKeepAlive = 10000;
 	private ThreadPoolExecutor mExecutor;
 	private DrawerLayout mDrawerLayout;
+	
+	// Navigation state
+	private boolean mHasNext;
+	private boolean mHasPrev;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -127,7 +132,17 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, 0);
 		Log.i(TAG, mBook.getName());
 		mBookDetailsFragment.setBook(mBook);
-		mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
+		if (mBook.getChapters().size() == 0) {
+			new AlertDialog.Builder(this).setTitle("Info").setMessage("This book has no chapter").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			}).show();
+		} else {
+			mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
+		}
 	}
 
 	@Override
@@ -317,11 +332,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			return view == object;
 		}
 	};
-	private Book mBook;
-	private BookDetailsFragment mBookDetailsFragment;
-	private int mCurrentChapterIndex;
-	private boolean mHasNext;
-	private boolean mHasPrev;
 
 	private void updateScaleTypeFromOrientation(final TouchImageView img) {
 		if (isLandScape()) {
