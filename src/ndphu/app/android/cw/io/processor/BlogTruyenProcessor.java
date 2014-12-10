@@ -107,7 +107,6 @@ public class BlogTruyenProcessor implements BookProcessor {
 				} else if (line.startsWith("<span class=\"title\">")) {
 					Chapter chapter = new Chapter();
 					chapter.setName(line.substring(line.lastIndexOf("\">") + 2, line.indexOf("</a>")));
-					chapter.setChapterOrder(0);
 					chapter.setChapterUrl(PREFIX + line.substring(line.indexOf("/truyen"), line.indexOf("\" title")));
 					chapter.setChapterSource(Source.BLOGTRUYEN);
 					book.getChapters().add(chapter);
