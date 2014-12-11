@@ -113,6 +113,7 @@ public class IZMangaProcessor implements BookProcessor {
 	public Book loadBook(String bookUrl, boolean complete) throws Exception {
 		Log.d(TAG, "Load book: " + bookUrl);
 		final Book book = new Book();
+        book.setBookUrl(bookUrl);
 		final StringBuilder content = new StringBuilder();
 		BasicParser.processLineByLine(bookUrl, new LineHandler() {
 

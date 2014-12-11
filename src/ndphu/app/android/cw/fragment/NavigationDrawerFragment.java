@@ -3,7 +3,6 @@ package ndphu.app.android.cw.fragment;
 import java.lang.ref.WeakReference;
 
 import ndphu.app.android.cw.R;
-import ndphu.app.android.cw.model.Source;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -39,7 +38,6 @@ public class NavigationDrawerFragment extends Fragment implements OnItemClickLis
 		mNavigationMenuItem = new String[]{
 				"Home",
 				"My Books",
-				"Search",
 				"Settings"
 		};
 		return view;
