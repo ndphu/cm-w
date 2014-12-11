@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:layout_margin="4dp"
         android:layout_weight="1"
-        android:background="@drawable/button_background"
+        android:background="@drawable/navigation_button_background"
         android:contentDescription="@string/go_to_the_previous_chapter"
         android:src="@drawable/ic_action_prev" />
 
@@ -21,7 +21,7 @@
         android:layout_height="0dp"
         android:layout_margin="4dp"
         android:layout_weight="1"
-        android:background="@drawable/button_background"
+        android:background="@drawable/navigation_button_background"
         android:contentDescription="@string/go_to_the_next_chapter"
         android:src="@drawable/ic_action_next" />
 

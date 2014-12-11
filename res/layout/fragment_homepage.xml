@@ -43,7 +43,7 @@
     </GridView>
 
     <ProgressBar
-        android:id="@+id/fragment_homepage_preogressbar_loading_indicator"
+        android:id="@+id/fragment_homepage_progressbar_loading_indicator"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

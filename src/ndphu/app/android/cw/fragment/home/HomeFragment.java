@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -43,7 +41,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public int mPage = 0;
 	private SpinnerAdapter mSpinnerAdapter;
 	private int mCurrentSpinnerPosition = 0;
-	// private ProgressDialog mProgressDialog;
 	private ProgressBar mProgressIndicator;
 	public boolean mIsLoading = false;
 	public boolean mEndCategory = false;
@@ -58,7 +55,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		for (int i = 0; i < categories.length; ++i) {
 			mCategories[i] = categories[i].getDisplayName();
 		}
-		setHasOptionsMenu(true);
 		mSpinnerAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, mCategories);
 	}
 
@@ -66,7 +62,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_homepage, container, false);
 		// Spinner
-		Log.i(TAG, "Init Spinner");
 		mSpinner = (Spinner) view.findViewById(R.id.fragment_homepage_spinner_category);
 		mSpinner.setAdapter(mSpinnerAdapter);
 		mSpinner.setSelection(mCurrentSpinnerPosition);
@@ -94,7 +89,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			}
 		});
 		// Progressbar indicator
-		mProgressIndicator = (ProgressBar) view.findViewById(R.id.fragment_homepage_preogressbar_loading_indicator);
+		mProgressIndicator = (ProgressBar) view.findViewById(R.id.fragment_homepage_progressbar_loading_indicator);
 		mProgressIndicator.setVisibility(View.GONE);
 		return view;
 	}
@@ -104,15 +99,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		super.onViewCreated(view, savedInstanceState);
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-	}
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -133,10 +119,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			Log.i(TAG, "Start loading");
 			super.onPreExecute();
 			mProgressIndicator.setVisibility(View.VISIBLE);
-			// mProgressDialog = new ProgressDialog(getActivity());
-			// mProgressDialog.setTitle("Loading");
-			// mProgressDialog.setMessage("Preparing " + mCurrentCategory.getDisplayName() + "...");
-			// mProgressDialog.show();
 		}
 
 		@Override
@@ -183,7 +165,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 		if (totalItemCount > 0 && firstVisibleItem + visibleItemCount >= totalItemCount) {
 			if (!mIsLoading && !mEndCategory) {
-				Log.i(TAG, "Loading when scolling to end");
+				Log.i(TAG, "Loading when scrolling to end");
 				mIsLoading = true;
 				new LoadDataTask().execute();
 			}

@@ -37,7 +37,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private Book mBook;
 	private ActionBar mActionBar;
 	private int mCurrentChapterIndex;
-	private WeakReference<OnChapterSelectedListner> mOnChapterSelectedListener;
+	private WeakReference<OnChapterSelectedListener> mOnChapterSelectedListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,8 +49,8 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		loadBookDetails();
 	}
 
-	public void setOnChapterSelectedListener(OnChapterSelectedListner listener) {
-		mOnChapterSelectedListener = new WeakReference<OnChapterSelectedListner>(listener);
+	public void setOnChapterSelectedListener(OnChapterSelectedListener listener) {
+		mOnChapterSelectedListener = new WeakReference<OnChapterSelectedListener>(listener);
 	}
 
 	private void loadBookDetails() {
@@ -125,9 +125,10 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		if (mOnChapterSelectedListener != null && mOnChapterSelectedListener.get() != null) {
 			mOnChapterSelectedListener.get().onChapterSelected(mCurrentChapterIndex);
 		}
+        mChapterList.smoothScrollToPosition(mCurrentChapterIndex);
 	}
 
-	public static interface OnChapterSelectedListner {
+	public static interface OnChapterSelectedListener {
 		public void onChapterSelected(int chapterIndex);
 	}
 

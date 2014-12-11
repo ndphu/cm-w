@@ -1,13 +1,13 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ndphu.app.android.cw.MainActivity" >
+    tools:context="ndphu.app.android.cw.MainActivity">
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
         <!--
         <RelativeLayout
@@ -34,6 +34,13 @@
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <RelativeLayout
+            android:id="@+id/search_container"
+            android:background="@color/background_material_dark"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"></RelativeLayout>
         <!-- Nav drawer -->
 
         <fragment
@@ -41,7 +48,8 @@
             android:name="ndphu.app.android.cw.fragment.NavigationDrawerFragment"
             android:layout_width="@dimen/drawer_width"
             android:layout_height="match_parent"
-            android:layout_gravity="start" />
+            android:layout_gravity="start"
+            tools:layout="@layout/fragment_navigation_drawer" />
     </android.support.v4.widget.DrawerLayout>
 
-</FrameLayout>
+</RelativeLayout>
