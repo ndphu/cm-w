@@ -26,7 +26,6 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
     private static final String TAG = "SearchFragment";
     private ListView mListView;
     private SearchResultAdapter mAdapter;
-    private SearchView mSearchView;
     private WeakReference<OnSearchItemSelected> mSearchItemSelectedListener;
 
     public void executeSearch(String searchString) {
@@ -38,6 +37,7 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    	Log.i(TAG, "On Create View");
         View view = inflater.inflate(R.layout.fragment_book_search_listview, container, false);
         mListView = (ListView) view.findViewById(R.id.fragment_book_search_listview);
         if (mAdapter == null) {
@@ -50,6 +50,7 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+    	Log.i(TAG, "On View Created");
         super.onViewCreated(view, savedInstanceState);
     }
 
