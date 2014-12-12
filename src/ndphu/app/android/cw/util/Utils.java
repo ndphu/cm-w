@@ -12,9 +12,10 @@ import android.util.Log;
 public class Utils {
 
 	private static final String TAG = Utils.class.getSimpleName();
+	private static final int MAX_BITMAP_SIZE = 4096;
 
 	public static Bitmap decodeBitmap(byte[] data, int screenWidth, int screenHeight) {
-		Log.i(TAG,"Input size: " + data.length);
+		Log.d(TAG, "Input size: " + data.length);
 		long maxBitmapSize = (long) (screenWidth * screenHeight * 4 * 1.5);
 		Options options = new BitmapFactory.Options();
 		options.inSampleSize = 1;
@@ -22,16 +23,40 @@ public class Utils {
 		Bitmap bitmap = null;
 		while (bitmap == null) {
 			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
-			if (bitmap.getByteCount() < maxBitmapSize) {
+			if (bitmap != null && bitmap.getByteCount() < maxBitmapSize) {
 				break;
 			} else {
 				bitmap = null;
 				options.inSampleSize++;
 			}
 		}
-		float ratio = (float) screenWidth / bitmap.getWidth();
-		int destHeight = (int) (ratio * bitmap.getHeight());
-		return Bitmap.createScaledBitmap(bitmap, screenWidth, destHeight, true);
+		// float ratio = (float) screenWidth / bitmap.getWidth();
+		// int destHeight = (int) (ratio * bitmap.getHeight());
+		// we need to scale for fixed screen height
+		// 0 is width, 1 is height
+		Log.d(TAG, "bitmap w = " + bitmap.getWidth() + "; h = " + bitmap.getHeight());
+		float ratio = -1f;
+		if (bitmap.getWidth() > bitmap.getHeight()) {
+			if (bitmap.getWidth() > MAX_BITMAP_SIZE) {
+				ratio = (float) MAX_BITMAP_SIZE / bitmap.getWidth();
+			}
+		} else {
+			if (bitmap.getHeight() > MAX_BITMAP_SIZE) {
+				ratio = (float) MAX_BITMAP_SIZE / bitmap.getHeight();
+			}
+		}
+		Log.d(TAG, "Ratio = " + ratio);
+		if (ratio < 0) {
+			// Do not need to scale
+			return bitmap;
+		} else {
+			Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
+					(int)(ratio * bitmap.getWidth()),
+					(int)(ratio * bitmap.getHeight()), true);
+			Log.d(TAG, "scaled bitmap w = " + scaledBitmap.getWidth() + "; h = " + scaledBitmap.getHeight());
+			return scaledBitmap;
+		}
+
 	}
 
 	public static String getMD5Hash(String input) {
