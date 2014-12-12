@@ -1,5 +1,16 @@
 package ndphu.app.android.cw;
 
+import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
+import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
+import ndphu.app.android.cw.fragment.home.HomeFragment;
+import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
+import ndphu.app.android.cw.fragment.search.SearchFragment;
+import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
+import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.HomePageItem;
+import ndphu.app.android.cw.model.SearchResult;
+import ndphu.app.android.cw.task.LoadBookTask;
+import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -16,22 +27,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-
-import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
-import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
-import ndphu.app.android.cw.fragment.home.HomeFragment;
-import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
-import ndphu.app.android.cw.fragment.search.SearchFragment;
-import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
-import ndphu.app.android.cw.model.Book;
-import ndphu.app.android.cw.model.HomePageItem;
-import ndphu.app.android.cw.model.SearchResult;
-import ndphu.app.android.cw.task.LoadBookTask;
-import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
     protected static final String TAG = MainActivity.class.getSimpleName();
@@ -74,9 +71,6 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
         NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
         mNavFragment.setNavigationItemSelected(this);
         onItemSelected(0);
-        searchFragment = new SearchFragment();
-        searchFragment.setBookSearchListener(this);
-        mFragmentManager.beginTransaction().replace(R.id.search_container, searchFragment).commit();
     }
 
     @Override
@@ -215,13 +209,17 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
     @Override
     public boolean onMenuItemActionExpand(MenuItem item) {
-        findViewById(R.id.search_container).setVisibility(View.VISIBLE);
+    	searchFragment = new SearchFragment();
+        searchFragment.setBookSearchListener(this);
+        mFragmentManager.beginTransaction()
+        	.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_top)
+        	.replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
         return true;
     }
 
     @Override
     public boolean onMenuItemActionCollapse(MenuItem item) {
-        findViewById(R.id.search_container).setVisibility(View.GONE);
+    	mFragmentManager.popBackStack();
         return true;
     }
 
