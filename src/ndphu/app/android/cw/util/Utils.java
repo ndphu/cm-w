@@ -4,7 +4,36 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
+import android.util.Log;
+
 public class Utils {
+
+	private static final String TAG = Utils.class.getSimpleName();
+
+	public static Bitmap decodeBitmap(byte[] data, int screenWidth, int screenHeight) {
+		Log.i(TAG,"Input size: " + data.length);
+		long maxBitmapSize = (long) (screenWidth * screenHeight * 4 * 1.5);
+		Options options = new BitmapFactory.Options();
+		options.inSampleSize = 1;
+		options.inPreferQualityOverSpeed = true;
+		Bitmap bitmap = null;
+		while (bitmap == null) {
+			bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+			if (bitmap.getByteCount() < maxBitmapSize) {
+				break;
+			} else {
+				bitmap = null;
+				options.inSampleSize++;
+			}
+		}
+		float ratio = (float) screenWidth / bitmap.getWidth();
+		int destHeight = (int) (ratio * bitmap.getHeight());
+		return Bitmap.createScaledBitmap(bitmap, screenWidth, destHeight, true);
+	}
+
 	public static String getMD5Hash(String input) {
 		StringBuffer hexString = new StringBuffer();
 		MessageDigest md = null;

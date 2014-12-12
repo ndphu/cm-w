@@ -34,13 +34,14 @@
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
+<!--  
         <RelativeLayout
             android:id="@+id/search_container"
             android:background="@color/background_material_dark"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"></RelativeLayout>
+            android:visibility="visible"/>
+            -->
         <!-- Nav drawer -->
 
         <fragment
