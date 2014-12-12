@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -105,7 +106,8 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		public View instantiateItem(ViewGroup container, int position) {
 			if (position < mPages.size()) {
 				final TouchImageView img = new TouchImageView(container.getContext());
-				img.setImageResource(R.drawable.ic_launcher);
+				img.setImageResource(R.drawable.ic_placeholder_loading);
+				img.setScaleType(ScaleType.CENTER);
 				updateScaleTypeFromOrientation(img);
 				String hasedUrl = mPages.get(position).getHashedUrl();
 				String cachedFile = getBitmapFileFromCache(hasedUrl);
@@ -485,9 +487,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		protected void onPreExecute() {
 			Log.d(TAG, "Loading image");
 		}
-
-		;
-
+		
 		@SuppressWarnings("unchecked")
 		@Override
 		protected Object[] doInBackground(Object... params) {
@@ -495,12 +495,18 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 			WeakReference<TouchImageView> imageView = (WeakReference<TouchImageView>) params[2];
 			// Fix out of memory error
-			// Bitmap result = BitmapFactory.decodeFile(filePath);
 			Bitmap result = null;
 			try {
-				result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), mScreenWidth, mScreenHeight);
-			} catch (IOException e) {
-				e.printStackTrace();
+				result = BitmapFactory.decodeFile(filePath);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				Log.e(TAG, "Regular bitmap decoding process failed for image at " + filePath + ". Retry with owned decoding process.");
+				try {
+					result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), mScreenWidth, mScreenHeight);
+				} catch (IOException e) {
+					e.printStackTrace();
+					Log.e(TAG, "Owned decoding process failed.");
+				}
 			}
 			return new Object[] { result, imageView };
 		}
@@ -572,7 +578,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 							@Override
 							public void onCompleted(String url, String destination, long fileSize) {
-								Log.e(TAG, "Download completed: " + url);
+								Log.d(TAG, "Download completed: " + url);
 								addBitmapFileToCache(hasedUrl, destination);
 								publishProgress(new Object[] { mCachedMap.size(), hasedUrl });
 							}
@@ -595,8 +601,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				}
 			}
 		}
-
-		;
 	}
 
 }

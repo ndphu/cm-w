@@ -1,7 +1,9 @@
 package ndphu.app.android.cw.io.processor;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -189,10 +191,15 @@ public class IZMangaProcessor implements BookProcessor {
 
 		String[] urls = sb.toString().split("\\|");
 		for (String url : urls) {
-			Page p = new Page();
-			p.setLink(url);
-			p.setHashedUrl(Utils.getMD5Hash(url));
-			result.add(p);
+			try {
+				new URL(url);
+				Page p = new Page();
+				p.setLink(url);
+				p.setHashedUrl(Utils.getMD5Hash(url));
+				result.add(p);
+			} catch (MalformedURLException ex) {
+				Log.w(TAG, "Ingonred malform url at: " + url);
+			}
 		}
 
 		return result;

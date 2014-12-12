@@ -37,7 +37,7 @@ public class DownloadFileRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		Log.i(TAG,"Download file at " + getUrl() + " and saved as " + getDestination());
+		Log.d(TAG,"Download file at " + getUrl() + " and saved as " + getDestination());
 		DefaultHttpClient client = new DefaultHttpClient();
 		HttpGet get = new HttpGet(getUrl());
 		try {
