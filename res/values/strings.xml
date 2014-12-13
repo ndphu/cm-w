@@ -22,5 +22,9 @@
     <string name="chapter">Chapter</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="favorite_item_cover">Favorite Item Cover</string>
+    <string name="book_title">Book Title</string>
+    <string name="last_chapter">Last Chapter</string>
+    <string name="menu_button">Menu button</string>
 
 </resources>

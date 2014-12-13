@@ -69,16 +69,16 @@ public class Manga24hProcessor implements BookProcessor {
 
 		Book book = new Book();
 		book.setBookUrl(bookUrl);
+		book.setSource(Source.MANGA24H);
 		book.setName(bookName);
 		book.setCover(coverUrl);
-		book.setBookDesc(bookDesc);
+		book.setDescription(bookDesc);
 		int len = chapters.size();
 		for (int i = 0; i < len; i++) {
 			Chapter chapter = new Chapter();
 			chapter.setName(chapters.get(i)[0]);
-			chapter.setChapterUrl(chapters.get(i)[1]);
-			chapter.setChapterOrder(len - i);
-			chapter.setChapterSource(Source.MANGA24H);
+			chapter.setUrl(chapters.get(i)[1]);
+			chapter.setSource(Source.MANGA24H);
 			chapter.setPages(complete ? getPageList(chapters.get(i)[1]) : new ArrayList<Page>());
 			book.getChapters().add(chapter);
 		}
