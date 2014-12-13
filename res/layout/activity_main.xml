@@ -47,7 +47,8 @@
         <fragment
             android:id="@+id/fragment_drawer"
             android:name="ndphu.app.android.cw.fragment.NavigationDrawerFragment"
-            android:layout_width="@dimen/drawer_width"
+            android:layout_width="match_parent"
+            android:layout_marginRight="40dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             tools:layout="@layout/fragment_navigation_drawer" />

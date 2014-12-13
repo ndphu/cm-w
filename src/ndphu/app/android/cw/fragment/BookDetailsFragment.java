@@ -5,6 +5,9 @@ import java.lang.ref.WeakReference;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.util.Utils;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -34,10 +37,13 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private Button mShowChapters;
 	private ImageView mBookCover;
 	private ViewGroup mParentContainer = null;
+	private ImageView mFavoriteIcon;
+
 	private Book mBook;
 	private ActionBar mActionBar;
 	private int mCurrentChapterIndex;
 	private WeakReference<OnChapterSelectedListener> mOnChapterSelectedListener;
+	private String mBookMD5Hash;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +70,9 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		}
 		mAdapter.clear();
 		mAdapter.addAll(mBook.getChapters());
+		mBookMD5Hash = Utils.getMD5Hash(mBook.getBookUrl());
+		updateFavoriteIcon();
+
 	}
 
 	@Override
@@ -90,6 +99,8 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		mBookSummary = (TextView) view.findViewById(R.id.fragment_book_details_textview_summary);
 		mBookSummary.setMovementMethod(new ScrollingMovementMethod());
 		mBookCover = (ImageView) view.findViewById(R.id.fragment_book_details_cover_image);
+		mFavoriteIcon = (ImageView) view.findViewById(R.id.fragment_book_details_imageview_favorite);
+		mFavoriteIcon.setOnClickListener(this);
 		mShowChapters = (Button) view.findViewById(R.id.fragment_book_details_button_show_chapters);
 		mShowChapters.setOnClickListener(this);
 		return view;
@@ -105,7 +116,15 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.fragment_book_details_button_show_chapters) {
+		switch (v.getId()) {
+		case R.id.fragment_book_details_imageview_favorite:
+			SharedPreferences pref = getActivity().getSharedPreferences(mBookMD5Hash, Context.MODE_APPEND);
+			// toggle
+			boolean currentEnabled = !pref.getBoolean("enable", false);
+			pref.edit().putBoolean("enable", currentEnabled).commit();
+			updateFavoriteIcon();
+			break;
+		case R.id.fragment_book_details_button_show_chapters:
 			if (mChapterList.getVisibility() == View.VISIBLE) {
 				mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_bottom));
 				mChapterList.setVisibility(View.GONE);
@@ -115,7 +134,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 				mChapterList.setVisibility(View.VISIBLE);
 				mShowChapters.setText(R.string.hide_chapters);
 			}
-
+			break;
 		}
 	}
 
@@ -125,7 +144,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		if (mOnChapterSelectedListener != null && mOnChapterSelectedListener.get() != null) {
 			mOnChapterSelectedListener.get().onChapterSelected(mCurrentChapterIndex);
 		}
-        mChapterList.smoothScrollToPosition(mCurrentChapterIndex);
+		mChapterList.smoothScrollToPosition(mCurrentChapterIndex);
 	}
 
 	public static interface OnChapterSelectedListener {
@@ -134,5 +153,14 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 
 	public boolean isValidChapterIndex(int i) {
 		return i >= 0 && i < mBook.getChapters().size();
+	}
+
+	private void updateFavoriteIcon() {
+		SharedPreferences pref = getActivity().getSharedPreferences(mBookMD5Hash, Context.MODE_APPEND);
+		if (pref.getBoolean("enable", false)) {
+			mFavoriteIcon.setImageResource(R.drawable.ic_favorite);
+		} else {
+			mFavoriteIcon.setImageResource(R.drawable.ic_not_favorite);
+		}
 	}
 }
