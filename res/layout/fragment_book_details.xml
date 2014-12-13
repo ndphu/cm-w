@@ -23,6 +23,7 @@
         android:id="@+id/fragment_book_details_imageview_favorite"
         android:layout_width="48dp"
         android:layout_height="48dp"
+        android:padding="8dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:src="@drawable/ic_favorite" />

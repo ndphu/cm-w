@@ -126,7 +126,7 @@ public class TouchImageView extends ImageView {
         	mScaleType = ScaleType.FIT_CENTER;
         }
         minScale = 1;
-        maxScale = 20;
+        maxScale = 7;
         superMinScale = SUPER_MIN_MULTIPLIER * minScale;
         superMaxScale = SUPER_MAX_MULTIPLIER * maxScale;
         setImageMatrix(matrix);
