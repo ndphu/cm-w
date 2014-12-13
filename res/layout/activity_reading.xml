@@ -27,8 +27,9 @@
     <fragment
         android:id="@+id/fragment_drawer"
         android:name="ndphu.app.android.cw.fragment.BookDetailsFragment"
-        android:layout_width="@dimen/drawer_width_larger"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/drawer_margin_right"
         android:layout_gravity="start"
         android:background="@color/background_material_light" >
     </fragment>

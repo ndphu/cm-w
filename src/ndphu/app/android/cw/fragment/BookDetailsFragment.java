@@ -4,10 +4,8 @@ import java.lang.ref.WeakReference;
 
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
+import ndphu.app.android.cw.dao.BookDao;
 import ndphu.app.android.cw.model.Book;
-import ndphu.app.android.cw.util.Utils;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -38,16 +36,16 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private ImageView mBookCover;
 	private ViewGroup mParentContainer = null;
 	private ImageView mFavoriteIcon;
-
 	private Book mBook;
 	private ActionBar mActionBar;
 	private int mCurrentChapterIndex;
 	private WeakReference<OnChapterSelectedListener> mOnChapterSelectedListener;
-	private String mBookMD5Hash;
+	private BookDao mBookDao;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mBookDao = new BookDao(getActivity());
 	}
 
 	public void setBook(Book book) {
@@ -62,15 +60,14 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private void loadBookDetails() {
 		mTitle.setText(mBook.getName());
 		Picasso.with(getActivity()).load(Uri.parse(mBook.getCover())).into(mBookCover);
-		if (mBook.getBookDesc() != null && !mBook.getBookDesc().trim().isEmpty()) {
+		if (mBook.getDescription() != null && !mBook.getDescription().trim().isEmpty()) {
 			mBookSummary.setVisibility(View.VISIBLE);
-			mBookSummary.setText(Html.fromHtml(mBook.getBookDesc()));
+			mBookSummary.setText(Html.fromHtml(mBook.getDescription()));
 		} else {
 			mBookSummary.setVisibility(View.GONE);
 		}
 		mAdapter.clear();
 		mAdapter.addAll(mBook.getChapters());
-		mBookMD5Hash = Utils.getMD5Hash(mBook.getBookUrl());
 		updateFavoriteIcon();
 
 	}
@@ -118,10 +115,9 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.fragment_book_details_imageview_favorite:
-			SharedPreferences pref = getActivity().getSharedPreferences(mBookMD5Hash, Context.MODE_APPEND);
 			// toggle
-			boolean currentEnabled = !pref.getBoolean("enable", false);
-			pref.edit().putBoolean("enable", currentEnabled).commit();
+			mBook.setFavorite(!mBook.getFavorite());
+			mBookDao.update(mBook.getId(), mBook);
 			updateFavoriteIcon();
 			break;
 		case R.id.fragment_book_details_button_show_chapters:
@@ -156,8 +152,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	}
 
 	private void updateFavoriteIcon() {
-		SharedPreferences pref = getActivity().getSharedPreferences(mBookMD5Hash, Context.MODE_APPEND);
-		if (pref.getBoolean("enable", false)) {
+		if (mBook.getFavorite()) {
 			mFavoriteIcon.setImageResource(R.drawable.ic_favorite);
 		} else {
 			mFavoriteIcon.setImageResource(R.drawable.ic_not_favorite);

@@ -81,6 +81,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 	public Book loadBook(String bookUrl, boolean complete) throws Exception {
 		final Book book = new Book();
 		book.setBookUrl(bookUrl);
+		book.setSource(Source.BLOGTRUYEN);
 		final StringBuilder content = new StringBuilder();
 
 		BasicParser.processLineByLine(bookUrl, new LineHandler() {
@@ -107,14 +108,14 @@ public class BlogTruyenProcessor implements BookProcessor {
 				} else if (line.startsWith("<span class=\"title\">")) {
 					Chapter chapter = new Chapter();
 					chapter.setName(line.substring(line.lastIndexOf("\">") + 2, line.indexOf("</a>")));
-					chapter.setChapterUrl(PREFIX + line.substring(line.indexOf("/truyen"), line.indexOf("\" title")));
-					chapter.setChapterSource(Source.BLOGTRUYEN);
+					chapter.setUrl(PREFIX + line.substring(line.indexOf("/truyen"), line.indexOf("\" title")));
+					chapter.setSource(Source.BLOGTRUYEN);
 					book.getChapters().add(chapter);
 				}
 				return false;
 			}
 		});
-		book.setBookDesc(content.toString());
+		book.setDescription(content.toString());
 		return book;
 	}
 

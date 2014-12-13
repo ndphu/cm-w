@@ -116,6 +116,7 @@ public class IZMangaProcessor implements BookProcessor {
 		Log.d(TAG, "Load book: " + bookUrl);
 		final Book book = new Book();
         book.setBookUrl(bookUrl);
+        book.setSource(Source.IZMANGA);
 		final StringBuilder content = new StringBuilder();
 		BasicParser.processLineByLine(bookUrl, new LineHandler() {
 
@@ -140,13 +141,13 @@ public class IZMangaProcessor implements BookProcessor {
 						if (line.contains("http") && !line.contains("class=\"row\"")) {
 							Log.d(TAG, "Chapter line:" + line);
 							Chapter chapter = new Chapter();
-							chapter.setChapterSource(Source.IZMANGA);
+							chapter.setSource(Source.IZMANGA);
 							String chapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
 							Log.d(TAG, "Chapter name:" + chapterName);
 							chapter.setName(chapterName);
 							String chapterUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\" title"));
 							Log.d(TAG, "Chapter url:" + chapterUrl);
-							chapter.setChapterUrl(chapterUrl);
+							chapter.setUrl(chapterUrl);
 							book.getChapters().add(chapter);
 						}
 					}
@@ -168,7 +169,7 @@ public class IZMangaProcessor implements BookProcessor {
 			}
 		});
 		Log.d(TAG, "Content: " + content.toString());
-		book.setBookDesc(content.toString());
+		book.setDescription(content.toString());
 		return book;
 	}
 

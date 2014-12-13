@@ -18,6 +18,8 @@ import ndphu.app.android.cw.customview.ExtendedViewPager;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressIndicatorListener;
 import ndphu.app.android.cw.customview.TouchImageView;
+import ndphu.app.android.cw.dao.BookDao;
+import ndphu.app.android.cw.dao.ChapterDao;
 import ndphu.app.android.cw.fragment.BookDetailsFragment;
 import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
@@ -35,10 +37,8 @@ import org.apache.commons.io.IOUtils;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -61,15 +61,13 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
 public class ReadingActivity extends ActionBarActivity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, DrawerListener,
 		BookDetailsFragment.OnChapterSelectedListener, ChapterNavigationBarListener {
 	public static final String TAG = ReadingActivity.class.getSimpleName();
 	public static final String EXTRA_BOOK_JSON = "book_in_json";
+	public static final String EXTRA_BOOK_ID = "book_id";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
 
-	public static final String PREF_CURRENT_CHAPTER = "pref_current_chapter";
 	// Caching params
 	private final Object mDiskCacheLock = new Object();
 	protected ChapterNavigationBar mChapterNavigation;
@@ -143,7 +141,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			return view == object;
 		}
 	};
-	private SharedPreferences mSharedPref;
 	private OnPageChangeListener mPageChangeListener = new OnPageChangeListener() {
 
 		@Override
@@ -174,6 +171,9 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	};
 	private int mScreenWidth;
 	private int mScreenHeight;
+	// Dao
+	private ChapterDao mChapterDao;
+	private BookDao mBookDao;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -193,6 +193,10 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		// Init thread pool
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), this);
 
+		// Init dao
+		mBookDao = new BookDao(this);
+		mChapterDao = new ChapterDao(this);
+
 		// Init drawer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -211,31 +215,30 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	}
 
 	private void readFromIntent(Intent intent) {
-		// Read from intent
-		// mChapterUrl = intent.getStringExtra(EXTRA_CHAPTER_URL);
-		// mChapterUrlList = intent.getCharSequenceArrayListExtra(EXTRA_CHAPTER_ARRAY);
-		// mChapterSource = Source.valueOf(intent.getStringExtra(EXTRA_SOURCE));
-		// mCurrentChapterIndex = mChapterUrlList.indexOf(mChapterUrl);
-		Gson gson = new Gson();
-		mBook = gson.fromJson(intent.getStringExtra(EXTRA_BOOK_JSON), Book.class);
+		long bookId = intent.getLongExtra(EXTRA_BOOK_ID, -1);
+		Log.d(TAG, "Book id: " + bookId);
+		mBook = mBookDao.read(bookId);
+		List<Chapter> chapters = mChapterDao.getChaptersInBook(bookId);
+		mBook.setChapters(chapters);
+		// Default is first chapter (chap 1)
+		if (mBook.getCurrentChapter() < 0) {
+			mBook.setCurrentChapter(chapters.size() - 1);
+		}
 		mBookDetailsFragment.setBook(mBook);
 		if (mBook.getChapters().size() == 0) {
-			new AlertDialog.Builder(this).setTitle("Info").setMessage("This book has no chapter")
-					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					}).show();
+			new AlertDialog.Builder(this).setMessage("This book has no chapter").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			}).show();
 		} else {
 			// Default is the first chapter
 			final int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, mBook.getChapters().size() - 1);
-			mSharedPref = getSharedPreferences(Utils.getMD5Hash(mBook.getBookUrl()), Context.MODE_PRIVATE);
-			if (mSharedPref.contains(PREF_CURRENT_CHAPTER)) {
-				final int savedChapterIndex = mSharedPref.getInt(PREF_CURRENT_CHAPTER, currentChapterIndex);
-				if (mBookDetailsFragment.isValidChapterIndex(savedChapterIndex) && currentChapterIndex != savedChapterIndex) {
-					new AlertDialog.Builder(this).setTitle("Info").setMessage("Do you wish to resume from where you read?")
+			if (mBook.getCurrentChapter() != currentChapterIndex) {
+				final int savedChapterIndex = mBook.getCurrentChapter();
+				if (mBookDetailsFragment.isValidChapterIndex(savedChapterIndex)) {
+					new AlertDialog.Builder(this).setMessage("Do you wish to resume from where you read?")
 							.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
@@ -267,7 +270,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 	private void refresh() {
 		// Init cache dir
-		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getChapterUrl()));
+		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getUrl()));
 		new InitCacheTask().execute(mCacheDir);
 		// Execute task
 		new LoadChapterDataTask().execute();
@@ -397,7 +400,8 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 	@Override
 	public void onChapterSelected(int chapterIndex) {
-		mSharedPref.edit().putInt(PREF_CURRENT_CHAPTER, chapterIndex).commit();
+		mBook.setCurrentChapter(chapterIndex);
+		mBookDao.update(mBook.getId(), mBook);
 		mCurrentChapterIndex = chapterIndex;
 		mCurrentChapter = mBook.getChapters().get(chapterIndex);
 		mHasNext = mBookDetailsFragment.isValidChapterIndex(chapterIndex - 1);
@@ -439,7 +443,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		@Override
 		protected Object doInBackground(Void... params) {
 			BookProcessor processor = null;
-			switch (mCurrentChapter.getChapterSource()) {
+			switch (mCurrentChapter.getSource()) {
 			case MANGA24H:
 				processor = new Manga24hProcessor();
 				break;
@@ -452,7 +456,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				break;
 			}
 			try {
-				return processor.getPageList(mCurrentChapter.getChapterUrl());
+				return processor.getPageList(mCurrentChapter.getUrl());
 			} catch (IOException e) {
 				e.printStackTrace();
 				return e;
@@ -487,7 +491,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		protected void onPreExecute() {
 			Log.d(TAG, "Loading image");
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		@Override
 		protected Object[] doInBackground(Object... params) {
