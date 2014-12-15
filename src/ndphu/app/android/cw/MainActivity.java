@@ -11,6 +11,7 @@ import ndphu.app.android.cw.fragment.home.HomeFragment;
 import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
 import ndphu.app.android.cw.fragment.search.SearchFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
+import ndphu.app.android.cw.fragment.settings.SettingsFragment;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
@@ -20,6 +21,7 @@ import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import ndphu.app.android.cw.util.Utils;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -39,6 +41,7 @@ import android.view.MenuItem;
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
 		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
+	public static final String PREF_APP_THEME = "pref_app_theme";
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
 	// private Toolbar mToolbar;
@@ -63,6 +66,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseTheme);
+		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -163,6 +168,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			break;
 		case 2:
 			// Settings
+			SettingsFragment settingsFragment = new SettingsFragment();
+			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, settingsFragment).commit();
 			break;
 		default:
 			// Function not implements

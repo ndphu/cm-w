@@ -8,6 +8,8 @@
     <ListView
         android:id="@+id/fragment_favorite_listview"
         android:layout_width="fill_parent"
+        android:dividerHeight="0dp"
+        android:divider="@android:color/transparent"
         android:layout_height="fill_parent"
         android:clipToPadding="false" >
     </ListView>

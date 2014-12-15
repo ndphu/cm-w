@@ -1,5 +1,7 @@
 package ndphu.app.android.cw.fragment.favorite;
 
+import java.util.List;
+
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.dao.BookDao;
@@ -41,7 +43,10 @@ public class FavoriteFragment extends Fragment implements OnItemClickListener {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		mBookAdapter.clear();
-		mBookAdapter.addAll(mBookDao.readAllWhere(Book.COL_FAVORITE, "1"));
+		List<Book> favoriteBooks = mBookDao.readAllWhere(Book.COL_FAVORITE, "1");
+		if (favoriteBooks != null && favoriteBooks.size() > 0) {
+			mBookAdapter.addAll(favoriteBooks);
+		}
 	}
 
 	@Override

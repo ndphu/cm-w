@@ -35,7 +35,6 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mBookDao = new BookDao(getContext());
 		mChapterDao = new ChapterDao(getContext());
-
 	}
 
 	@Override
