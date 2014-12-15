@@ -26,5 +26,6 @@
     <string name="book_title">Book Title</string>
     <string name="last_chapter">Last Chapter</string>
     <string name="menu_button">Menu button</string>
+    <string name="theme">Theme</string>
 
 </resources>

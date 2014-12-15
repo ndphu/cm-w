@@ -6,7 +6,7 @@ import ndphu.app.android.cw.model.Chapter;
 import android.app.Application;
 
 public class MainApplication extends Application {
-	private final static int DATABASE_VERSION = 14;
+	private final static int DATABASE_VERSION = 20;
 
 	@Override
 	public void onCreate() {
