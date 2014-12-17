@@ -238,20 +238,25 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			if (mBook.getCurrentChapter() != currentChapterIndex) {
 				final int savedChapterIndex = mBook.getCurrentChapter();
 				if (mBookDetailsFragment.isValidChapterIndex(savedChapterIndex)) {
-					new AlertDialog.Builder(this).setMessage("Do you wish to resume from where you read?")
-							.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
-									mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
-								}
-							}).setNegativeButton("NO", new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
-									mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
-								}
-							}).show();
+					/*
+					 * new AlertDialog.Builder(this).setMessage("Do you wish to resume from where you read?")
+					 * .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+					 *
+					 * @Override
+					 * public void onClick(DialogInterface dialog, int which) {
+					 * dialog.dismiss();
+					 * mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
+					 * }
+					 * }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
+					 *
+					 * @Override
+					 * public void onClick(DialogInterface dialog, int which) {
+					 * dialog.dismiss();
+					 * mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
+					 * }
+					 * }).show();
+					 */
+					mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
 				} else {
 					mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
 				}
@@ -542,57 +547,9 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		;
 
 		@Override
-		protected void onProgressUpdate(Object... values) {
-			Integer loadedCount = (Integer) values[0];
-			mLoadingIndicator.setProgressBarProgress(loadedCount);
-			if (loadedCount >= mPages.size()) {
-				mLoadingIndicator.setVisibility(View.GONE);
-			}
-			mPageAdapter.notifyDataSetChanged();
-			String viewTag = (String) values[1];
-			loadImageToView(viewTag);
-		}
-
-		@Override
 		protected Void doInBackground(Void... params) {
 			for (Page p : mPages) {
-				String pageUrl = p.getLink();
-				Log.d(TAG, "Loading page: " + pageUrl);
-				final String hasedUrl = p.getHashedUrl();
-				Log.d(TAG, "MD5 hash of the URL: " + hasedUrl);
-				try {
-					if (isCancelled()) {
-						break;
-					}
-					File cacheFile = new File(mCacheDir.getAbsolutePath() + "/" + hasedUrl);
-					if (cacheFile.isFile()) {
-						// Found cached file. Do not need to download any more
-						Log.d(TAG, "Found cached file at " + cacheFile.getAbsolutePath());
-						addBitmapFileToCache(hasedUrl, cacheFile.getAbsolutePath());
-						publishProgress(new Object[] { mCachedMap.size(), hasedUrl });
-					} else {
-						DownloadFileRunnable dfr = new DownloadFileRunnable(pageUrl, cacheFile.getAbsolutePath());
-						dfr.setDownloadFileListener(new DownloadFileListener() {
-
-							@Override
-							public void onFailed(String url, String destination, Exception ex) {
-								Log.e(TAG, "Download failed for url: " + url);
-								ex.printStackTrace();
-							}
-
-							@Override
-							public void onCompleted(String url, String destination, long fileSize) {
-								Log.d(TAG, "Download completed: " + url);
-								addBitmapFileToCache(hasedUrl, destination);
-								publishProgress(new Object[] { mCachedMap.size(), hasedUrl });
-							}
-						});
-						mExecutor.execute(dfr);
-					}
-
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
+				loadPage(p, mCacheDir, true);
 			}
 			return null;
 		}
@@ -603,8 +560,112 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				if (mCachedMap.entrySet().size() >= mPages.size()) {
 					mLoadingIndicator.setVisibility(View.GONE);
 				}
+				// start load next chapter
 			}
+			loadNextChapter();
 		}
+
+	}
+
+	private void loadPage(Page p, File cachedDir, final boolean publishProgress) {
+		String pageUrl = p.getLink();
+		Log.d(TAG, "Loading page: " + pageUrl);
+		final String hasedUrl = p.getHashedUrl();
+		Log.d(TAG, "MD5 hash of the URL: " + hasedUrl);
+		try {
+			File cacheFile = new File(cachedDir.getAbsolutePath() + "/" + hasedUrl);
+			if (cacheFile.isFile()) {
+				// Found cached file. Do not need to download any more
+				Log.d(TAG, "Found cached file at " + cacheFile.getAbsolutePath());
+				addBitmapFileToCache(hasedUrl, cacheFile.getAbsolutePath());
+				if (publishProgress) {
+					publishProgress(mCachedMap.size(), hasedUrl);
+				}
+			} else {
+				DownloadFileRunnable dfr = new DownloadFileRunnable(pageUrl, cacheFile.getAbsolutePath());
+				dfr.setDownloadFileListener(new DownloadFileListener() {
+
+					@Override
+					public void onFailed(String url, String destination, Exception ex) {
+						Log.e(TAG, "Download failed for url: " + url);
+						ex.printStackTrace();
+					}
+
+					@Override
+					public void onCompleted(String url, String destination, long fileSize) {
+						Log.d(TAG, "Download completed: " + url);
+						addBitmapFileToCache(hasedUrl, destination);
+						if (publishProgress) {
+							publishProgress(mCachedMap.size(), hasedUrl);
+						}
+					}
+				});
+				mExecutor.execute(dfr);
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	private void publishProgress(final int loadedCount, final String viewTag) {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mLoadingIndicator.setProgressBarProgress(loadedCount);
+				if (loadedCount >= mPages.size()) {
+					mLoadingIndicator.setVisibility(View.GONE);
+				}
+				mPageAdapter.notifyDataSetChanged();
+				loadImageToView(viewTag);
+			}
+		});
+
+	}
+
+	/**
+	 * Preload next chapter
+	 */
+	private void loadNextChapter() {
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				int nextChapIdx = mCurrentChapterIndex - 1;
+				if (mBookDetailsFragment.isValidChapterIndex(nextChapIdx)) {
+					Log.i(TAG, "Load next chapter");
+					BookProcessor processor = null;
+					switch (mCurrentChapter.getSource()) {
+					case MANGA24H:
+						processor = new Manga24hProcessor();
+						break;
+					case BLOGTRUYEN:
+						processor = new BlogTruyenProcessor();
+						break;
+					case IZMANGA:
+						processor = new IZMangaProcessor();
+					default:
+						break;
+					}
+					try {
+						Chapter nextChapter = mBook.getChapters().get(nextChapIdx);
+						List<Page> pages = processor.getPageList(nextChapter.getUrl());
+						nextChapter.setPages(pages);
+						File cachedDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(nextChapter.getUrl()));
+						cachedDir.mkdir();
+						for (Page p : pages) {
+							loadPage(p, cachedDir, false);
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+
+				}
+				return null;
+			}
+
+		}.execute();
 	}
 
 }

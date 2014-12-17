@@ -9,9 +9,11 @@ import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.SearchResult;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 
+	private static final String TAG = LoadBookTask.class.getSimpleName();
 	private WeakReference<LoadBookListener> mListener;
 	private SearchResult mSearchResult;
 
@@ -25,7 +27,7 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 	}
 
 	public static interface LoadBookListener {
-		public void onStart(String url);
+		public void onStartLoading(String url);
 
 		public void onComplete(Book book);
 
@@ -37,9 +39,9 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 		super.onPreExecute();
 		if (mListener.get() != null) {
 			if (mSearchResult != null) {
-				mListener.get().onStart(mSearchResult.bookName);
+				mListener.get().onStartLoading(mSearchResult.bookName);
 			} else {
-				mListener.get().onStart("Uknown");
+				mListener.get().onStartLoading("Uknown");
 			}
 		}
 	}
@@ -63,12 +65,14 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 			}
 			return processor.loadBook(this.mSearchResult.bookUrl, false);
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			return ex;
 		}
 	}
 
 	@Override
 	protected void onPostExecute(Object result) {
+		Log.d(TAG, "postexecute loadbooktask");
 		super.onPostExecute(result);
 		if (mListener.get() != null) {
 			if (result == null) {

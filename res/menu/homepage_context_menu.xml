@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="ndphu.app.android.cw.MainActivity" >
+
+    <item
+        android:id="@+id/action_add_to_favorite"
+        android:orderInCategory="100"
+        android:title="@string/add_to_favorite"
+        app:showAsAction="ifRoom"/>
+
+</menu>

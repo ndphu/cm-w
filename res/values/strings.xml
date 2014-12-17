@@ -27,5 +27,7 @@
     <string name="last_chapter">Last Chapter</string>
     <string name="menu_button">Menu button</string>
     <string name="theme">Theme</string>
+    <string name="more">More</string>
+    <string name="add_to_favorite">Add to favorite</string>
 
 </resources>
