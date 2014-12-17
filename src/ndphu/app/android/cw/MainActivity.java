@@ -229,7 +229,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	// Callbacks for Book loaded
 	@Override
-	public void onStart(String url) {
+	public void onStartLoading(String url) {
 		mProgressDialog = new ProgressDialog(this);
 		mProgressDialog.setCancelable(false);
 		mProgressDialog.setTitle("Loading");

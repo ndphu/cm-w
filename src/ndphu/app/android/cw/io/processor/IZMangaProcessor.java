@@ -170,6 +170,7 @@ public class IZMangaProcessor implements BookProcessor {
 		});
 		Log.d(TAG, "Content: " + content.toString());
 		book.setDescription(content.toString());
+		Log.d(TAG, "Load book successfully");
 		return book;
 	}
 
