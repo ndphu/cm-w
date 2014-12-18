@@ -4,9 +4,15 @@
     tools:context="ndphu.app.android.cw.MainActivity" >
 
     <item
-        android:id="@+id/action_add_to_favorite"
+        android:id="@+id/action_add_favorite"
         android:orderInCategory="100"
         android:title="@string/add_to_favorite"
+        app:showAsAction="ifRoom"/>
+    
+    <item
+        android:id="@+id/action_remove_favorite"
+        android:orderInCategory="200"
+        android:title="@string/remove_favorite"
         app:showAsAction="ifRoom"/>
 
 </menu>

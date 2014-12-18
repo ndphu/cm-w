@@ -106,21 +106,37 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 					public void onClick(View v) {
 						PopupMenu menu = new PopupMenu(getContext(), v);
 						menu.inflate(R.menu.homepage_context_menu);
+						MenuItem addFavorite = menu.getMenu().findItem(R.id.action_add_favorite);
+						MenuItem removeFavorite = menu.getMenu().findItem(R.id.action_remove_favorite);
+						if (book == null) {
+							removeFavorite.setVisible(false);
+							addFavorite.setVisible(true);
+						} else {
+							removeFavorite.setVisible(book.getFavorite());
+							addFavorite.setVisible(!book.getFavorite());
+						}
 						menu.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
 							@Override
 							public boolean onMenuItemClick(MenuItem menuItem) {
 								switch (menuItem.getItemId()) {
-								case R.id.action_add_to_favorite:
-									Log.d(TAG, "BookHased:" + hasedUrl);
+								case R.id.action_add_favorite: {
 									if (book == null) {
 										SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
 										new LoadBookTask(result, HomePageItemAdapter.this).execute();
 									} else {
 										book.setFavorite(true);
 										mBookDao.update(book.getId(), book);
+										notifyDataSetChanged();
 									}
 									return true;
+								}
+								case R.id.action_remove_favorite: {
+									book.setFavorite(false);
+									mBookDao.update(book.getId(), book);
+									notifyDataSetChanged();
+									return true;
+								}
 								default:
 									return false;
 								}
@@ -165,6 +181,7 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 			chapter.setBookId(newBookId);
 			mChapterDao.create(chapter);
 		}
+		notifyDataSetChanged();
 	}
 
 }

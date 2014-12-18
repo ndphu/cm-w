@@ -66,7 +66,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseTheme);
+		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseThemeLight);
 		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);

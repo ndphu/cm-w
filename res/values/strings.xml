@@ -29,5 +29,6 @@
     <string name="theme">Theme</string>
     <string name="more">More</string>
     <string name="add_to_favorite">Add to favorite</string>
+    <string name="remove_favorite">Remove Favorite</string>
 
 </resources>
