@@ -6,6 +6,6 @@
     <dimen name="drawer_width">240dp</dimen>
     <dimen name="drawer_width_larger">320dp</dimen>
     <dimen name="online_book_search_item_containers_margin">4dp</dimen>
-    <dimen name="drawer_margin_right">20dp</dimen>
+    <dimen name="drawer_margin_right">10dp</dimen>
 
 </resources>

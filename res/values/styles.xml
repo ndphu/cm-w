@@ -8,6 +8,9 @@
      <style name="AppBaseThemeLight" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/colorEdgeEffect</item>
+        <item name="colorButtonNormal">@color/colorPrimary</item>
     </style>
 
     <!-- Application theme. -->

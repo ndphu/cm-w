@@ -6,12 +6,13 @@
     android:layout_marginRight="6dp" >
 
     <ListView
+        android:listSelector="@android:color/transparent"
         android:id="@+id/fragment_favorite_listview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:clipToPadding="false"
         android:divider="@android:color/transparent"
-        android:dividerHeight="4dp"
+        android:dividerHeight="1dp"
         android:paddingTop="6dp" >
     </ListView>
 

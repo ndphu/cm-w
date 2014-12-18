@@ -56,7 +56,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	private HomeFragment mHomeFragment;
 	private ProgressDialog mProgressDialog;
 	private SearchFragment searchFragment;
-	
+
 	// Favorite fragment
 	private FavoriteFragment mFavoriteFragment;
 

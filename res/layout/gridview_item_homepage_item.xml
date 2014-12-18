@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    app:cardCornerRadius="2dp" >
+    app:cardCornerRadius="2dp"
+    android:foreground="@drawable/listview_selectable_foreground"    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -47,7 +48,7 @@
 
             <ImageView
                 android:id="@+id/gridview_item_homepage_item_imageview_menu"
-                android:layout_width="24dp"
+                android:layout_width="36dp"
                 android:layout_height="24dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
