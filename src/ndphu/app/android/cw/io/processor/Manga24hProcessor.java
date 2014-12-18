@@ -111,9 +111,8 @@ public class Manga24hProcessor implements BookProcessor {
 					continue;
 				}
 				Page page = new Page();
-				page.setLink(line);
+				page.setUrl(line);
 				page.setHashedUrl(ndphu.app.android.cw.util.Utils.getMD5Hash(line));
-				page.setPageOrder(0);
 				pages.add(page);
 			}
 		} catch (Exception ex) {

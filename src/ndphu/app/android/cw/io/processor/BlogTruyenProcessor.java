@@ -152,7 +152,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 			String pageUrl = img.substring(img.indexOf("http"), img.lastIndexOf("\""));
 			String hashedUrl = Utils.getMD5Hash(pageUrl);
 			page.setHashedUrl(hashedUrl);
-			page.setLink(pageUrl);
+			page.setUrl(pageUrl);
 			result.add(page);
 		}
 

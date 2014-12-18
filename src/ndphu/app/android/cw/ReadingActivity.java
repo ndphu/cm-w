@@ -20,6 +20,7 @@ import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressI
 import ndphu.app.android.cw.customview.TouchImageView;
 import ndphu.app.android.cw.dao.BookDao;
 import ndphu.app.android.cw.dao.ChapterDao;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.BookDetailsFragment;
 import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
@@ -61,8 +62,9 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class ReadingActivity extends ActionBarActivity implements LoadingProgressIndicatorListener, RejectedExecutionHandler, DrawerListener,
-		BookDetailsFragment.OnChapterSelectedListener, ChapterNavigationBarListener {
+public class ReadingActivity extends ActionBarActivity implements LoadingProgressIndicatorListener,
+		RejectedExecutionHandler, DrawerListener, BookDetailsFragment.OnChapterSelectedListener,
+		ChapterNavigationBarListener {
 	public static final String TAG = ReadingActivity.class.getSimpleName();
 	public static final String EXTRA_BOOK_JSON = "book_in_json";
 	public static final String EXTRA_BOOK_ID = "book_id";
@@ -77,7 +79,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	private BookDetailsFragment mBookDetailsFragment;
 	// Activity data
 	private Book mBook;
-	private List<Page> mPages;
 	private Chapter mCurrentChapter;
 	private int mCurrentChapterIndex;
 	private boolean mCacheInitialized = false;
@@ -97,17 +98,17 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		@Override
 		public int getCount() {
 			// Add the lastpage for navigation
-			return mPages.size() + 1;
+			return mCurrentChapter.getPages().size() + 1;
 		}
 
 		@Override
 		public View instantiateItem(ViewGroup container, int position) {
-			if (position < mPages.size()) {
+			if (position < mCurrentChapter.getPages().size()) {
 				final TouchImageView img = new TouchImageView(container.getContext());
 				img.setImageResource(R.drawable.ic_placeholder_loading);
 				img.setScaleType(ScaleType.CENTER);
 				updateScaleTypeFromOrientation(img);
-				String hasedUrl = mPages.get(position).getHashedUrl();
+				String hasedUrl = mCurrentChapter.getPages().get(position).getHashedUrl();
 				String cachedFile = getBitmapFileFromCache(hasedUrl);
 				if (cachedFile == null) {
 					Log.w(TAG, "Cached is not ready for url " + hasedUrl);
@@ -120,12 +121,14 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				return img;
 			} else {
 				if (mChapterNavigation == null) {
-					mChapterNavigation = (ChapterNavigationBar) getLayoutInflater().inflate(R.layout.cv_chapter_navigation, container, false);
+					mChapterNavigation = (ChapterNavigationBar) getLayoutInflater().inflate(
+							R.layout.cv_chapter_navigation, container, false);
 					mChapterNavigation.setChapterNavigationBarListener(ReadingActivity.this);
 				}
 				mChapterNavigation.showPrev(mHasPrev);
 				mChapterNavigation.showNext(mHasNext);
-				container.addView(mChapterNavigation, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+				container.addView(mChapterNavigation, LinearLayout.LayoutParams.MATCH_PARENT,
+						LinearLayout.LayoutParams.MATCH_PARENT);
 				return mChapterNavigation;
 			}
 
@@ -146,13 +149,15 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		@Override
 		public void onPageSelected(int position) {
 			if (position < mCurrentChapter.getPages().size()) {
-				Toast.makeText(ReadingActivity.this, (position + 1) + "/" + mPages.size(), Toast.LENGTH_SHORT).show();
-				Page page = mPages.get(position);
+				Toast.makeText(ReadingActivity.this, (position + 1) + "/" + mCurrentChapter.getPages().size(),
+						Toast.LENGTH_SHORT).show();
+				Page page = mCurrentChapter.getPages().get(position);
 				String viewTag = page.getHashedUrl();
 				TouchImageView tiv = (TouchImageView) mViewPager.findViewWithTag(viewTag);
 				if (tiv != null) {
 					if (tiv.getScaleType() == ScaleType.FIT_CENTER) {
-						// this view still not updated for new orientation, so we
+						// this view still not updated for new orientation, so
+						// we
 						// need to update manually
 						updateScaleTypeFromOrientation(tiv);
 					}
@@ -191,7 +196,8 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		getSupportActionBar().hide();
 
 		// Init thread pool
-		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), this);
+		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>(), this);
 
 		// Init dao
 		mBookDao = new BookDao(this);
@@ -226,12 +232,13 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		}
 		mBookDetailsFragment.setBook(mBook);
 		if (mBook.getChapters().size() == 0) {
-			new AlertDialog.Builder(this).setMessage("This book has no chapter").setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			}).show();
+			new AlertDialog.Builder(this).setMessage("This book has no chapter")
+					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					}).show();
 		} else {
 			// Default is the first chapter
 			final int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, mBook.getChapters().size() - 1);
@@ -239,22 +246,21 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				final int savedChapterIndex = mBook.getCurrentChapter();
 				if (mBookDetailsFragment.isValidChapterIndex(savedChapterIndex)) {
 					/*
-					 * new AlertDialog.Builder(this).setMessage("Do you wish to resume from where you read?")
-					 * .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-					 *
-					 * @Override
-					 * public void onClick(DialogInterface dialog, int which) {
-					 * dialog.dismiss();
-					 * mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
-					 * }
-					 * }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
-					 *
-					 * @Override
-					 * public void onClick(DialogInterface dialog, int which) {
-					 * dialog.dismiss();
-					 * mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
-					 * }
-					 * }).show();
+					 * new AlertDialog.Builder(this).setMessage(
+					 * "Do you wish to resume from where you read?")
+					 * .setPositiveButton("YES", new
+					 * DialogInterface.OnClickListener() {
+					 * 
+					 * @Override public void onClick(DialogInterface dialog, int
+					 * which) { dialog.dismiss();
+					 * mBookDetailsFragment.setSetCurrentChapterIndex
+					 * (savedChapterIndex); } }).setNegativeButton("NO", new
+					 * DialogInterface.OnClickListener() {
+					 * 
+					 * @Override public void onClick(DialogInterface dialog, int
+					 * which) { dialog.dismiss();
+					 * mBookDetailsFragment.setSetCurrentChapterIndex
+					 * (currentChapterIndex); } }).show();
 					 */
 					mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
 				} else {
@@ -278,7 +284,14 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getUrl()));
 		new InitCacheTask().execute(mCacheDir);
 		// Execute task
-		new LoadChapterDataTask().execute();
+		DaoUtils.loadPagesOfChapter(ReadingActivity.this, mCurrentChapter);
+		if (mCurrentChapter.getPages().size() == 0) {
+			new LoadChapterDataTask().execute();
+		} else {
+			mViewPager.setAdapter(mPageAdapter);
+			mViewPager.setOnPageChangeListener(mPageChangeListener);
+			new PageLoaderTask().execute();
+		}
 	}
 
 	@Override
@@ -289,7 +302,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	}
 
 	private void updateViewAtPosition(int position) {
-		Page page = mPages.get(position);
+		Page page = mCurrentChapter.getPages().get(position);
 		loadImageToView(page.getHashedUrl());
 	}
 
@@ -313,7 +326,8 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		}
 		TouchImageView viewToBeUpdated = (TouchImageView) mViewPager.findViewWithTag(viewTag);
 		if (viewToBeUpdated != null) {
-			new ImageLoader().execute(getBitmapFileFromCache(viewTag), viewTag, new WeakReference<TouchImageView>(viewToBeUpdated));
+			new ImageLoader().execute(getBitmapFileFromCache(viewTag), viewTag, new WeakReference<TouchImageView>(
+					viewToBeUpdated));
 		}
 	}
 
@@ -461,14 +475,16 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				break;
 			}
 			try {
-				return processor.getPageList(mCurrentChapter.getUrl());
+				List<Page> pageList = processor.getPageList(mCurrentChapter.getUrl());
+				mCurrentChapter.setPages(pageList);
+				DaoUtils.savePagesInChapter(ReadingActivity.this, mCurrentChapter);
+				return pageList;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return e;
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected void onPostExecute(Object result) {
 			if (mProgressDialog != null && mProgressDialog.get() != null) {
@@ -476,9 +492,9 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			}
 			if (result != null) {
 				if (result instanceof Exception) {
-					new AlertDialog.Builder(ReadingActivity.this).setTitle("Error").setMessage(((Exception) result).getMessage()).create().show();
+					new AlertDialog.Builder(ReadingActivity.this).setTitle("Error")
+							.setMessage(((Exception) result).getMessage()).create().show();
 				} else if (result instanceof List) {
-					mPages = (List<Page>) result;
 					mViewPager.setAdapter(mPageAdapter);
 					mViewPager.setOnPageChangeListener(mPageChangeListener);
 					new PageLoaderTask().execute();
@@ -509,9 +525,11 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				result = BitmapFactory.decodeFile(filePath);
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				Log.e(TAG, "Regular bitmap decoding process failed for image at " + filePath + ". Retry with owned decoding process.");
+				Log.e(TAG, "Regular bitmap decoding process failed for image at " + filePath
+						+ ". Retry with owned decoding process.");
 				try {
-					result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), mScreenWidth, mScreenHeight);
+					result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), mScreenWidth,
+							mScreenHeight);
 				} catch (IOException e) {
 					e.printStackTrace();
 					Log.e(TAG, "Owned decoding process failed.");
@@ -541,14 +559,14 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		protected void onPreExecute() {
 			mLoadingIndicator.setVisibility(View.VISIBLE);
 			mLoadingIndicator.setProgressBarProgress(0);
-			mLoadingIndicator.setProgressBarMax(mPages.size());
+			mLoadingIndicator.setProgressBarMax(mCurrentChapter.getPages().size());
 		}
 
 		;
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			for (Page p : mPages) {
+			for (Page p : mCurrentChapter.getPages()) {
 				loadPage(p, mCacheDir, true);
 			}
 			return null;
@@ -557,7 +575,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		@Override
 		protected void onPostExecute(Void result) {
 			synchronized (mDiskCacheLock) {
-				if (mCachedMap.entrySet().size() >= mPages.size()) {
+				if (mCachedMap.entrySet().size() >= mCurrentChapter.getPages().size()) {
 					mLoadingIndicator.setVisibility(View.GONE);
 				}
 				// start load next chapter
@@ -568,7 +586,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	}
 
 	private void loadPage(Page p, File cachedDir, final boolean publishProgress) {
-		String pageUrl = p.getLink();
+		String pageUrl = p.getUrl();
 		Log.d(TAG, "Loading page: " + pageUrl);
 		final String hasedUrl = p.getHashedUrl();
 		Log.d(TAG, "MD5 hash of the URL: " + hasedUrl);
@@ -614,7 +632,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			@Override
 			public void run() {
 				mLoadingIndicator.setProgressBarProgress(loadedCount);
-				if (loadedCount >= mPages.size()) {
+				if (loadedCount >= mCurrentChapter.getPages().size()) {
 					mLoadingIndicator.setVisibility(View.GONE);
 				}
 				mPageAdapter.notifyDataSetChanged();
@@ -652,7 +670,9 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 						Chapter nextChapter = mBook.getChapters().get(nextChapIdx);
 						List<Page> pages = processor.getPageList(nextChapter.getUrl());
 						nextChapter.setPages(pages);
-						File cachedDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(nextChapter.getUrl()));
+						DaoUtils.savePagesInChapter(ReadingActivity.this, nextChapter);
+						File cachedDir = new File(getExternalCacheDir().getAbsolutePath() + "/"
+								+ Utils.getMD5Hash(nextChapter.getUrl()));
 						cachedDir.mkdir();
 						for (Page p : pages) {
 							loadPage(p, cachedDir, false);

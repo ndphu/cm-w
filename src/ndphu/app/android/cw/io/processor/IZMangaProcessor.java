@@ -196,7 +196,7 @@ public class IZMangaProcessor implements BookProcessor {
 			try {
 				new URL(url);
 				Page p = new Page();
-				p.setLink(url);
+				p.setUrl(url);
 				p.setHashedUrl(Utils.getMD5Hash(url));
 				result.add(p);
 			} catch (MalformedURLException ex) {
