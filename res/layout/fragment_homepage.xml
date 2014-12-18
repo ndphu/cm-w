@@ -29,6 +29,7 @@
     <GridView
         android:id="@+id/fragment_homepage_gridview"
         android:layout_width="fill_parent"
+        android:listSelector="@android:color/transparent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/fragment_homepage_spinner_category"
         android:layout_centerHorizontal="true"

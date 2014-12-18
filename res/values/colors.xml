@@ -4,6 +4,9 @@
     <color name="colorPrimary">#EF6C00</color>
     <color name="colorPrimaryDark">#E65100</color>
     <color name="colorPrimaryLight">#DDEF6C00</color>
+    <color name="colorAccent">#FFA726</color>
+    <color name="colorControlActivated">#EF6C00</color>
+    <color name="colorEdgeEffect">#DDEF6C00</color>
     <color name="toolbar_color">@color/colorPrimary</color>
     <color name="colorSecondary">@color/material_deep_teal_200</color>
     <color name="colorSecondaryDark">@color/material_deep_teal_500</color>
@@ -14,6 +17,9 @@
     <color name="background_translucent_dark">#66000000</color>
     <color name="background_translucent_darker">#88000000</color>
     <color name="background_translucent_darker2">#BB000000</color>
+    <color name="background_translucent_darker3">#CC000000</color>
+    <color name="background_translucent_darker4">#DD000000</color>
     <color name="homepage_background_color">#FFF</color>
+    <color name="listitem_forground">#5CCC</color>
 
 </resources>

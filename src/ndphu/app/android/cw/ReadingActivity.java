@@ -250,24 +250,24 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 					 * "Do you wish to resume from where you read?")
 					 * .setPositiveButton("YES", new
 					 * DialogInterface.OnClickListener() {
-					 * 
+					 *
 					 * @Override public void onClick(DialogInterface dialog, int
 					 * which) { dialog.dismiss();
 					 * mBookDetailsFragment.setSetCurrentChapterIndex
 					 * (savedChapterIndex); } }).setNegativeButton("NO", new
 					 * DialogInterface.OnClickListener() {
-					 * 
+					 *
 					 * @Override public void onClick(DialogInterface dialog, int
 					 * which) { dialog.dismiss();
 					 * mBookDetailsFragment.setSetCurrentChapterIndex
 					 * (currentChapterIndex); } }).show();
 					 */
-					mBookDetailsFragment.setSetCurrentChapterIndex(savedChapterIndex);
+					mBookDetailsFragment.setCurrentChapterIndex(savedChapterIndex);
 				} else {
-					mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
+					mBookDetailsFragment.setCurrentChapterIndex(currentChapterIndex);
 				}
 			} else {
-				mBookDetailsFragment.setSetCurrentChapterIndex(currentChapterIndex);
+				mBookDetailsFragment.setCurrentChapterIndex(currentChapterIndex);
 			}
 		}
 		mDrawerLayout.openDrawer(GravityCompat.START);
@@ -288,6 +288,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		if (mCurrentChapter.getPages().size() == 0) {
 			new LoadChapterDataTask().execute();
 		} else {
+			Log.i(TAG, "chapter found, reload");
 			mViewPager.setAdapter(mPageAdapter);
 			mViewPager.setOnPageChangeListener(mPageChangeListener);
 			new PageLoaderTask().execute();
@@ -393,7 +394,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 	private void goToChapter(int chapterIndex) {
 		if (mBookDetailsFragment.isValidChapterIndex(chapterIndex)) {
-			mBookDetailsFragment.setSetCurrentChapterIndex(chapterIndex);
+			mBookDetailsFragment.setCurrentChapterIndex(chapterIndex);
 		}
 	}
 

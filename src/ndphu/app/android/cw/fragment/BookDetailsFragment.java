@@ -16,6 +16,8 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -33,6 +35,8 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private TextView mTitle;
 	private TextView mBookSummary;
 	private Button mShowChapters;
+	private Button mGoToLastChapter;
+	private Button mGoToFirstChapter;
 	private ImageView mBookCover;
 	private ViewGroup mParentContainer = null;
 	private ImageView mFavoriteIcon;
@@ -61,10 +65,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		mTitle.setText(mBook.getName());
 		Picasso.with(getActivity()).load(Uri.parse(mBook.getCover())).into(mBookCover);
 		if (mBook.getDescription() != null && !mBook.getDescription().trim().isEmpty()) {
-			mBookSummary.setVisibility(View.VISIBLE);
 			mBookSummary.setText(Html.fromHtml(mBook.getDescription()));
-		} else {
-			mBookSummary.setVisibility(View.GONE);
 		}
 		mAdapter.clear();
 		mAdapter.addAll(mBook.getChapters());
@@ -84,6 +85,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+		showChapterList();
 	}
 
 	private View getContainerView() {
@@ -100,6 +102,10 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		mFavoriteIcon.setOnClickListener(this);
 		mShowChapters = (Button) view.findViewById(R.id.fragment_book_details_button_show_chapters);
 		mShowChapters.setOnClickListener(this);
+		mGoToFirstChapter = (Button) view.findViewById(R.id.fragment_book_details_button_go_to_first_chapter);
+		mGoToFirstChapter.setOnClickListener(this);
+		mGoToLastChapter = (Button) view.findViewById(R.id.fragment_book_details_button_go_to_last_chapter);
+		mGoToLastChapter.setOnClickListener(this);
 		return view;
 	}
 
@@ -122,25 +128,75 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 			break;
 		case R.id.fragment_book_details_button_show_chapters:
 			if (mChapterList.getVisibility() == View.VISIBLE) {
-				mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_bottom));
-				mChapterList.setVisibility(View.GONE);
-				mShowChapters.setText(R.string.show_chapters);
+				hideChapterList();
 			} else {
-				mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_bottom));
-				mChapterList.setVisibility(View.VISIBLE);
-				mShowChapters.setText(R.string.hide_chapters);
+				showChapterList();
 			}
+			break;
+		case R.id.fragment_book_details_button_go_to_first_chapter:
+			setCurrentChapterIndex(mAdapter.getCount() - 1);
+			break;
+		case R.id.fragment_book_details_button_go_to_last_chapter:
+			setCurrentChapterIndex(0);
 			break;
 		}
 	}
 
-	public void setSetCurrentChapterIndex(int currentChapterIndex) {
+	private void showChapterList() {
+		mChapterList.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_bottom));
+		mChapterList.setVisibility(View.VISIBLE);
+		mShowChapters.setText(R.string.show_info);
+		Animation slideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_top);
+		slideOut.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				mBookSummary.setVisibility(View.GONE);
+			}
+		});
+		mBookSummary.setAnimation(slideOut);
+
+	}
+
+	private void hideChapterList() {
+		Animation slideOut = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_out_bottom);
+		slideOut.setAnimationListener(new AnimationListener() {
+
+			@Override
+			public void onAnimationStart(Animation animation) {
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				mChapterList.setVisibility(View.GONE);
+			}
+		});
+		mChapterList.setAnimation(slideOut);
+		mShowChapters.setText(R.string.show_chapters);
+		mBookSummary.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.slide_in_top));
+		mBookSummary.setVisibility(View.VISIBLE);
+	}
+
+	public void setCurrentChapterIndex(int currentChapterIndex) {
 		mCurrentChapterIndex = currentChapterIndex;
 		mChapterList.setItemChecked(currentChapterIndex, true);
+		mChapterList.setSelection(currentChapterIndex);
 		if (mOnChapterSelectedListener != null && mOnChapterSelectedListener.get() != null) {
 			mOnChapterSelectedListener.get().onChapterSelected(mCurrentChapterIndex);
 		}
-		mChapterList.smoothScrollToPosition(mCurrentChapterIndex);
 	}
 
 	public static interface OnChapterSelectedListener {

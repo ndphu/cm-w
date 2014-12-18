@@ -5,84 +5,109 @@
     android:layout_centerHorizontal="true"
     android:background="@color/background_material_dark"
     android:orientation="vertical"
-    android:padding="2dp">
-
-    <TextView
-        android:id="@+id/fragment_book_details_textview_book_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/fragment_book_details_imageview_favorite"
-        android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@+id/fragment_book_details_imageview_favorite"
-        android:maxLines="1"
-        android:padding="6dp"
-        android:textSize="26sp"
-        android:textStyle="bold" />
-
-    <ImageView
-        android:id="@+id/fragment_book_details_imageview_favorite"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="8dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/ic_favorite" />
-
-    <!--<LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="2dp"
-        android:layout_alignBottom="@+id/fragment_book_details_textview_book_title"
-        android:background="#cccc"></LinearLayout>-->
+    android:padding="2dp" >
 
     <ndphu.app.android.cw.customview.TouchImageView
         android:id="@+id/fragment_book_details_cover_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/fragment_book_details_textview_summary"
-        android:layout_below="@+id/fragment_book_details_textview_book_title"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="6dp"
-        android:layout_marginRight="6dp"
-        android:layout_marginTop="4dp"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:contentDescription="@string/book_cover_background"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher" />
 
-    <!--<LinearLayout
+    <RelativeLayout
+        android:id="@+id/fragment_book_details_container_title_and_favorite"
         android:layout_width="fill_parent"
-        android:layout_height="2dp"
-        android:layout_alignTop="@+id/fragment_book_details_textview_summary"
-        android:background="#cccc"></LinearLayout>-->
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/background_translucent_darker4" >
+
+        <ImageView
+            android:id="@+id/fragment_book_details_imageview_favorite"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/favorite_icon"
+            android:padding="8dp"
+            android:src="@drawable/ic_favorite" />
+
+        <TextView
+            android:id="@+id/fragment_book_details_textview_book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/fragment_book_details_imageview_favorite"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/fragment_book_details_imageview_favorite"
+            android:layout_toLeftOf="@+id/fragment_book_details_imageview_favorite"
+            android:layout_toStartOf="@+id/fragment_book_details_imageview_favorite"
+            android:maxLines="1"
+            android:padding="6dp"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/fragment_book_details_textview_summary"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/fragment_book_details_button_show_chapters"
-        android:maxHeight="260dp"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/fragment_book_details_quick_action_container"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/fragment_book_details_container_title_and_favorite"
+        android:background="@color/background_translucent_darker2"
         android:padding="12dp"
         android:scrollbars="vertical"
         android:textSize="16sp"
         android:visibility="gone" />
 
-    <Button
-        android:id="@+id/fragment_book_details_button_show_chapters"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/common_button_background"
-        android:text="@string/show_chapters"
-        android:textColor="@color/abc_primary_text_material_dark" />
-
     <ListView
         android:id="@+id/fragment_book_details_listview_chapters"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/fragment_book_details_button_show_chapters"
-        android:background="@color/background_material_dark"
+        android:layout_above="@+id/fragment_book_details_quick_action_container"
+        android:layout_below="@+id/fragment_book_details_container_title_and_favorite"
+        android:background="@color/background_translucent_darker2"
         android:choiceMode="singleChoice"
         android:clipToPadding="false"
-        android:layout_marginBottom="4dp"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/fragment_book_details_quick_action_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/background_translucent_darker4"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/fragment_book_details_button_show_chapters"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="3"
+            android:text="@string/show_chapters" />
+
+        <Button
+            android:id="@+id/fragment_book_details_button_go_to_first_chapter"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="2"
+            android:text="@string/first_chapter" />
+
+        <Button
+            android:id="@+id/fragment_book_details_button_go_to_last_chapter"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="2"
+            android:text="@string/last_chapter" />
+    </LinearLayout>
 
 </RelativeLayout>

@@ -15,7 +15,7 @@
     <string name="add_to_favirite_books">Add to favirite books</string>
     <string name="action_select_category">Select category</string>
     <string name="close">Close</string>
-    <string name="show_chapters">Show Chapters</string>
+    <string name="show_chapters">Chapters</string>
     <string name="hide_chapters">Hide Chapters</string>
     <string name="book_name">Book name</string>
     <string name="category_">Category:</string>
@@ -24,11 +24,14 @@
     <string name="hello_world">Hello world!</string>
     <string name="favorite_item_cover">Favorite Item Cover</string>
     <string name="book_title">Book Title</string>
-    <string name="last_chapter">Last Chapter</string>
+    <string name="last_chapter">Last</string>
     <string name="menu_button">Menu button</string>
     <string name="theme">Theme</string>
     <string name="more">More</string>
     <string name="add_to_favorite">Add to favorite</string>
     <string name="remove_favorite">Remove Favorite</string>
+    <string name="favorite_icon">Favorite icon</string>
+    <string name="show_info">Info</string>
+    <string name="first_chapter">First</string>
 
 </resources>
