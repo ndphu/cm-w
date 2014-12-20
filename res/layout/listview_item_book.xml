@@ -6,8 +6,10 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:foreground="@drawable/listview_selectable_foreground"
-    app:cardCornerRadius="3dp"
-    app:cardElevation="3dp" >
+    android:focusable="true"
+    android:clickable="true"
+    app:cardCornerRadius="2dp"
+    app:cardElevation="2dp" >
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -47,6 +49,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_toEndOf="@+id/listview_item_book_cover"
             android:layout_toRightOf="@+id/listview_item_book_cover"
             android:visibility="gone" />
@@ -67,15 +70,52 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
+        <ImageView
+            android:id="@+id/listview_item_book_imageview_recent"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@+id/listview_item_book_name"
+            android:layout_marginTop="16dp"
+            android:layout_toRightOf="@+id/listview_item_book_cover"
+            android:src="@drawable/ic_history" />
+
+        <TextView
+            android:id="@+id/listview_item_book_textview_recent_chapter"
+            android:layout_width="fill_parent"
+            android:layout_height="32dp"
+            android:layout_alignTop="@+id/listview_item_book_imageview_recent"
+            android:layout_toEndOf="@+id/listview_item_book_imageview_recent"
+            android:layout_toRightOf="@+id/listview_item_book_imageview_recent"
+            android:gravity="center_vertical"
+            android:paddingLeft="4dp"
+            android:text="@string/last_chapter"
+            android:textAlignment="gravity" />
+
+        <ImageView
+            android:id="@+id/listview_item_book_imageview_new_chapter"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignBottom="@+id/listview_item_book_button_lastchapter"
+            android:layout_alignTop="@+id/listview_item_book_button_lastchapter"
+            android:layout_below="@+id/listview_item_book_imageview_recent"
+            android:layout_toRightOf="@+id/listview_item_book_cover"
+            android:src="@drawable/ic_book_new_chapter" />
+
         <Button
             android:id="@+id/listview_item_book_button_lastchapter"
+            style="?attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_height="40dp"
+            android:layout_alignLeft="@+id/listview_item_book_textview_recent_chapter"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
+            android:layout_below="@+id/listview_item_book_imageview_recent"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
             android:focusable="false"
+            android:gravity="left|center_vertical"
             android:text="@string/last_chapter"
+            android:textColor="@color/light_blue_link"
             android:textSize="14sp" />
     </RelativeLayout>
 

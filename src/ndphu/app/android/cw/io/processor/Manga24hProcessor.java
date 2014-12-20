@@ -182,13 +182,13 @@ public class Manga24hProcessor implements BookProcessor {
 					if (line.contains("item_anime_box")) {
 						item = new HomePageItem();
 					} else if (line.contains("lazy img-responsive")) {
-						item.mCoverUrl = line.substring(line.lastIndexOf("http"), line.lastIndexOf("\" style"));
+						item.cover = line.substring(line.lastIndexOf("http"), line.lastIndexOf("\" style"));
 					} else if (line.contains("<div class=\"title\">")) {
-						item.mBookUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
-						item.mBookName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
+						item.bookUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
+						item.bookName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
 					} else if (line.contains("<div class=\"title2\">")) {
-						item.mChapterUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
-						item.mChapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
+						item.chapterUrl = line.substring(line.indexOf("http"), line.lastIndexOf("\">"));
+						item.chapterName = line.substring(line.lastIndexOf("\">") + 2, line.lastIndexOf("</a>"));
 						result.add(item);
 					}
 					return false;

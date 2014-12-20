@@ -5,6 +5,7 @@ import java.util.List;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.dao.BookDao;
 import ndphu.app.android.cw.dao.ChapterDao;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
@@ -33,15 +34,11 @@ import com.squareup.picasso.Picasso;
 public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements LoadBookListener {
 	private static final String TAG = HomePageItemAdapter.class.getSimpleName();
 	private LayoutInflater mInflater;
-	private BookDao mBookDao;
-	private ChapterDao mChapterDao;
 	private ProgressDialog mProgressDialog;
 
 	public HomePageItemAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mBookDao = new BookDao(context);
-		mChapterDao = new ChapterDao(context);
 	}
 
 	@Override
@@ -71,21 +68,18 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 	}
 
 	private void fillDataToItem(final ViewHolder holder, final HomePageItem item) {
-		holder.bookNameText.setText(item.mBookName);
-		Picasso.with(getContext()).load(Uri.parse(item.mCoverUrl)).into(holder.coverImageView);
-		final String hasedUrl = Utils.getMD5Hash(item.mBookUrl);
+		holder.bookNameText.setText(item.bookName);
+		Picasso.with(getContext()).load(Uri.parse(item.cover)).into(holder.coverImageView);
+		final String hasedUrl = Utils.getMD5Hash(item.bookUrl);
 		new AsyncTask<Void, Void, Book>() {
 			@Override
 			protected void onPreExecute() {
 				holder.favorite.setVisibility(View.INVISIBLE);
 			};
+
 			@Override
 			protected Book doInBackground(Void... params) {
-				final List<Book> books = mBookDao.readAllWhere(Book.COL_HASED_URL, hasedUrl);
-				if (books.size() > 0) {
-					return books.get(0);
-				}
-				return null;
+				return DaoUtils.getBookByHasedUrl(hasedUrl);
 			}
 
 			@Override
@@ -122,18 +116,18 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 								switch (menuItem.getItemId()) {
 								case R.id.action_add_favorite: {
 									if (book == null) {
-										SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
+										SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
 										new LoadBookTask(result, HomePageItemAdapter.this).execute();
 									} else {
 										book.setFavorite(true);
-										mBookDao.update(book.getId(), book);
+										DaoUtils.updateBook(book);
 										notifyDataSetChanged();
 									}
 									return true;
 								}
 								case R.id.action_remove_favorite: {
 									book.setFavorite(false);
-									mBookDao.update(book.getId(), book);
+									DaoUtils.updateBook(book);
 									notifyDataSetChanged();
 									return true;
 								}
@@ -174,13 +168,7 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 	public void onComplete(Book book) {
 		mProgressDialog.dismiss();
 		book.setFavorite(true);
-		long newBookId = mBookDao.create(book);
-		book.setId(newBookId);
-		Log.d(TAG, "New book id: " + newBookId);
-		for (Chapter chapter : book.getChapters()) {
-			chapter.setBookId(newBookId);
-			mChapterDao.create(chapter);
-		}
+		DaoUtils.saveOrUpdate(book);
 		notifyDataSetChanged();
 	}
 

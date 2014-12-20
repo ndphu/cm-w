@@ -176,9 +176,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	};
 	private int mScreenWidth;
 	private int mScreenHeight;
-	// Dao
-	private ChapterDao mChapterDao;
-	private BookDao mBookDao;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -198,10 +195,6 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		// Init thread pool
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS,
 				new LinkedBlockingQueue<Runnable>(), this);
-
-		// Init dao
-		mBookDao = new BookDao(this);
-		mChapterDao = new ChapterDao(this);
 
 		// Init drawer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -223,8 +216,8 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	private void readFromIntent(Intent intent) {
 		long bookId = intent.getLongExtra(EXTRA_BOOK_ID, -1);
 		Log.d(TAG, "Book id: " + bookId);
-		mBook = mBookDao.read(bookId);
-		List<Chapter> chapters = mChapterDao.getChaptersInBook(bookId);
+		mBook = DaoUtils.getBookAndChapters(bookId);
+		List<Chapter> chapters = mBook.getChapters();
 		mBook.setChapters(chapters);
 		// Default is first chapter (chap 1)
 		if (mBook.getCurrentChapter() < 0) {
@@ -284,7 +277,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getUrl()));
 		new InitCacheTask().execute(mCacheDir);
 		// Execute task
-		DaoUtils.loadPagesOfChapter(ReadingActivity.this, mCurrentChapter);
+		mCurrentChapter = DaoUtils.getChapterAndPages(mCurrentChapter.getId());
 		if (mCurrentChapter.getPages().size() == 0) {
 			new LoadChapterDataTask().execute();
 		} else {
@@ -421,7 +414,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	@Override
 	public void onChapterSelected(int chapterIndex) {
 		mBook.setCurrentChapter(chapterIndex);
-		mBookDao.update(mBook.getId(), mBook);
+		DaoUtils.updateBook(mBook);
 		mCurrentChapterIndex = chapterIndex;
 		mCurrentChapter = mBook.getChapters().get(chapterIndex);
 		mHasNext = mBookDetailsFragment.isValidChapterIndex(chapterIndex - 1);
@@ -478,7 +471,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 			try {
 				List<Page> pageList = processor.getPageList(mCurrentChapter.getUrl());
 				mCurrentChapter.setPages(pageList);
-				DaoUtils.savePagesInChapter(ReadingActivity.this, mCurrentChapter);
+				//DaoUtils.savePagesInChapter(ReadingActivity.this, mCurrentChapter);
 				return pageList;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -671,7 +664,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 						Chapter nextChapter = mBook.getChapters().get(nextChapIdx);
 						List<Page> pages = processor.getPageList(nextChapter.getUrl());
 						nextChapter.setPages(pages);
-						DaoUtils.savePagesInChapter(ReadingActivity.this, nextChapter);
+//						DaoUtils.savePagesInChapter(ReadingActivity.this, nextChapter);
 						File cachedDir = new File(getExternalCacheDir().getAbsolutePath() + "/"
 								+ Utils.getMD5Hash(nextChapter.getUrl()));
 						cachedDir.mkdir();

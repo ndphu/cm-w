@@ -1,6 +1,7 @@
 package ndphu.app.android.cw.app;
 
 import garin.artemiy.sqlitesimple.library.SQLiteSimple;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.Page;
@@ -14,5 +15,6 @@ public class MainApplication extends Application {
 		super.onCreate();
 		SQLiteSimple databaseSimple = new SQLiteSimple(this, DATABASE_VERSION);
 		databaseSimple.create(Book.class, Chapter.class, Page.class);
+		DaoUtils.initialize(this);
 	}
 }
