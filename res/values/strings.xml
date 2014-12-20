@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Comic World</string>
+    <string name="app_name">Manga World</string>
     <string name="action_settings">Settings</string>
     <string name="action_search">Search</string>
     <string name="the_logo">The logo</string>
@@ -33,5 +33,7 @@
     <string name="favorite_icon">Favorite icon</string>
     <string name="show_info">Info</string>
     <string name="first_chapter">First</string>
+    <string name="value">Value</string>
+    <string name="last_viewed_">Last viewed:</string>
 
 </resources>

@@ -1,59 +1,42 @@
 package ndphu.app.android.cw.fragment.favorite;
 
-import java.util.List;
-
 import ndphu.app.android.cw.R;
-import ndphu.app.android.cw.ReadingActivity;
-import ndphu.app.android.cw.dao.BookDao;
-import ndphu.app.android.cw.model.Book;
-import android.content.Intent;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 
-public class FavoriteFragment extends Fragment implements OnItemClickListener {
+public class FavoriteFragment extends Fragment {
 	private static final String TAG = FavoriteFragment.class.getSimpleName();
-	private BookDao mBookDao;
-	private BookArrayAdapter mBookAdapter;
+	private BookRecyclerAdapter mBookAdapter;
+	private RecyclerView mListViewBook;
+	private LinearLayoutManager layoutManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mBookDao = new BookDao(getActivity());
+		layoutManager = new LinearLayoutManager(getActivity());
+		layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+		mBookAdapter = new BookRecyclerAdapter(getActivity());
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_favorite, container, false);
-		ListView mListView = (ListView) view.findViewById(R.id.fragment_favorite_listview);
-		if (mBookAdapter == null) {
-			mBookAdapter = new BookArrayAdapter(getActivity(), 0);
-		}
-		mListView.setAdapter(mBookAdapter);
-		mListView.setOnItemClickListener(this);
+		mListViewBook = (RecyclerView) view.findViewById(R.id.fragment_favorite_recyclerview_book_list);
+		mListViewBook.setHasFixedSize(true);
+		mListViewBook.setLayoutManager(layoutManager);
+		mListViewBook.setAdapter(mBookAdapter);
 		return view;
 	}
 
 	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
-		mBookAdapter.clear();
-		List<Book> favoriteBooks = mBookDao.readAllWhere(Book.COL_FAVORITE, "1");
-		if (favoriteBooks != null && favoriteBooks.size() > 0) {
-			mBookAdapter.addAll(favoriteBooks);
-		}
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Book book = mBookAdapter.getItem(position);
-		Intent intent = new Intent(getActivity(), ReadingActivity.class);
-		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
-		getActivity().startActivity(intent);
+	public void onResume() {
+		super.onResume();
+		mBookAdapter.refresh();
 	}
 }

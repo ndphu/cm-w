@@ -54,13 +54,21 @@ public class NavigationDrawerFragment extends Fragment implements OnItemClickLis
 			mListener.get().onItemSelected(0);
 		}
 	}
+	
+	public void setSelection(int position) {
+		selectMenu(position);
+	}
 
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
-		mListView.setSelection(position);
+	private void selectMenu(int position) {
+		mListView.setItemChecked(position, true);
 		if (mListener != null && mListener.get() != null) {
 			mListener.get().onItemSelected(position);
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long arg3) {
+		selectMenu(position);
 	}
 
 }

@@ -243,27 +243,27 @@ public class IZMangaProcessor implements BookProcessor {
 						if (line.contains("title=\"\"")) {
 							Log.d(TAG, "Debug: Line: " + line);
 							String tmp = line.substring(line.indexOf("http"));
-							homePageItem.mBookUrl = tmp.substring(0, tmp.indexOf("\""));
+							homePageItem.bookUrl = tmp.substring(0, tmp.indexOf("\""));
 						} else if (line.contains("<img")) {
 							String tmp = line.substring(line.lastIndexOf("src"), line.lastIndexOf("alt"));
 							String coverPath = tmp.substring(tmp.indexOf("\"") + 1, tmp.lastIndexOf("\""));
 							if (coverPath.startsWith("http")) {
-								homePageItem.mCoverUrl = coverPath;
+								homePageItem.cover = coverPath;
 							} else {
-								homePageItem.mCoverUrl = BASE_URL + coverPath;
+								homePageItem.cover = BASE_URL + coverPath;
 							}
 							tmp = line.substring(line.lastIndexOf("alt"));
-							homePageItem.mBookName = tmp.substring(tmp.indexOf("\"") + 1, tmp.lastIndexOf("\""));
-							Log.d(TAG, "Name: " + homePageItem.mBookName);
-							Log.d(TAG, "Url: " + homePageItem.mBookUrl);
-							Log.d(TAG, "Cover: " + homePageItem.mCoverUrl);
+							homePageItem.bookName = tmp.substring(tmp.indexOf("\"") + 1, tmp.lastIndexOf("\""));
+							Log.d(TAG, "Name: " + homePageItem.bookName);
+							Log.d(TAG, "Url: " + homePageItem.bookUrl);
+							Log.d(TAG, "Cover: " + homePageItem.cover);
 							result.add(homePageItem);
 							homePageItem = null;
 						}
 					}
 					if (line.contains("<div class=\"list-truyen-item-wrap\">")) {
 						homePageItem = new HomePageItem();
-						homePageItem.mSource = Source.IZMANGA;
+						homePageItem.source = Source.IZMANGA;
 					}
 					return false;
 				}

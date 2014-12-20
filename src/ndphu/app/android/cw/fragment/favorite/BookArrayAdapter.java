@@ -1,9 +1,12 @@
 package ndphu.app.android.cw.fragment.favorite;
 
+import java.util.List;
+
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.dao.BookDao;
 import ndphu.app.android.cw.dao.ChapterDao;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.Chapter;
 import android.content.Context;
@@ -27,14 +30,10 @@ import com.squareup.picasso.Picasso;
 public class BookArrayAdapter extends ArrayAdapter<Book> {
 
 	private LayoutInflater mInflater;
-	private BookDao mBookDao;
-	private ChapterDao mChapterDao;
 
 	public BookArrayAdapter(Context context, int resource) {
 		super(context, resource);
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mBookDao = new BookDao(getContext());
-		mChapterDao = new ChapterDao(getContext());
 	}
 
 	@Override
@@ -46,6 +45,7 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 			holder.cover = (ImageView) convertView.findViewById(R.id.listview_item_book_cover);
 			holder.menu = (ImageView) convertView.findViewById(R.id.listview_item_book_menu_button);
 			holder.lastChapter = (Button) convertView.findViewById(R.id.listview_item_book_button_lastchapter);
+			holder.recentChapter = (TextView) convertView.findViewById(R.id.listview_item_book_textview_recent_chapter);
 			convertView.setTag(holder);
 		}
 		final ViewHolder holder = (ViewHolder) convertView.getTag();
@@ -64,7 +64,7 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 						switch (menuItem.getItemId()) {
 						case R.id.action_remove_favorite:
 							book.setFavorite(false);
-							mBookDao.update(book.getId(), book);
+							DaoUtils.updateBook(book);
 							remove(book);
 							return true;
 						default:
@@ -76,22 +76,31 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 			}
 		});
 		holder.name.setText(book.getName());
+		holder.recentChapter.setText("Loading...");
 		holder.lastChapter.setText("Loading...");
-		new AsyncTask<Void, Void, Chapter>() {
+		new AsyncTask<Void, Void, List<Chapter>>() {
 
 			@Override
-			protected Chapter doInBackground(Void... params) {
-				return mChapterDao.getChaptersInBook(book.getId()).get(0);
+			protected List<Chapter> doInBackground(Void... params) {
+				return DaoUtils.getBookAndChapters(book.getId()).getChapters();
 			}
 
 			@Override
-			protected void onPostExecute(Chapter chapter) {
-				super.onPostExecute(chapter);
-				if (chapter == null) {
+			protected void onPostExecute(List<Chapter> chapters) {
+				super.onPostExecute(chapters);
+				if (chapters == null || chapters.size() == 0) {
 					holder.lastChapter.setVisibility(View.GONE);
 				} else {
+					Integer currentChapterIdx = book.getCurrentChapter();
+					if (currentChapterIdx < 0) {
+						holder.recentChapter.setText("None");
+					} else {
+						Chapter currentChapter = chapters.get(currentChapterIdx);
+						holder.recentChapter.setText(currentChapter.getName());
+					}
+					Chapter lastChapter = chapters.get(0);
 					holder.lastChapter.setVisibility(View.VISIBLE);
-					holder.lastChapter.setText(chapter.getName());
+					holder.lastChapter.setText(lastChapter.getName());
 					holder.lastChapter.setOnClickListener(new OnClickListener() {
 
 						@Override
@@ -99,7 +108,7 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 							Intent intent = new Intent(getContext(), ReadingActivity.class);
 							intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
 							book.setCurrentChapter(0);
-							mBookDao.update(book.getId(), book);
+							DaoUtils.updateBook(book);
 							intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, 0);
 							getContext().startActivity(intent);
 						}
@@ -117,6 +126,7 @@ public class BookArrayAdapter extends ArrayAdapter<Book> {
 		TextView name;
 		ImageView cover;
 		ImageView menu;
+		TextView recentChapter;
 		Button lastChapter;
 	}
 

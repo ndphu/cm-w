@@ -4,6 +4,7 @@ import java.util.List;
 
 import ndphu.app.android.cw.dao.BookDao;
 import ndphu.app.android.cw.dao.ChapterDao;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.fragment.favorite.FavoriteFragment;
@@ -38,8 +39,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
-		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
+public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener,
+		OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener,
+		MenuItemCompat.OnActionExpandListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
 	public static final String PREF_APP_THEME = "pref_app_theme";
 	private DrawerLayout mDrawerLayout;
@@ -60,13 +62,10 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	// Favorite fragment
 	private FavoriteFragment mFavoriteFragment;
 
-	// Dao
-	BookDao mBookDao;
-	ChapterDao mChapterDao;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseThemeLight);
+		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME,
+				R.style.AppBaseThemeLight);
 		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -79,18 +78,27 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-		// mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.app_name, R.string.app_name);
+		// mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+		// mToolbar, R.string.app_name, R.string.app_name);
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.app_name, R.string.app_name);
 		mDrawerToggle.setDrawerIndicatorEnabled(true);
 		mDrawerToggle.setHomeAsUpIndicator(R.drawable.ic_drawer);
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
+		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
+				.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
-		onItemSelected(0);
-		mBookDao = new BookDao(this);
-		mChapterDao = new ChapterDao(this);
+		// Initialize DAO instances
+		// If there is not favorite book, set page to HOME, otherwise, set page
+		// to Favorite book
+		if (DaoUtils.getFavoriteBooks().size() == 0) {
+			// No favorite, go to HOME
+			mNavFragment.setSelection(0);
+		} else {
+			mNavFragment.setSelection(1);
+		}
+
 	}
 
 	@Override
@@ -153,6 +161,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		supportInvalidateOptionsMenu();
 		switch (position) {
 		case 0:
+			getSupportActionBar().setTitle("Home");
 			if (mHomeFragment == null) {
 				mHomeFragment = new HomeFragment();
 				mHomeFragment.setHomeFragmentListener(this);
@@ -160,6 +169,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mHomeFragment).commit();
 			break;
 		case 1:
+			getSupportActionBar().setTitle("My Books");
 			// My Books
 			if (mFavoriteFragment == null) {
 				mFavoriteFragment = new FavoriteFragment();
@@ -167,6 +177,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, mFavoriteFragment).commit();
 			break;
 		case 2:
+			getSupportActionBar().setTitle("Settings");
 			// Settings
 			SettingsFragment settingsFragment = new SettingsFragment();
 			getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, settingsFragment).commit();
@@ -180,7 +191,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
-		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
+		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0
+				&& !selectedItem.bookUrl.trim().equals("0")) {
 			// showBookDetails(selectedItem);
 			openBookFromSearch(selectedItem);
 		}
@@ -198,32 +210,14 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	public void onHomePageItemSelected(HomePageItem item) {
-		String hasedUrl = Utils.getMD5Hash(item.mBookUrl);
+		String hasedUrl = Utils.getMD5Hash(item.bookUrl);
 		Log.d(TAG, "BookHased:" + hasedUrl);
-		List<Book> books = mBookDao.readAllWhere(Book.COL_HASED_URL, hasedUrl);
-		if (books.size() == 0) {
-			SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
+		Book savedBook = DaoUtils.getBookByHasedUrl(hasedUrl);
+		if (savedBook == null) {
+			SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
 			new LoadBookTask(result, this).execute();
 		} else {
-			Book savedBook = books.get(0);
-			loadChaptersList(savedBook);
 			startReadingActivity(savedBook);
-		}
-	}
-
-	// Dao
-	private Book loadChaptersList(Book book) {
-		book.getChapters().addAll(mChapterDao.readAllWhere(Chapter.COL_BOOK_ID, book.getId() + ""));
-		return book;
-	}
-
-	private void saveBookToDB(Book book) {
-		long newBookId = mBookDao.create(book);
-		book.setId(newBookId);
-		Log.d(TAG, "New book id: " + newBookId);
-		for (Chapter chapter : book.getChapters()) {
-			chapter.setBookId(newBookId);
-			mChapterDao.create(chapter);
 		}
 	}
 
@@ -232,14 +226,13 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onStartLoading(String url) {
 		mProgressDialog = new ProgressDialog(this);
 		mProgressDialog.setCancelable(false);
-		mProgressDialog.setTitle("Loading");
 		mProgressDialog.setMessage("Please wait...");
 		mProgressDialog.show();
 	}
 
 	@Override
 	public void onComplete(Book book) {
-		saveBookToDB(book);
+		DaoUtils.saveOrUpdate(book);
 		mProgressDialog.dismiss();
 		startReadingActivity(book);
 	}
@@ -248,13 +241,14 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onError(Exception ex) {
 		mProgressDialog.dismiss();
 		ex.printStackTrace();
-		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage()).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage())
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).show();
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).show();
 	}
 
 	// Search...
@@ -262,8 +256,10 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public boolean onMenuItemActionExpand(MenuItem item) {
 		searchFragment = new SearchFragment();
 		searchFragment.setBookSearchListener(this);
-		mFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_top)
-				.replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
+		mFragmentManager
+				.beginTransaction()
+				.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom,
+						R.anim.slide_out_top).replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
 		return true;
 	}
 

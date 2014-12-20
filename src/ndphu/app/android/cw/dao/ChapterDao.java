@@ -11,8 +11,4 @@ public class ChapterDao extends SQLiteSimpleDAO<Chapter> {
 	public ChapterDao(Context context) {
 		super(Chapter.class, context);
 	}
-
-	public List<Chapter> getChaptersInBook(Long bookId) {
-		return readAllWhere(Chapter.COL_BOOK_ID, bookId + "");
-	}
 }

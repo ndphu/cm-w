@@ -4,7 +4,7 @@ import java.lang.ref.WeakReference;
 
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
-import ndphu.app.android.cw.dao.BookDao;
+import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.model.Book;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,12 +44,10 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 	private ActionBar mActionBar;
 	private int mCurrentChapterIndex;
 	private WeakReference<OnChapterSelectedListener> mOnChapterSelectedListener;
-	private BookDao mBookDao;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mBookDao = new BookDao(getActivity());
 	}
 
 	public void setBook(Book book) {
@@ -123,7 +121,7 @@ public class BookDetailsFragment extends Fragment implements OnItemClickListener
 		case R.id.fragment_book_details_imageview_favorite:
 			// toggle
 			mBook.setFavorite(!mBook.getFavorite());
-			mBookDao.update(mBook.getId(), mBook);
+			DaoUtils.updateBook(mBook);
 			updateFavoriteIcon();
 			break;
 		case R.id.fragment_book_details_button_show_chapters:
