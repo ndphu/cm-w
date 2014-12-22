@@ -2,6 +2,7 @@ package ndphu.app.android.cw.fragment.favorite;
 
 import java.lang.ref.WeakReference;
 
+import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.ReadingActivity;
 import ndphu.app.android.cw.dao.DaoUtils;
@@ -23,7 +24,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 	TextView name;
 	ImageView cover;
 	ImageView menu;
-	TextView recentChapter;
+	Button recentChapter;
 	Button lastChapter;
 	WeakReference<Book> bookRef;
 	private WeakReference<BookViewHolderListener> mListener;
@@ -34,7 +35,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 		name = (TextView) itemView.findViewById(R.id.listview_item_book_name);
 		cover = (ImageView) itemView.findViewById(R.id.listview_item_book_cover);
 		menu = (ImageView) itemView.findViewById(R.id.listview_item_book_menu_button);
-		recentChapter = (TextView) itemView.findViewById(R.id.listview_item_book_textview_recent_chapter);
+		recentChapter = (Button) itemView.findViewById(R.id.listview_item_book_button_recent_chapter);
 		lastChapter = (Button) itemView.findViewById(R.id.listview_item_book_button_lastchapter);
 		mListener = new WeakReference<BookViewHolder.BookViewHolderListener>(listener);
 		initialize();
@@ -46,6 +47,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 
 	private void initialize() {
 		lastChapter.setOnClickListener(this);
+		recentChapter.setOnClickListener(this);
 		menu.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -80,16 +82,31 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 			case R.id.listview_item_book_button_lastchapter: {
 				book.setCurrentChapter(0);
 				DaoUtils.updateBook(book);
-				startReadingActivity(v.getContext(), book);
+				openBook(v.getContext(), book);
 			}
 				break;
+			case R.id.listview_item_book_button_recent_chapter: {
+				if (book.getCurrentChapter() < 0) {
+					book.setCurrentChapter(book.getChapters().size() - 1);
+				}
+				openBook(v.getContext(), book);
+				break;
+			}
 			default: {
-				startReadingActivity(v.getContext(), book);
+				openBook(v.getContext(), book);
 				break;
 			}
 
 			}
 		}
+	}
+
+	private void openBook(Context context, Book book) {
+		// startReadingActivity(context, book);
+		Intent intent = new Intent(context, MainActivity.class);
+		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
+		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, book.getCurrentChapter());
+		context.startActivity(intent);
 	}
 
 	private void startReadingActivity(Context context, Book book) {
