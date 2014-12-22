@@ -3,14 +3,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <ndphu.app.android.cw.customview.VerticalViewPager
-        android:id="@+id/fragment_reading_vertical_viewpager_page_list"
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/black" />
+        android:layout_height="match_parent" >
+
+        <ndphu.app.android.cw.customview.VerticalViewPager
+            android:id="@+id/fragment_reading_vertical_viewpager_page_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black" />
+
+        <FrameLayout
+            android:id="@+id/fragment_reading_vertical_fragment_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:layout_marginRight="@dimen/drawer_margin_right"
+            android:background="@color/background_material_light" >
+        </FrameLayout>
+    </android.support.v4.widget.DrawerLayout>
 
     <include
         android:id="@+id/fragment_reading_vertical_toolbar"
-        layout="@layout/toolbar" />
+        layout="@layout/toolbar"/>
 
 </RelativeLayout>

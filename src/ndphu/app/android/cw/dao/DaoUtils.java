@@ -25,11 +25,15 @@ public class DaoUtils {
 	}
 
 	public static Book saveOrUpdate(Book book) {
-		long newBookId = bookDao.create(book);
-		book.setId(newBookId);
-		for (Chapter chapter : book.getChapters()) {
-			chapter.setBookId(newBookId);
-			saveOrUpdate(chapter);
+		if (isValidId(book.getId())) {
+			bookDao.update(book.getId(), book);
+		} else {
+			long newBookId = bookDao.create(book);
+			book.setId(newBookId);
+			for (Chapter chapter : book.getChapters()) {
+				chapter.setBookId(newBookId);
+				saveOrUpdate(chapter);
+			}
 		}
 		return book;
 	}
@@ -107,7 +111,7 @@ public class DaoUtils {
 
 	public static void saveOrUpdate(CachedImage cachedImage) {
 		if (isValidId(cachedImage.getId())) {
-			//update
+			// update
 			cachedImageDao.update(cachedImage.getId(), cachedImage);
 		} else {
 			// save

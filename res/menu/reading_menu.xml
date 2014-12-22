@@ -6,6 +6,7 @@
     <item
         android:id="@+id/action_show_chapters"
         android:title="@string/show_chapters"
+        android:icon="@drawable/ic_action_show_list"
         app:showAsAction="ifRoom"/>
 
 </menu>

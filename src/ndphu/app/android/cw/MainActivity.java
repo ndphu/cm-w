@@ -108,6 +108,11 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			Book book = DaoUtils.getBookAndChapters(intent.getLongExtra(EXTRA_BOOK_ID, -1));
 			if (book != null) {
 				int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
+				if (currentChapterIndex < 0) {
+					currentChapterIndex = book.getChapters().size() - 1;
+					book.setCurrentChapter(currentChapterIndex);
+					DaoUtils.saveOrUpdate(book);
+				}
 				Chapter chapter = book.getChapters().get(currentChapterIndex);
 				new LoadChapterTask(chapter.getId(), new LoadChapterTaskListener() {
 
