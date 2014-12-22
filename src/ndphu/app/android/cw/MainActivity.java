@@ -11,13 +11,10 @@ import ndphu.app.android.cw.fragment.search.SearchFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.fragment.settings.SettingsFragment;
 import ndphu.app.android.cw.model.Book;
-import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
-import ndphu.app.android.cw.task.LoadChapterTask;
-import ndphu.app.android.cw.task.LoadChapterTask.LoadChapterTaskListener;
 import ndphu.app.android.cw.util.Utils;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -27,6 +24,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -87,6 +85,18 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
+		mFragmentManager.addOnBackStackChangedListener(new OnBackStackChangedListener() {
+
+			@Override
+			public void onBackStackChanged() {
+				if (mFragmentManager.getBackStackEntryCount() > 0) {
+					String bsEntryName = mFragmentManager.getBackStackEntryAt(0).getName();
+					if (!"reading".equals(bsEntryName)) {
+						mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+					}
+				}
+			}
+		});
 		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		// Initialize DAO instances
@@ -105,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent.hasExtra(EXTRA_BOOK_ID)) {
-			Book book = DaoUtils.getBookAndChapters(intent.getLongExtra(EXTRA_BOOK_ID, -1));
+			final Book book = DaoUtils.getBookAndChapters(intent.getLongExtra(EXTRA_BOOK_ID, -1));
 			if (book != null) {
 				int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
 				if (currentChapterIndex < 0) {
@@ -113,41 +123,10 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 					book.setCurrentChapter(currentChapterIndex);
 					DaoUtils.saveOrUpdate(book);
 				}
-				Chapter chapter = book.getChapters().get(currentChapterIndex);
-				new LoadChapterTask(chapter.getId(), new LoadChapterTaskListener() {
-
-					private ProgressDialog mProgressDialog;
-
-					@Override
-					public void onErrorOccurred(Exception cause) {
-						mProgressDialog.dismiss();
-						new AlertDialog.Builder(MainActivity.this).setTitle("Error").setMessage(cause.getMessage())
-								.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										dialog.dismiss();
-									}
-								}).show();
-					}
-
-					@Override
-					public void onCompleted(Chapter result) {
-						mProgressDialog.dismiss();
-						VerticalReadingFragment fragment = new VerticalReadingFragment();
-						fragment.setChapter(result);
-						mFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
-					}
-
-					@Override
-					public void onBegin() {
-						mProgressDialog = new ProgressDialog(MainActivity.this);
-						mProgressDialog.setCancelable(false);
-						mProgressDialog.setMessage("Loading...");
-						mProgressDialog.show();
-					}
-				}).execute();
-
+				VerticalReadingFragment fragment = new VerticalReadingFragment();
+				fragment.setBook(book);
+				mFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("reading").commit();
+				mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 			}
 		}
 	}

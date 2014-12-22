@@ -14,18 +14,28 @@
             android:layout_height="match_parent"
             android:background="@android:color/black" />
 
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/fragment_reading_vertical_fragment_drawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:layout_marginRight="@dimen/drawer_margin_right"
+            android:layout_gravity="start"
+            android:layout_marginLeft="@dimen/drawer_margin_right"
             android:background="@color/background_material_light" >
-        </FrameLayout>
-    </android.support.v4.widget.DrawerLayout>
 
-    <include
-        android:id="@+id/fragment_reading_vertical_toolbar"
-        layout="@layout/toolbar"/>
+            <include
+                android:id="@+id/fragment_reading_vertical_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                layout="@layout/toolbar" />
+
+            <ListView
+                android:id="@+id/fragment_reading_listview_chapter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:choiceMode="singleChoice"
+                android:layout_below="@+id/fragment_reading_vertical_toolbar" />
+        </RelativeLayout>
+    </android.support.v4.widget.DrawerLayout>
 
 </RelativeLayout>

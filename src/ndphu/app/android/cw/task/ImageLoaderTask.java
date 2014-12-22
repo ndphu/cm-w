@@ -35,6 +35,9 @@ public class ImageLoaderTask extends AsyncTask<Object, Void, Object[]> {
 		String filePath = (String) params[0];
 
 		WeakReference<TouchImageView> imageView = (WeakReference<TouchImageView>) params[2];
+		if (imageView.get() == null) {
+			return null;
+		}
 		// Fix out of memory error
 		Display display = ((WindowManager) imageView.get().getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		Point size = new Point();
@@ -60,6 +63,9 @@ public class ImageLoaderTask extends AsyncTask<Object, Void, Object[]> {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void onPostExecute(Object[] result) {
+		if (result == null) {
+			return;
+		}
 		Bitmap bm = (Bitmap) result[0];
 		WeakReference<TouchImageView> iv = (WeakReference<TouchImageView>) result[1];
 		if (iv != null && iv.get() != null) {
