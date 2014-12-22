@@ -5,9 +5,9 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:foreground="@drawable/listview_selectable_foreground"
-    android:focusable="true"
     android:clickable="true"
+    android:focusable="true"
+    android:foreground="@drawable/listview_selectable_foreground"
     app:cardCornerRadius="2dp"
     app:cardElevation="2dp" >
 
@@ -19,8 +19,8 @@
 
         <ImageView
             android:id="@+id/listview_item_book_cover"
-            android:layout_width="72dp"
-            android:layout_height="96dp"
+            android:layout_width="90dp"
+            android:layout_height="120dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
@@ -58,6 +58,7 @@
             android:id="@+id/listview_item_book_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
             android:layout_toEndOf="@+id/listview_item_book_cover"
             android:layout_toLeftOf="@+id/listview_item_book_menu_button"
             android:layout_toRightOf="@+id/listview_item_book_cover"
@@ -74,31 +75,36 @@
             android:id="@+id/listview_item_book_imageview_recent"
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_alignLeft="@+id/listview_item_book_name"
             android:layout_below="@+id/listview_item_book_name"
             android:layout_marginTop="16dp"
-            android:layout_toRightOf="@+id/listview_item_book_cover"
             android:src="@drawable/ic_history" />
 
-        <TextView
-            android:id="@+id/listview_item_book_textview_recent_chapter"
+        <Button
+            android:id="@+id/listview_item_book_button_recent_chapter"
+            style="?attr/buttonBarButtonStyle"
             android:layout_width="fill_parent"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
             android:layout_alignTop="@+id/listview_item_book_imageview_recent"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
             android:layout_toEndOf="@+id/listview_item_book_imageview_recent"
             android:layout_toRightOf="@+id/listview_item_book_imageview_recent"
             android:gravity="center_vertical"
+            android:minHeight="32dp"
             android:paddingLeft="4dp"
             android:text="@string/last_chapter"
-            android:textAlignment="gravity" />
+            android:textAlignment="gravity"
+            android:textSize="14sp" />
 
         <ImageView
             android:id="@+id/listview_item_book_imageview_new_chapter"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignBottom="@+id/listview_item_book_button_lastchapter"
+            android:layout_alignLeft="@+id/listview_item_book_name"
             android:layout_alignTop="@+id/listview_item_book_button_lastchapter"
             android:layout_below="@+id/listview_item_book_imageview_recent"
-            android:layout_toRightOf="@+id/listview_item_book_cover"
             android:src="@drawable/ic_book_new_chapter" />
 
         <Button
@@ -106,7 +112,7 @@
             style="?attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_alignLeft="@+id/listview_item_book_textview_recent_chapter"
+            android:layout_alignLeft="@+id/listview_item_book_button_recent_chapter"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/listview_item_book_imageview_recent"

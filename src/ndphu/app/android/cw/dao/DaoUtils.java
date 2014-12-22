@@ -3,8 +3,8 @@ package ndphu.app.android.cw.dao;
 import java.util.List;
 
 import ndphu.app.android.cw.model.Book;
+import ndphu.app.android.cw.model.CachedImage;
 import ndphu.app.android.cw.model.Chapter;
-import ndphu.app.android.cw.model.Page;
 import android.content.Context;
 
 /**
@@ -15,11 +15,13 @@ public class DaoUtils {
 	private static ChapterDao chapterDao;
 	private static BookDao bookDao;
 	private static PageDao pageDao;
+	private static CachedImageDao cachedImageDao;
 
 	public static void initialize(Context context) {
 		bookDao = new BookDao(context);
 		chapterDao = new ChapterDao(context);
 		pageDao = new PageDao(context);
+		cachedImageDao = new CachedImageDao(context);
 	}
 
 	public static Book saveOrUpdate(Book book) {
@@ -56,7 +58,7 @@ public class DaoUtils {
 
 	/**
 	 * Get book by id and all of its chapters
-	 * 
+	 *
 	 * @param bookId
 	 * @return
 	 */
@@ -85,7 +87,7 @@ public class DaoUtils {
 
 	/**
 	 * Get chapter by id
-	 * 
+	 *
 	 * @param chapterId
 	 * @return
 	 */
@@ -94,20 +96,42 @@ public class DaoUtils {
 	}
 
 	/**
-	 * Get chapter and all of their pages
-	 * 
-	 * @param chapterId
+	 * Check if the book is added to db or not
+	 *
+	 * @param id
 	 * @return
 	 */
-	public static Chapter getChapterAndPages(Long chapterId) {
-		Chapter chapter = getChapterById(chapterId);
-		List<Page> pages = pageDao.readAllWhere(Page.COL_CHAPTER_ID, chapterId + "");
-		chapter.setPages(pages);
-		return chapter;
-	}
-
 	private static boolean isValidId(Long id) {
 		return id != null && id > 0;
+	}
+
+	public static void saveOrUpdate(CachedImage cachedImage) {
+		if (isValidId(cachedImage.getId())) {
+			//update
+			cachedImageDao.update(cachedImage.getId(), cachedImage);
+		} else {
+			// save
+			cachedImageDao.create(cachedImage);
+		}
+	}
+
+	public static CachedImage getCachedImageByUrl(String url) {
+		List<CachedImage> cachedList = cachedImageDao.readAllWhere(CachedImage.COL_URL, url);
+		if (cachedList.size() == 0) {
+			return null;
+		} else {
+			return cachedList.get(0);
+		}
+
+	}
+
+	public static CachedImage getCachedImageByHasedUrl(String hasedUrl) {
+		List<CachedImage> cachedList = cachedImageDao.readAllWhere(CachedImage.COL_HASED_URL, hasedUrl);
+		if (cachedList.size() == 0) {
+			return null;
+		} else {
+			return cachedList.get(0);
+		}
 	}
 
 }

@@ -12,14 +12,13 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import ndphu.app.android.cw.app.MainApplication;
 import ndphu.app.android.cw.customview.ChapterNavigationBar;
 import ndphu.app.android.cw.customview.ChapterNavigationBar.ChapterNavigationBarListener;
 import ndphu.app.android.cw.customview.ExtendedViewPager;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator;
 import ndphu.app.android.cw.customview.LoadingProgressIndicator.LoadingProgressIndicatorListener;
 import ndphu.app.android.cw.customview.TouchImageView;
-import ndphu.app.android.cw.dao.BookDao;
-import ndphu.app.android.cw.dao.ChapterDao;
 import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.BookDetailsFragment;
 import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
@@ -277,7 +276,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getUrl()));
 		new InitCacheTask().execute(mCacheDir);
 		// Execute task
-		mCurrentChapter = DaoUtils.getChapterAndPages(mCurrentChapter.getId());
+		mCurrentChapter = DaoUtils.getChapterById(mCurrentChapter.getId());
 		if (mCurrentChapter.getPages().size() == 0) {
 			new LoadChapterDataTask().execute();
 		} else {
@@ -302,7 +301,9 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 
 	public boolean isLandScape() {
 		Configuration configuration = getResources().getConfiguration();
-		return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE;
+		boolean isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE;
+		MainApplication.isLandscape = isLandscape;
+		return isLandscape;
 	}
 
 	private void updateScaleTypeFromOrientation(final TouchImageView img) {

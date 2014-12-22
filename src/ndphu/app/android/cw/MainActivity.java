@@ -1,15 +1,12 @@
 package ndphu.app.android.cw;
 
-import java.util.List;
-
-import ndphu.app.android.cw.dao.BookDao;
-import ndphu.app.android.cw.dao.ChapterDao;
 import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
 import ndphu.app.android.cw.fragment.favorite.FavoriteFragment;
 import ndphu.app.android.cw.fragment.home.HomeFragment;
 import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
+import ndphu.app.android.cw.fragment.reading.VerticalReadingFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.fragment.settings.SettingsFragment;
@@ -19,6 +16,8 @@ import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
+import ndphu.app.android.cw.task.LoadChapterTask;
+import ndphu.app.android.cw.task.LoadChapterTask.LoadChapterTaskListener;
 import ndphu.app.android.cw.util.Utils;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -39,11 +38,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener,
-		OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener,
-		MenuItemCompat.OnActionExpandListener {
+public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
+		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
 	public static final String PREF_APP_THEME = "pref_app_theme";
+	// For intent
+	public static final String EXTRA_BOOK_ID = "book_id";
+	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
+
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
 	// private Toolbar mToolbar;
@@ -64,8 +66,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME,
-				R.style.AppBaseThemeLight);
+		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseThemeLight);
 		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -86,8 +87,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		mFragmentManager = getSupportFragmentManager();
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
-				.findFragmentById(R.id.fragment_drawer);
+		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		// Initialize DAO instances
 		// If there is not favorite book, set page to HOME, otherwise, set page
@@ -99,6 +99,52 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			mNavFragment.setSelection(1);
 		}
 
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent.hasExtra(EXTRA_BOOK_ID)) {
+			Book book = DaoUtils.getBookAndChapters(intent.getLongExtra(EXTRA_BOOK_ID, -1));
+			if (book != null) {
+				int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
+				Chapter chapter = book.getChapters().get(currentChapterIndex);
+				new LoadChapterTask(chapter.getId(), new LoadChapterTaskListener() {
+
+					private ProgressDialog mProgressDialog;
+
+					@Override
+					public void onErrorOccurred(Exception cause) {
+						mProgressDialog.dismiss();
+						new AlertDialog.Builder(MainActivity.this).setTitle("Error").setMessage(cause.getMessage())
+								.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.dismiss();
+									}
+								}).show();
+					}
+
+					@Override
+					public void onCompleted(Chapter result) {
+						mProgressDialog.dismiss();
+						VerticalReadingFragment fragment = new VerticalReadingFragment();
+						fragment.setChapter(result);
+						mFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(null).commit();
+					}
+
+					@Override
+					public void onBegin() {
+						mProgressDialog = new ProgressDialog(MainActivity.this);
+						mProgressDialog.setCancelable(false);
+						mProgressDialog.setMessage("Loading...");
+						mProgressDialog.show();
+					}
+				}).execute();
+
+			}
+		}
 	}
 
 	@Override
@@ -191,8 +237,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
-		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0
-				&& !selectedItem.bookUrl.trim().equals("0")) {
+		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
 			// showBookDetails(selectedItem);
 			openBookFromSearch(selectedItem);
 		}
@@ -241,14 +286,13 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onError(Exception ex) {
 		mProgressDialog.dismiss();
 		ex.printStackTrace();
-		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage())
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage()).setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				}).show();
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).show();
 	}
 
 	// Search...
@@ -256,10 +300,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public boolean onMenuItemActionExpand(MenuItem item) {
 		searchFragment = new SearchFragment();
 		searchFragment.setBookSearchListener(this);
-		mFragmentManager
-				.beginTransaction()
-				.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom,
-						R.anim.slide_out_top).replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
+		mFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_top)
+				.replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
 		return true;
 	}
 
