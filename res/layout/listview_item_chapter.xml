@@ -9,6 +9,7 @@
         android:id="@+id/listview_item_chapter_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/abc_secondary_text_material_dark"
         android:padding="8dp"
         android:textSize="18sp"
         android:textStyle="bold" />

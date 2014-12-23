@@ -19,7 +19,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:layout_marginLeft="@dimen/drawer_margin_right"
             android:background="@color/background_material_light" >
 
             <include
@@ -33,8 +32,10 @@
                 android:id="@+id/fragment_reading_listview_chapter"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:choiceMode="singleChoice"
-                android:layout_below="@+id/fragment_reading_vertical_toolbar" />
+                android:background="@color/background_material_dark"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_below="@+id/fragment_reading_vertical_toolbar"
+                android:choiceMode="singleChoice" />
         </RelativeLayout>
     </android.support.v4.widget.DrawerLayout>
 
