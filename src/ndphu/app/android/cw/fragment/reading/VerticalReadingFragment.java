@@ -221,6 +221,8 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 		mVerticalPager.setPageTransformer(false, new VerticalTransformer());
 		mVerticalPager.setOnPageChangeListener(new PageChangedListener());
 		mToolbar = (Toolbar) view.findViewById(R.id.fragment_reading_vertical_toolbar);
+		// Hide toolbar
+		mToolbar.setVisibility(View.GONE);
 		mToolbar.setNavigationIcon(R.drawable.ic_action_close);
 		mToolbar.setBackgroundColor(getActivity().getResources().getColor(R.color.background_translucent_darker));
 		mToolbar.setOnMenuItemClickListener(this);

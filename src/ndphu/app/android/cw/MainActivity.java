@@ -43,6 +43,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	// For intent
 	public static final String EXTRA_BOOK_ID = "book_id";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
+	public static final String FRAGMENT_READING_TAG = "reading";
 
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -64,6 +65,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		//getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseThemeLight);
 		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
@@ -90,10 +92,9 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			@Override
 			public void onBackStackChanged() {
 				if (mFragmentManager.getBackStackEntryCount() > 0) {
-					String bsEntryName = mFragmentManager.getBackStackEntryAt(0).getName();
-					if (!"reading".equals(bsEntryName)) {
-						mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-					}
+					mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+				} else {
+					mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 				}
 			}
 		});
@@ -125,8 +126,11 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				}
 				VerticalReadingFragment fragment = new VerticalReadingFragment();
 				fragment.setBook(book);
-				mFragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("reading").commit();
-				mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+				mFragmentManager.beginTransaction()
+					.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+					.replace(R.id.content_frame, fragment)
+					.addToBackStack(FRAGMENT_READING_TAG)
+					.commit();
 			}
 		}
 	}
