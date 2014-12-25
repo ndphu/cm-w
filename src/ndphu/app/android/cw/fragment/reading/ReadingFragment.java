@@ -31,6 +31,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -72,6 +73,7 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 	private ChapterAdapter mChapterAdapter;
 	private Toast mPageInfoToast;
 	private int mSwipeMode;
+	private MenuItem mMenuItemFavorite;
 
 	public void setBook(Book book) {
 		mBook = book;
@@ -150,10 +152,11 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 									if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
 										if (getActivity() != null) {
 											getActivity().runOnUiThread(new Runnable() {
-												
+
 												@Override
 												public void run() {
-													Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+													Toast.makeText(getActivity(), "Download next chapter finished",
+															Toast.LENGTH_SHORT).show();
 												}
 											});
 										}
@@ -165,10 +168,11 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 									if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
 										if (getActivity() != null) {
 											getActivity().runOnUiThread(new Runnable() {
-												
+
 												@Override
 												public void run() {
-													Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+													Toast.makeText(getActivity(), "Download next chapter finished",
+															Toast.LENGTH_SHORT).show();
 												}
 											});
 										}
@@ -179,7 +183,8 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 						} else {
 							if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
 								if (getActivity() != null) {
-									Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+									Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT)
+											.show();
 								}
 							}
 						}
@@ -227,7 +232,8 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 
 								@Override
 								public void run() {
-									TouchImageView viewToBeUpdated = (TouchImageView) (mVerticalViewPager != null ? mVerticalViewPager : mViewPager).findViewWithTag(hasedUrl);
+									TouchImageView viewToBeUpdated = (TouchImageView) (mVerticalViewPager != null ? mVerticalViewPager
+											: mViewPager).findViewWithTag(hasedUrl);
 									new ImageLoaderTask().execute(destination, hasedUrl,
 											new WeakReference<TouchImageView>(viewToBeUpdated));
 									mAdapter.notifyDataSetChanged();
@@ -264,24 +270,25 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 		SharedPreferences preferences = getActivity().getSharedPreferences(MainActivity.PREF_APP_SETTINGS,
 				Context.MODE_APPEND);
 		mSwipeMode = preferences.getInt(MainActivity.PREF_SWIPE_MODE, MainActivity.SWIPE_MODE_VERTICAL);
-		View view = null;
+		View view = inflater.inflate(R.layout.fragment_reading, container, false);
 		switch (mSwipeMode) {
 		case MainActivity.SWIPE_MODE_VERTICAL:
-			view = inflater.inflate(R.layout.fragment_reading_vertical, container, false);
-			mVerticalViewPager = (VerticalViewPager) view.findViewById(R.id.fragment_reading_viewpager_page_list);
+			mVerticalViewPager = (VerticalViewPager) view
+					.findViewById(R.id.fragment_reading_vertical_viewpager_page_list);
 			mVerticalViewPager.setOnPageChangeListener(new PageChangedListener());
 			mVerticalViewPager.setPageTransformer(false, new VerticalTransformer());
+			mVerticalViewPager.setVisibility(View.VISIBLE);
 			break;
 		case MainActivity.SWIPE_MODE_HORIZONTAL:
-			view = inflater.inflate(R.layout.fragment_reading_horizontal, container, false);
 			mViewPager = (ViewPager) view.findViewById(R.id.fragment_reading_viewpager_page_list);
 			mViewPager.setOnPageChangeListener(new PageChangedListener());
 			mViewPager.setPageTransformer(false, new HorizontalTransformer());
+			mViewPager.setVisibility(View.VISIBLE);
 			break;
 		}
 		mToolbar = (Toolbar) view.findViewById(R.id.fragment_reading_vertical_toolbar);
 		// Hide toolbar
-		mToolbar.setVisibility(View.GONE);
+
 		mToolbar.setNavigationIcon(R.drawable.ic_action_close);
 		mToolbar.setBackgroundColor(getActivity().getResources().getColor(R.color.background_translucent_darker));
 		mToolbar.setOnMenuItemClickListener(this);
@@ -292,8 +299,12 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 				getActivity().getSupportFragmentManager().popBackStack();
 			}
 		});
-		mToolbar.setTitle(mBook.getName());
+		// mToolbar.setTitle(mBook.getName());
 		mToolbar.setOnClickListener(this);
+		mToolbar.inflateMenu(R.menu.reading_menu);
+		mToolbar.setOnMenuItemClickListener(this);
+		mMenuItemFavorite = mToolbar.getMenu().findItem(R.id.action_add_to_favorite);
+		updateFavoriteIcon();
 		// Init drawer
 		mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -313,6 +324,14 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 		mChapterListView.setAdapter(mChapterAdapter);
 		mPageInfoToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
 		return view;
+	}
+
+	private void updateFavoriteIcon() {
+		if (mBook.getFavorite()) {
+			mMenuItemFavorite.setIcon(R.drawable.ic_favorite);
+		} else {
+			mMenuItemFavorite.setIcon(R.drawable.ic_not_favorite);
+		}
 	}
 
 	@Override
@@ -428,22 +447,15 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 	@Override
 	public boolean onMenuItemClick(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_show_chapters:
-			toggleDrawer();
+		case R.id.action_add_to_favorite:
+			mBook.setFavorite(!mBook.getFavorite());
+			DaoUtils.updateBook(mBook);
+			updateFavoriteIcon();
 			break;
-
 		default:
 			break;
 		}
 		return false;
-	}
-
-	private void toggleDrawer() {
-		if (mDrawerLayout.isDrawerOpen(GravityCompat.END)) {
-			mDrawerLayout.closeDrawer(GravityCompat.END);
-		} else {
-			mDrawerLayout.openDrawer(GravityCompat.END);
-		}
 	}
 
 	@Override

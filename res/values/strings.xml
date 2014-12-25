@@ -38,5 +38,7 @@
     <string name="swipe_mode">Swipe Mode</string>
     <string name="vertical">Vertical</string>
     <string name="horizontal">Horizontal</string>
+    <string name="download">Download</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

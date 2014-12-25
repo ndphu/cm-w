@@ -128,7 +128,11 @@ public class Manga24hProcessor implements BookProcessor {
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		try {
 			String url = String.format(SEARCH_URL_TEMPLATE, URLEncoder.encode(token, "UTF-8"));
-			String response = new String(Utils.getRawDataFromURL(url));
+			byte[] rawDataFromURL = Utils.getRawDataFromURL(url);
+			if (rawDataFromURL == null) {
+				return new ArrayList<SearchResult>();
+			}
+			String response = new String(rawDataFromURL);
 			JSONArray arr = new JSONArray(response);
 			for (int i = 0; i < arr.length(); ++i) {
 				JSONObject bookJson = arr.getJSONObject(i);
