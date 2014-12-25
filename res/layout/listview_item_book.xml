@@ -80,9 +80,8 @@
             android:layout_marginTop="16dp"
             android:src="@drawable/ic_history" />
 
-        <Button
-            android:id="@+id/listview_item_book_button_recent_chapter"
-            style="?attr/buttonBarButtonStyle"
+        <TextView
+            android:id="@+id/listview_item_book_textview_recent_chapter"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/listview_item_book_imageview_recent"
@@ -93,6 +92,7 @@
             android:gravity="center_vertical"
             android:minHeight="32dp"
             android:maxLines="2"
+            android:textColor="@color/light_blue_link"
             android:paddingLeft="4dp"
             android:text="@string/last_chapter"
             android:textAlignment="gravity"
@@ -102,18 +102,17 @@
             android:id="@+id/listview_item_book_imageview_new_chapter"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:layout_alignBottom="@+id/listview_item_book_button_lastchapter"
+            android:layout_alignBottom="@+id/listview_item_book_textview_lastchapter"
             android:layout_alignLeft="@+id/listview_item_book_name"
-            android:layout_alignTop="@+id/listview_item_book_button_lastchapter"
+            android:layout_alignTop="@+id/listview_item_book_textview_lastchapter"
             android:layout_below="@+id/listview_item_book_imageview_recent"
             android:src="@drawable/ic_book_new_chapter" />
 
-        <Button
-            android:id="@+id/listview_item_book_button_lastchapter"
-            style="?attr/buttonBarButtonStyle"
+        <TextView
+            android:id="@+id/listview_item_book_textview_lastchapter"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_alignLeft="@+id/listview_item_book_button_recent_chapter"
+            android:layout_alignLeft="@+id/listview_item_book_textview_recent_chapter"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/listview_item_book_imageview_recent"
@@ -123,7 +122,7 @@
             android:focusable="false"
             android:gravity="left|center_vertical"
             android:text="@string/last_chapter"
-            android:textColor="@color/light_blue_link"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="14sp" />
     </RelativeLayout>
 

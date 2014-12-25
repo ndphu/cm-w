@@ -15,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,8 +23,8 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 	TextView name;
 	ImageView cover;
 	ImageView menu;
-	Button recentChapter;
-	Button lastChapter;
+	TextView recentChapter;
+	TextView lastChapter;
 	WeakReference<Book> bookRef;
 	private WeakReference<BookViewHolderListener> mListener;
 
@@ -35,8 +34,8 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 		name = (TextView) itemView.findViewById(R.id.listview_item_book_name);
 		cover = (ImageView) itemView.findViewById(R.id.listview_item_book_cover);
 		menu = (ImageView) itemView.findViewById(R.id.listview_item_book_menu_button);
-		recentChapter = (Button) itemView.findViewById(R.id.listview_item_book_button_recent_chapter);
-		lastChapter = (Button) itemView.findViewById(R.id.listview_item_book_button_lastchapter);
+		recentChapter = (TextView) itemView.findViewById(R.id.listview_item_book_textview_recent_chapter);
+		lastChapter = (TextView) itemView.findViewById(R.id.listview_item_book_textview_lastchapter);
 		mListener = new WeakReference<BookViewHolder.BookViewHolderListener>(listener);
 		initialize();
 	}
@@ -79,13 +78,13 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 		if (bookRef != null && bookRef.get() != null) {
 			Book book = bookRef.get();
 			switch (v.getId()) {
-			case R.id.listview_item_book_button_lastchapter: {
+			case R.id.listview_item_book_textview_lastchapter: {
 				book.setCurrentChapter(0);
 				DaoUtils.updateBook(book);
 				openBook(v.getContext(), book);
 			}
 				break;
-			case R.id.listview_item_book_button_recent_chapter: {
+			case R.id.listview_item_book_textview_recent_chapter: {
 				if (book.getCurrentChapter() < 0) {
 					book.setCurrentChapter(book.getChapters().size() - 1);
 				}
@@ -109,6 +108,7 @@ public class BookViewHolder extends RecyclerView.ViewHolder implements View.OnCl
 		context.startActivity(intent);
 	}
 
+	@SuppressWarnings("unused")
 	private void startReadingActivity(Context context, Book book) {
 		Intent intent = new Intent(context, ReadingActivity.class);
 		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());

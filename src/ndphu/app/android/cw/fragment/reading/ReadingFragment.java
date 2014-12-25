@@ -3,7 +3,9 @@ package ndphu.app.android.cw.fragment.reading;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import ndphu.app.android.cw.MainActivity;
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.adapter.ChapterAdapter;
 import ndphu.app.android.cw.customview.TouchImageView;
@@ -23,11 +25,14 @@ import ndphu.app.android.cw.util.Utils;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -48,7 +53,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class VerticalReadingFragment extends Fragment implements OnMenuItemClickListener, DrawerListener, OnClickListener {
+public class ReadingFragment extends Fragment implements OnMenuItemClickListener, DrawerListener, OnClickListener {
 	private static final String TAG = PagesPagerAdapter.class.getSimpleName();
 	static final float MIN_SCALE = 0.7f;
 
@@ -60,11 +65,13 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 	private Chapter mChapter;
 	private List<Page> mPages = new ArrayList<Page>();
 	private Book mBook;
-	private VerticalViewPager mVerticalPager;
+	private ViewPager mViewPager;
+	private VerticalViewPager mVerticalViewPager;
 
 	private ListView mChapterListView;
 	private ChapterAdapter mChapterAdapter;
 	private Toast mPageInfoToast;
+	private int mSwipeMode;
 
 	public void setBook(Book book) {
 		mBook = book;
@@ -77,8 +84,8 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 			@Override
 			public void onErrorOccurred(Exception cause) {
 				mPd.dismiss();
-				new AlertDialog.Builder(getActivity()).setTitle("Error").setMessage(cause.getMessage()).setCancelable(false)
-						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				new AlertDialog.Builder(getActivity()).setTitle("Error").setMessage(cause.getMessage())
+						.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
@@ -103,8 +110,9 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 			}
 		});
 		loadChapterTask.execute();
-
-		if (mBook.getCurrentChapter() > 0) {
+		boolean allowPreLoad = getActivity().getSharedPreferences(MainActivity.PREF_APP_SETTINGS, Context.MODE_APPEND)
+				.getBoolean(MainActivity.PREF_PRELOAD_NEXT_CHAPTER, true);
+		if (allowPreLoad && mBook.getCurrentChapter() > 0) {
 			Long nextChapterId = mBook.getChapters().get(mBook.getCurrentChapter() - 1).getId();
 			LoadChapterTask loadNextChapter = new LoadChapterTask(nextChapterId, new LoadChapterTaskListener() {
 
@@ -116,6 +124,8 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 				@Override
 				public void onCompleted(Chapter result) {
 					Log.i(TAG, "Load next chapter completed");
+					final AtomicInteger pageCount = new AtomicInteger(result.getPages().size());
+					final AtomicInteger pageDownloadedCount = new AtomicInteger(0);
 					for (Page targetPage : result.getPages()) {
 						CachedImage cachedImage = DaoUtils.getCachedImageByHasedUrl(targetPage.getHashedUrl());
 						if (cachedImage == null) {
@@ -126,8 +136,8 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 							DaoUtils.saveOrUpdate(cachedImage);
 						}
 						if (cachedImage.getFilePath() == null) {
-							DownloadFileRunnable dfr = new DownloadFileRunnable(targetPage.getUrl(), getActivity().getExternalCacheDir().getAbsolutePath()
-									+ "/" + targetPage.getHashedUrl());
+							DownloadFileRunnable dfr = new DownloadFileRunnable(targetPage.getUrl(), getActivity()
+									.getExternalCacheDir().getAbsolutePath() + "/" + targetPage.getHashedUrl());
 							dfr.setDownloadFileListener(new DownloadFileListener() {
 
 								@Override
@@ -137,14 +147,41 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 									cachedImage.setFilePath(destination);
 									cachedImage.setFileSize(fileSize);
 									DaoUtils.saveOrUpdate(cachedImage);
+									if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
+										if (getActivity() != null) {
+											getActivity().runOnUiThread(new Runnable() {
+												
+												@Override
+												public void run() {
+													Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+												}
+											});
+										}
+									}
 								}
 
 								@Override
 								public void onFailed(String url, String destination, Exception ex) {
-
+									if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
+										if (getActivity() != null) {
+											getActivity().runOnUiThread(new Runnable() {
+												
+												@Override
+												public void run() {
+													Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+												}
+											});
+										}
+									}
 								}
 							});
 							TaskManager.getInstance().downloadFile(dfr);
+						} else {
+							if (pageCount.get() == pageDownloadedCount.incrementAndGet()) {
+								if (getActivity() != null) {
+									Toast.makeText(getActivity(), "Download next chapter finished", Toast.LENGTH_SHORT).show();
+								}
+							}
 						}
 					}
 				}
@@ -152,6 +189,9 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 				@Override
 				public void onBegin() {
 					Log.i(TAG, "Begin load next chapter...");
+					if (getActivity() != null) {
+						Toast.makeText(getActivity(), "Downloading next chapter...", Toast.LENGTH_SHORT).show();
+					}
 				}
 			});
 			loadNextChapter.execute();
@@ -172,8 +212,8 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 					DaoUtils.saveOrUpdate(cachedImage);
 				}
 				if (cachedImage.getFilePath() == null) {
-					DownloadFileRunnable dfr = new DownloadFileRunnable(targetPage.getUrl(), getActivity().getExternalCacheDir().getAbsolutePath() + "/"
-							+ targetPage.getHashedUrl());
+					DownloadFileRunnable dfr = new DownloadFileRunnable(targetPage.getUrl(), getActivity()
+							.getExternalCacheDir().getAbsolutePath() + "/" + targetPage.getHashedUrl());
 					dfr.setDownloadFileListener(new DownloadFileListener() {
 
 						@Override
@@ -187,8 +227,9 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 
 								@Override
 								public void run() {
-									TouchImageView viewToBeUpdated = (TouchImageView) mVerticalPager.findViewWithTag(hasedUrl);
-									new ImageLoaderTask().execute(destination, hasedUrl, new WeakReference<TouchImageView>(viewToBeUpdated));
+									TouchImageView viewToBeUpdated = (TouchImageView) (mVerticalViewPager != null ? mVerticalViewPager : mViewPager).findViewWithTag(hasedUrl);
+									new ImageLoaderTask().execute(destination, hasedUrl,
+											new WeakReference<TouchImageView>(viewToBeUpdated));
 									mAdapter.notifyDataSetChanged();
 								}
 							});
@@ -203,7 +244,11 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 				}
 				mPages.add(targetPage);
 				mAdapter = new PagesPagerAdapter();
-				mVerticalPager.setAdapter(mAdapter);
+				if (mVerticalViewPager != null) {
+					mVerticalViewPager.setAdapter(mAdapter);
+				} else if (mViewPager != null) {
+					mViewPager.setAdapter(mAdapter);
+				}
 			}
 		}
 	}
@@ -213,13 +258,27 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 		super.onCreate(savedInstanceState);
 	}
 
-	@SuppressLint("ShowToast")
+	@SuppressLint({ "ShowToast", "CutPasteId" })
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_reading_vertical, container, false);
-		mVerticalPager = (VerticalViewPager) view.findViewById(R.id.fragment_reading_vertical_viewpager_page_list);
-		mVerticalPager.setPageTransformer(false, new VerticalTransformer());
-		mVerticalPager.setOnPageChangeListener(new PageChangedListener());
+		SharedPreferences preferences = getActivity().getSharedPreferences(MainActivity.PREF_APP_SETTINGS,
+				Context.MODE_APPEND);
+		mSwipeMode = preferences.getInt(MainActivity.PREF_SWIPE_MODE, MainActivity.SWIPE_MODE_VERTICAL);
+		View view = null;
+		switch (mSwipeMode) {
+		case MainActivity.SWIPE_MODE_VERTICAL:
+			view = inflater.inflate(R.layout.fragment_reading_vertical, container, false);
+			mVerticalViewPager = (VerticalViewPager) view.findViewById(R.id.fragment_reading_viewpager_page_list);
+			mVerticalViewPager.setOnPageChangeListener(new PageChangedListener());
+			mVerticalViewPager.setPageTransformer(false, new VerticalTransformer());
+			break;
+		case MainActivity.SWIPE_MODE_HORIZONTAL:
+			view = inflater.inflate(R.layout.fragment_reading_horizontal, container, false);
+			mViewPager = (ViewPager) view.findViewById(R.id.fragment_reading_viewpager_page_list);
+			mViewPager.setOnPageChangeListener(new PageChangedListener());
+			mViewPager.setPageTransformer(false, new HorizontalTransformer());
+			break;
+		}
 		mToolbar = (Toolbar) view.findViewById(R.id.fragment_reading_vertical_toolbar);
 		// Hide toolbar
 		mToolbar.setVisibility(View.GONE);
@@ -301,15 +360,19 @@ public class VerticalReadingFragment extends Fragment implements OnMenuItemClick
 					img.setTag(hasedUrl);
 					CachedImage cachedFile = getCachedImage(hasedUrl);
 					if (cachedFile != null && cachedFile.getFilePath() != null) {
-						new ImageLoaderTask().execute(cachedFile.getFilePath(), hasedUrl, new WeakReference<TouchImageView>(img));
+						Log.e(TAG, "Cache hit!!!");
+						new ImageLoaderTask().execute(cachedFile.getFilePath(), hasedUrl,
+								new WeakReference<TouchImageView>(img));
 					}
-					container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+					container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.MATCH_PARENT);
 					return img;
 				} else {
 					final TouchImageView img = new TouchImageView(container.getContext());
 					img.setImageResource(R.drawable.ic_placeholder_loading);
 					img.setScaleType(ScaleType.CENTER_INSIDE);
-					container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+					container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT,
+							LinearLayout.LayoutParams.MATCH_PARENT);
 					return img;
 				}
 			}

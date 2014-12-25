@@ -6,7 +6,7 @@ import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSe
 import ndphu.app.android.cw.fragment.favorite.FavoriteFragment;
 import ndphu.app.android.cw.fragment.home.HomeFragment;
 import ndphu.app.android.cw.fragment.home.HomeFragment.HomeFragmentListener;
-import ndphu.app.android.cw.fragment.reading.VerticalReadingFragment;
+import ndphu.app.android.cw.fragment.reading.ReadingFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment;
 import ndphu.app.android.cw.fragment.search.SearchFragment.OnSearchItemSelected;
 import ndphu.app.android.cw.fragment.settings.SettingsFragment;
@@ -18,7 +18,6 @@ import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
 import ndphu.app.android.cw.util.Utils;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -39,11 +38,16 @@ import android.view.MenuItem;
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
 		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
-	public static final String PREF_APP_THEME = "pref_app_theme";
+	public static final String PREF_APP_SETTINGS = "pref_app_settings";
+	public static final String PREF_SWIPE_MODE = "pref_app_settings_swipe_mode";
+	public static final String PREF_PRELOAD_NEXT_CHAPTER = "pref_app_settings_preload_next_chapter";
+	
 	// For intent
 	public static final String EXTRA_BOOK_ID = "book_id";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
 	public static final String FRAGMENT_READING_TAG = "reading";
+	public static final int SWIPE_MODE_VERTICAL = 0;
+	public static final int SWIPE_MODE_HORIZONTAL = 1;
 
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -65,9 +69,6 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		//getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		int appTheme = getSharedPreferences(PREF_APP_THEME, Context.MODE_APPEND).getInt(PREF_APP_THEME, R.style.AppBaseThemeLight);
-		setTheme(appTheme);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -124,7 +125,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 					book.setCurrentChapter(currentChapterIndex);
 					DaoUtils.saveOrUpdate(book);
 				}
-				VerticalReadingFragment fragment = new VerticalReadingFragment();
+				ReadingFragment fragment = new ReadingFragment();
 				fragment.setBook(book);
 				mFragmentManager.beginTransaction()
 					.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
@@ -239,8 +240,17 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		Intent intent = new Intent(this, ReadingActivity.class);
 		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
 		startActivity(intent);
+		
 	}
-
+	
+	private void openBook(Book book) {
+		// startReadingActivity(context, book);
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
+		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, book.getCurrentChapter());
+		startActivity(intent);
+	}
+	
 	@Override
 	public void onHomePageItemSelected(HomePageItem item) {
 		String hasedUrl = Utils.getMD5Hash(item.bookUrl);
@@ -250,7 +260,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
 			new LoadBookTask(result, this).execute();
 		} else {
-			startReadingActivity(savedBook);
+			//startReadingActivity(savedBook);
+			openBook(savedBook);
 		}
 	}
 
@@ -267,7 +278,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onComplete(Book book) {
 		DaoUtils.saveOrUpdate(book);
 		mProgressDialog.dismiss();
-		startReadingActivity(book);
+		//startReadingActivity(book);
+		openBook(book);
 	}
 
 	@Override
