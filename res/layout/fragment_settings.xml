@@ -8,33 +8,103 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="4dp" >
 
         <android.support.v7.widget.CardView
-            android:id="@+id/fragment_settings_cardview_theme"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            app:cardCornerRadius="4dp" >
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="2dp" >
 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp" >
+                android:orientation="vertical" >
 
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/theme"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                    android:layout_margin="4dp"
+                    android:padding="8dp"
+                    android:text="@string/swipe_mode"
+                    android:textColor="@color/primary_text_default_material_light"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                <Spinner
-                    android:id="@+id/fragment_settings_spinner_theme"
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:background="@color/colorPrimary" >
+                </LinearLayout>
+
+                <RadioGroup
+                    android:id="@+id/fragment_settings_radiogroup_swipemode"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/themes"
-                    android:spinnerMode="dropdown" />
+                    android:layout_margin="4dp"
+                    android:gravity="right"
+                    android:orientation="horizontal"
+                    android:padding="4dp" >
+
+                    <RadioButton
+                        android:id="@+id/fragment_settings_radiobutton_swipemode_vertical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/vertical" />
+
+                    <RadioButton
+                        android:id="@+id/fragment_settings_radiobutton_swipemode_horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/horizontal" />
+                </RadioGroup>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:padding="4dp"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="2dp" >
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="4dp"
+                    android:padding="8dp"
+                    android:text="Preload Next Chapter"
+                    android:textColor="@color/primary_text_default_material_light"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:background="@color/colorPrimary" >
+                </LinearLayout>
+
+                <Switch
+                    android:id="@+id/fragment_settings_radiobutton_switch_preload_next_chapter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_margin="4dp"
+                    android:padding="4dp" />
             </LinearLayout>
         </android.support.v7.widget.CardView>
     </LinearLayout>

@@ -3,16 +3,16 @@ package ndphu.app.android.cw.fragment.reading;
 import android.support.v4.view.ViewPager.PageTransformer;
 import android.view.View;
 
-class VerticalTransformer implements PageTransformer {
+class HorizontalTransformer implements PageTransformer {
 	@Override
 	public void transformPage(View view, float position) {
-		int pageHeight = view.getHeight();
+		int pageWidth = view.getWidth();
 
 		if (position < -1) {
 			view.setAlpha(0);
 		} else if (position <= 0) {
 			view.setAlpha(1 + position);
-			view.setTranslationY(pageHeight * -position);
+			view.setTranslationX(pageWidth * -position);
 			float scaleFactor = ReadingFragment.MIN_SCALE + (1 - ReadingFragment.MIN_SCALE) * (1 - Math.abs(position));
 			view.setScaleX(scaleFactor);
 			view.setScaleY(scaleFactor);
