@@ -66,7 +66,6 @@ public class LoadChapterTask extends AsyncTask<Void, Void, Object> {
 
 	@Override
 	protected void onPostExecute(Object result) {
-		Log.i(TAG, "Load book completed");
 		if (mListener != null) {
 			if (result == null) {
 				mListener.onErrorOccurred(new RuntimeException("Unexpected Error"));

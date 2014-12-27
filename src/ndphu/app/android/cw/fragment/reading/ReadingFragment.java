@@ -31,7 +31,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -41,10 +40,12 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -74,6 +75,7 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 	private Toast mPageInfoToast;
 	private int mSwipeMode;
 	private MenuItem mMenuItemFavorite;
+	private boolean mEnableVolumnKey;
 
 	public void setBook(Book book) {
 		mBook = book;
@@ -267,9 +269,13 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 	@SuppressLint({ "ShowToast", "CutPasteId" })
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		if (mBook == null) {
+			return null;
+		}
 		SharedPreferences preferences = getActivity().getSharedPreferences(MainActivity.PREF_APP_SETTINGS,
 				Context.MODE_APPEND);
 		mSwipeMode = preferences.getInt(MainActivity.PREF_SWIPE_MODE, MainActivity.SWIPE_MODE_VERTICAL);
+		mEnableVolumnKey = preferences.getBoolean(MainActivity.PREF_ENABLE_VOLUMN_KEY, false);
 		View view = inflater.inflate(R.layout.fragment_reading, container, false);
 		switch (mSwipeMode) {
 		case MainActivity.SWIPE_MODE_VERTICAL:
@@ -318,12 +324,71 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 				mBook.setCurrentChapter(position);
 				DaoUtils.saveOrUpdate(mBook);
 				updateChapter();
+				mDrawerLayout.closeDrawers();
 			}
 		});
 		mChapterAdapter = new ChapterAdapter(getActivity(), 0);
 		mChapterListView.setAdapter(mChapterAdapter);
 		mPageInfoToast = Toast.makeText(getActivity(), "", Toast.LENGTH_SHORT);
+		// Handle key event
+		view.setFocusableInTouchMode(true);
+		view.setFocusable(true);
+		view.requestFocus();
+		view.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if (event.getAction() == KeyEvent.ACTION_DOWN) {
+					return mEnableVolumnKey;
+				}
+				switch (keyCode) {
+				case KeyEvent.KEYCODE_BACK:
+					if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+						mDrawerLayout.closeDrawers();
+					} else {
+						getActivity().getSupportFragmentManager().popBackStack();
+					}
+					return true;
+				case KeyEvent.KEYCODE_VOLUME_UP:
+					if (mEnableVolumnKey) {
+						goToPage(getCurrentPageIndex() - 1);
+						return true;
+					} else {
+						return false;
+					}
+				case KeyEvent.KEYCODE_VOLUME_DOWN:
+					if (mEnableVolumnKey) {
+						goToPage(getCurrentPageIndex() + 1);
+						return true;
+					} else {
+						return false;
+					}
+				default:
+					return true;
+				}
+			}
+		});
 		return view;
+	}
+
+	private int getCurrentPageIndex() {
+		if (mVerticalViewPager != null) {
+			return mVerticalViewPager.getCurrentItem();
+		} else if (mViewPager != null) {
+			return mViewPager.getCurrentItem();
+		} else {
+			return -1;
+		}
+	}
+
+	private void goToPage(int pageIndex) {
+		if (pageIndex < 0 || pageIndex > mPages.size()) {
+			return;
+		}
+		if (mVerticalViewPager != null) {
+			mVerticalViewPager.setCurrentItem(pageIndex, true);
+		} else if (mViewPager != null) {
+			mVerticalViewPager.setCurrentItem(pageIndex, true);
+		}
 	}
 
 	private void updateFavoriteIcon() {

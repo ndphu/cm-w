@@ -76,7 +76,7 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 		super.onPostExecute(result);
 		if (mListener.get() != null) {
 			if (result == null) {
-				mListener.get().onError(new Exception("Unknow"));
+				mListener.get().onError(new Exception("Unknown"));
 			}
 			if (result instanceof Book) {
 				mListener.get().onComplete((Book) result);
