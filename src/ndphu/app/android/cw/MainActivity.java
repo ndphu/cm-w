@@ -21,6 +21,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentManager.OnBackStackChangedListener;
@@ -34,6 +35,11 @@ import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
 
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
 		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
@@ -41,10 +47,13 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public static final String PREF_APP_SETTINGS = "pref_app_settings";
 	public static final String PREF_SWIPE_MODE = "pref_app_settings_swipe_mode";
 	public static final String PREF_PRELOAD_NEXT_CHAPTER = "pref_app_settings_preload_next_chapter";
+	public static final String PREF_ENABLE_VOLUMN_KEY = "pref_app_settings_enable_volumn_key";
 	
 	// For intent
 	public static final String EXTRA_BOOK_ID = "book_id";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
+	public static final String EXTRA_READING_STATE = "extra_reading_state";
+	
 	public static final String FRAGMENT_READING_TAG = "reading";
 	public static final int SWIPE_MODE_VERTICAL = 0;
 	public static final int SWIPE_MODE_HORIZONTAL = 1;
@@ -66,9 +75,11 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	// Favorite fragment
 	private FavoriteFragment mFavoriteFragment;
+	private long mReadingBookId = -1;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		// mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -79,19 +90,18 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		actionBar.setDisplayShowTitleEnabled(true);
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
 		// mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
 		// mToolbar, R.string.app_name, R.string.app_name);
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.app_name, R.string.app_name);
 		mDrawerToggle.setDrawerIndicatorEnabled(true);
 		mDrawerToggle.setHomeAsUpIndicator(R.drawable.ic_drawer);
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
-
 		mFragmentManager = getSupportFragmentManager();
 		mFragmentManager.addOnBackStackChangedListener(new OnBackStackChangedListener() {
 
 			@Override
 			public void onBackStackChanged() {
+				Log.i(TAG, "bs counter=" + mFragmentManager.getBackStackEntryCount());
 				if (mFragmentManager.getBackStackEntryCount() > 0) {
 					mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 				} else {
@@ -99,52 +109,138 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				}
 			}
 		});
-		NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
+		final NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
-		// Initialize DAO instances
-		// If there is not favorite book, set page to HOME, otherwise, set page
-		// to Favorite book
-		if (DaoUtils.getFavoriteBooks().size() == 0) {
-			// No favorite, go to HOME
-			mNavFragment.setSelection(0);
-		} else {
-			mNavFragment.setSelection(1);
-		}
-
+		new AsyncTask<Void, Void, Integer>() {
+			protected void onPreExecute() {
+				getSupportActionBar().hide();
+			};
+			
+			@Override
+			protected Integer doInBackground(Void... params) {
+				// Initialize DAO instances
+				DaoUtils.initialize(MainActivity.this);
+				// If there is not favorite book, set page to HOME, otherwise, set page
+				// to Favorite book
+				int initializePage = DaoUtils.getFavoriteBooks().size() == 0 ? 0 : 1;
+				return initializePage;
+			}
+			
+			protected void onPostExecute(Integer result) {
+				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+				final View splashScreen = findViewById(R.id.activity_main_splash_screen);
+				Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_out);
+				anim.setAnimationListener(new AnimationListener() {
+					
+					@Override
+					public void onAnimationStart(Animation animation) {
+					}
+					
+					@Override
+					public void onAnimationRepeat(Animation animation) {
+						
+					}
+					
+					@Override
+					public void onAnimationEnd(Animation animation) {
+						splashScreen.setVisibility(View.GONE);
+						getSupportActionBar().show();
+					}
+				});
+				splashScreen.setAnimation(anim);
+				mNavFragment.setSelection(result);
+				if (savedInstanceState != null && savedInstanceState.getBoolean(EXTRA_READING_STATE, false)) {
+					// application was killed by low memory on device, we need to restore the previous book
+					Log.i(TAG, "restoring reading state");
+					// force remove all reading fragments
+					mFragmentManager.popBackStack(FRAGMENT_READING_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+					Long bookId = savedInstanceState.getLong(EXTRA_BOOK_ID, 0);
+					final Book book = DaoUtils.getBookAndChapters(bookId);
+					if (book != null) {
+						new AlertDialog.Builder(MainActivity.this).setMessage("Do you want to continue from where you read?")
+							.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+								
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									Integer currentChapter = book.getCurrentChapter();
+									if (currentChapter == null || currentChapter < 0) {
+										currentChapter = book.getChapters().size() - 1;
+									}
+									openBook(book, currentChapter);
+								}
+							}).setNegativeButton("NO", new DialogInterface.OnClickListener() {
+								
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss();
+								}
+							}).create().show();
+					}
+				}
+			};
+			
+		}.execute();
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent.hasExtra(EXTRA_BOOK_ID)) {
-			final Book book = DaoUtils.getBookAndChapters(intent.getLongExtra(EXTRA_BOOK_ID, -1));
-			if (book != null) {
-				int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
-				if (currentChapterIndex < 0) {
-					currentChapterIndex = book.getChapters().size() - 1;
-					book.setCurrentChapter(currentChapterIndex);
-					DaoUtils.saveOrUpdate(book);
-				}
-				ReadingFragment fragment = new ReadingFragment();
-				fragment.setBook(book);
-				mFragmentManager.beginTransaction()
-					.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
-					.replace(R.id.content_frame, fragment)
-					.addToBackStack(FRAGMENT_READING_TAG)
-					.commit();
-			}
+			mReadingBookId  = intent.getLongExtra(EXTRA_BOOK_ID, -1);
+			final Book book = DaoUtils.getBookAndChapters(mReadingBookId );
+			int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
+			openBook(book, currentChapterIndex);
 		}
 	}
 
+	/**
+	 * Open book by create a ReadingFragment to show book content
+	 * @param book
+	 * @param currentChapterIndex
+	 */
+	private void openBook(Book book, int currentChapterIndex) {
+		if (book != null) {
+			if (currentChapterIndex < 0) {
+				currentChapterIndex = book.getChapters().size() - 1;
+				book.setCurrentChapter(currentChapterIndex);
+				DaoUtils.saveOrUpdate(book);
+			}
+			ReadingFragment fragment = new ReadingFragment();
+			fragment.setBook(book);
+			mFragmentManager.beginTransaction()
+				.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+				.replace(R.id.content_frame, fragment)
+				.addToBackStack(FRAGMENT_READING_TAG)
+				.commit();
+		}
+	}
+	
 	@Override
-	protected void onPostCreate(Bundle savedInstanceState) {
-		super.onPostCreate(savedInstanceState);
-		mDrawerToggle.syncState();
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Log.w(TAG, "Saving current state...");
+		int entryCount = mFragmentManager.getBackStackEntryCount();
+		Log.i(TAG, "Saving state reading.");
+		if (entryCount > 0) {
+			outState.putBoolean(MainActivity.EXTRA_READING_STATE, true);
+			if (mReadingBookId > 0) {
+				outState.putLong(EXTRA_BOOK_ID, mReadingBookId);
+			}
+		} else {
+			outState.putBoolean(MainActivity.EXTRA_READING_STATE, false);
+		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+	}
+	
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		mDrawerToggle.syncState();
 	}
 
 	@Override

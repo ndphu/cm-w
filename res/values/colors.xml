@@ -23,5 +23,6 @@
     <color name="listitem_foreground">#5CCC</color>
     <color name="blue_link">#0645AD</color>
     <color name="light_blue_link">#3366BB</color>
+    <color name="splash_screen_background">#FF9800</color>
 
 </resources>

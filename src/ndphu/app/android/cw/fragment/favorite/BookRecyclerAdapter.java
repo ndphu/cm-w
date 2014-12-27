@@ -7,7 +7,6 @@ import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.favorite.BookViewHolder.BookViewHolderListener;
 import ndphu.app.android.cw.model.Book;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -21,10 +20,21 @@ public class BookRecyclerAdapter extends Adapter<BookViewHolder> implements Book
 
 	private List<Book> mBooks;
 	private Context mContext;
-
+	private RefreshListener mListener;
+	
+	public static interface RefreshListener {
+		public void onRefreshStart();
+		
+		public void onRefreshEnd();
+	}
+	
 	public BookRecyclerAdapter(Context context) {
 		mContext = context;
 		mBooks = new ArrayList<Book>();
+	}
+	
+	public void setRefreshListener(RefreshListener listener) {
+		this.mListener = listener;
 	}
 
 	public void refresh() {
@@ -63,15 +73,13 @@ public class BookRecyclerAdapter extends Adapter<BookViewHolder> implements Book
 	}
 
 	private class LoadFavoriteTask extends AsyncTask<Void, Void, List<Book>> {
-		private ProgressDialog progressDialog;
 
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			progressDialog = new ProgressDialog(BookRecyclerAdapter.this.mContext);
-			progressDialog.setCancelable(false);
-			progressDialog.setMessage("Loading...");
-			progressDialog.show();
+			if (mListener != null) {
+				mListener.onRefreshStart();
+			}
 		}
 
 		@Override
@@ -85,7 +93,9 @@ public class BookRecyclerAdapter extends Adapter<BookViewHolder> implements Book
 			mBooks.clear();
 			mBooks.addAll(result);
 			notifyDataSetChanged();
-			progressDialog.dismiss();
+			if (mListener != null) {
+				mListener.onRefreshEnd();
+			}
 		}
 	}
 

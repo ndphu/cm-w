@@ -58,7 +58,7 @@ public class SettingsFragment extends Fragment {
 		});
 
 		final Switch switchPreloadNextChapter = (Switch) v
-				.findViewById(R.id.fragment_settings_radiobutton_switch_preload_next_chapter);
+				.findViewById(R.id.fragment_settings_switch_preload_next_chapter);
 		boolean preloadNextChap = appSettingsPref.getBoolean(MainActivity.PREF_PRELOAD_NEXT_CHAPTER, true);
 		switchPreloadNextChapter.setChecked(preloadNextChap);
 		switchPreloadNextChapter.post(new Runnable() {
@@ -71,6 +71,26 @@ public class SettingsFragment extends Fragment {
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 						Editor editor = appSettingsPref.edit();
 						editor.putBoolean(MainActivity.PREF_PRELOAD_NEXT_CHAPTER, isChecked);
+						editor.commit();
+					}
+				});
+			}
+		});
+		
+		final Switch swithEnableVolumnKey = (Switch) v
+				.findViewById(R.id.fragment_settings_switch_enable_volumn_key);
+		boolean useVolumnKey = appSettingsPref.getBoolean(MainActivity.PREF_ENABLE_VOLUMN_KEY, true);
+		swithEnableVolumnKey.setChecked(useVolumnKey);
+		swithEnableVolumnKey.post(new Runnable() {
+
+			@Override
+			public void run() {
+				swithEnableVolumnKey.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						Editor editor = appSettingsPref.edit();
+						editor.putBoolean(MainActivity.PREF_ENABLE_VOLUMN_KEY, isChecked);
 						editor.commit();
 					}
 				});

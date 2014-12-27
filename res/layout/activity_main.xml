@@ -2,12 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ndphu.app.android.cw.MainActivity">
+    tools:context="ndphu.app.android.cw.MainActivity" >
 
     <android.support.v4.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" >
 
         <!--
         <RelativeLayout
@@ -34,25 +34,49 @@
             android:id="@+id/content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-<!--  
+        <!--
         <RelativeLayout
             android:id="@+id/search_container"
             android:background="@color/background_material_dark"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"/>
-            -->
+        -->
         <!-- Nav drawer -->
 
         <fragment
             android:id="@+id/fragment_drawer"
             android:name="ndphu.app.android.cw.fragment.NavigationDrawerFragment"
             android:layout_width="match_parent"
-            android:layout_marginRight="@dimen/drawer_margin_right"
-            android:layout_marginEnd="@dimen/drawer_margin_right"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:layout_marginEnd="@dimen/drawer_margin_right"
+            android:layout_marginRight="@dimen/drawer_margin_right"
             tools:layout="@layout/fragment_navigation_drawer" />
     </android.support.v4.widget.DrawerLayout>
+
+    <RelativeLayout
+        android:id="@+id/activity_main_splash_screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/splash_screen_background" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/loading"
+            android:textColor="@color/abc_primary_text_material_dark"
+            android:textSize="20sp" android:id="@+id/activity_main_splash_screen_textview_loading" />
+
+        <ProgressBar
+            android:id="@+id/activity_main_splash_screen_progressbar_loading"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@+id/activity_main_splash_screen_textview_loading"
+            android:layout_centerHorizontal="true" />
+        
+    </RelativeLayout>
 
 </RelativeLayout>

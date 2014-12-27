@@ -17,6 +17,5 @@ public class MainApplication extends Application {
 		super.onCreate();
 		SQLiteSimple databaseSimple = new SQLiteSimple(this, DATABASE_VERSION);
 		databaseSimple.create(Book.class, Chapter.class, Page.class, CachedImage.class);
-		DaoUtils.initialize(this);
 	}
 }

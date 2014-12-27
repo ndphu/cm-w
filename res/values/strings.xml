@@ -40,5 +40,6 @@
     <string name="horizontal">Horizontal</string>
     <string name="download">Download</string>
     <string name="refresh">Refresh</string>
+    <string name="loading">LOADING</string>
 
 </resources>
