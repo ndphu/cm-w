@@ -33,13 +33,14 @@ public class ImageLoaderTask extends AsyncTask<Object, Void, Object[]> {
 	@Override
 	protected Object[] doInBackground(Object... params) {
 		String filePath = (String) params[0];
-
+		Log.d(TAG, "Image file: " + filePath);
 		WeakReference<TouchImageView> imageView = (WeakReference<TouchImageView>) params[2];
 		if (imageView.get() == null) {
 			return null;
 		}
 		// Fix out of memory error
-		Display display = ((WindowManager) imageView.get().getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		Display display = ((WindowManager) imageView.get().getContext().getSystemService(Context.WINDOW_SERVICE))
+				.getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
 		int screenWidth = size.x;
@@ -49,9 +50,11 @@ public class ImageLoaderTask extends AsyncTask<Object, Void, Object[]> {
 			result = BitmapFactory.decodeFile(filePath);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			Log.e(TAG, "Regular bitmap decoding process failed for image at " + filePath + ". Retry with owned decoding process.");
+			Log.e(TAG, "Regular bitmap decoding process failed for image at " + filePath
+					+ ". Retry with owned decoding process.");
 			try {
-				result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), screenWidth, screeHeight);
+				result = Utils.decodeBitmap(IOUtils.toByteArray(new FileInputStream(filePath)), screenWidth,
+						screeHeight);
 			} catch (IOException e) {
 				e.printStackTrace();
 				Log.e(TAG, "Owned decoding process failed.");

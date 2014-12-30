@@ -41,5 +41,7 @@
     <string name="download">Download</string>
     <string name="refresh">Refresh</string>
     <string name="loading">LOADING</string>
+    <string name="load_next_chapter_completed">Next chapter is ready</string>
+    <string name="perparing_next_chapter">Perparing next chapter...</string>
 
 </resources>

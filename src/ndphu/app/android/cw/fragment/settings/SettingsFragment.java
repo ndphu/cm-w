@@ -76,21 +76,39 @@ public class SettingsFragment extends Fragment {
 				});
 			}
 		});
-		
-		final Switch swithEnableVolumnKey = (Switch) v
-				.findViewById(R.id.fragment_settings_switch_enable_volumn_key);
+
+		final Switch switchEnableVolumnKey = (Switch) v.findViewById(R.id.fragment_settings_switch_enable_volumn_key);
 		boolean useVolumnKey = appSettingsPref.getBoolean(MainActivity.PREF_ENABLE_VOLUMN_KEY, true);
-		swithEnableVolumnKey.setChecked(useVolumnKey);
-		swithEnableVolumnKey.post(new Runnable() {
+		switchEnableVolumnKey.setChecked(useVolumnKey);
+		switchEnableVolumnKey.post(new Runnable() {
 
 			@Override
 			public void run() {
-				swithEnableVolumnKey.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+				switchEnableVolumnKey.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 						Editor editor = appSettingsPref.edit();
 						editor.putBoolean(MainActivity.PREF_ENABLE_VOLUMN_KEY, isChecked);
+						editor.commit();
+					}
+				});
+			}
+		});
+
+		final Switch switchEnableCachePages = (Switch) v.findViewById(R.id.fragment_settings_switch_enable_cache_pages);
+		boolean cachePages = appSettingsPref.getBoolean(MainActivity.PREF_ENABLE_CACHE_PAGES, true);
+		switchEnableCachePages.setChecked(cachePages);
+		switchEnableCachePages.post(new Runnable() {
+
+			@Override
+			public void run() {
+				switchEnableCachePages.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						Editor editor = appSettingsPref.edit();
+						editor.putBoolean(MainActivity.PREF_ENABLE_CACHE_PAGES, isChecked);
 						editor.commit();
 					}
 				});

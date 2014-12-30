@@ -5,6 +5,7 @@ import java.util.List;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.CachedImage;
 import ndphu.app.android.cw.model.Chapter;
+import ndphu.app.android.cw.model.Page;
 import android.content.Context;
 
 /**
@@ -81,10 +82,21 @@ public class DaoUtils {
 		if (isValidId(chapter.getId())) {
 			// update
 			chapterDao.update(chapter.getId(), chapter);
+			for (Page p : pageDao.readAllWhere(Page.COL_CHAPTER_ID, chapter.getId() + "")) {
+				pageDao.delete(p.getId());
+			}
+			for (Page p : chapter.getPages()) {
+				p.setChapterId(chapter.getId());
+				pageDao.create(p);
+			}
 		} else {
 			// create
 			long newId = chapterDao.create(chapter);
 			chapter.setId(newId);
+			for (Page p : chapter.getPages()) {
+				p.setChapterId(newId);
+				pageDao.create(p);
+			}
 		}
 		return chapter;
 	}
@@ -97,6 +109,11 @@ public class DaoUtils {
 	 */
 	public static Chapter getChapterById(Long chapterId) {
 		return chapterDao.read(chapterId);
+	}
+
+	public static void loadPagesToChapter(Chapter chapter) {
+		chapter.getPages().clear();
+		chapter.getPages().addAll(pageDao.readAllWhere(Page.COL_CHAPTER_ID, chapter.getId() + ""));
 	}
 
 	/**

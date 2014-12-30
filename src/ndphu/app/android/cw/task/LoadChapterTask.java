@@ -11,12 +11,12 @@ import ndphu.app.android.cw.io.processor.Manga24hProcessor;
 import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.Page;
 import android.os.AsyncTask;
-import android.util.Log;
 
 public class LoadChapterTask extends AsyncTask<Void, Void, Object> {
 	private static final String TAG = LoadChapterTask.class.getSimpleName();
 	private Long mChapterId;
 	private Chapter mChapter;
+	private boolean mLoadFromDB;
 
 	LoadChapterTaskListener mListener;
 
@@ -24,10 +24,11 @@ public class LoadChapterTask extends AsyncTask<Void, Void, Object> {
 
 	}
 
-	public LoadChapterTask(Long chapterId, LoadChapterTaskListener listener) {
+	public LoadChapterTask(Long chapterId, LoadChapterTaskListener listener, boolean loadFromDB) {
 		mChapterId = chapterId;
 		mChapter = DaoUtils.getChapterById(mChapterId);
 		mListener = listener;
+		mLoadFromDB = loadFromDB;
 	}
 
 	@Override
@@ -40,6 +41,12 @@ public class LoadChapterTask extends AsyncTask<Void, Void, Object> {
 
 	@Override
 	protected Object doInBackground(Void... params) {
+		if (mLoadFromDB) {
+			DaoUtils.loadPagesToChapter(mChapter);
+			if (mChapter.getPages().size() > 0) {
+				return mChapter;
+			}
+		}
 		BookProcessor processor = null;
 		switch (mChapter.getSource()) {
 		case MANGA24H:
