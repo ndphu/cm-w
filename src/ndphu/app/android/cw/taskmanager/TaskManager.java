@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import ndphu.app.android.cw.runable.DownloadFileRunnable;
+import android.os.AsyncTask;
 
 public class TaskManager implements RejectedExecutionHandler {
 	private static final Object LOCK = new Object();
@@ -15,9 +16,8 @@ public class TaskManager implements RejectedExecutionHandler {
 	private static TaskManager instance = null;
 	private int mCorePoolSize = 8;
 	private int mMaximumPoolSize = 24;
-	private long mKeepAlive = 10000;
+	private long mKeepAlive = 1000000;
 	private ThreadPoolExecutor mExecutor;
-
 
 	private TaskManager() {
 		mExecutor = new ThreadPoolExecutor(mCorePoolSize, mMaximumPoolSize, mKeepAlive, TimeUnit.MILLISECONDS,
@@ -40,6 +40,10 @@ public class TaskManager implements RejectedExecutionHandler {
 	@Override
 	public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 
+	}
+
+	public void executeAsyncTask(AsyncTask task, Object... params) {
+		task.executeOnExecutor(mExecutor, params);
 	}
 
 }

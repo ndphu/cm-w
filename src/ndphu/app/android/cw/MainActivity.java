@@ -41,19 +41,22 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
-public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener, OnNavigationItemSelected, OnSearchItemSelected,
-		HomeFragmentListener, LoadBookListener, MenuItemCompat.OnActionExpandListener {
+public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener,
+		OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener,
+		MenuItemCompat.OnActionExpandListener {
 	protected static final String TAG = MainActivity.class.getSimpleName();
 	public static final String PREF_APP_SETTINGS = "pref_app_settings";
 	public static final String PREF_SWIPE_MODE = "pref_app_settings_swipe_mode";
 	public static final String PREF_PRELOAD_NEXT_CHAPTER = "pref_app_settings_preload_next_chapter";
 	public static final String PREF_ENABLE_VOLUMN_KEY = "pref_app_settings_enable_volumn_key";
-	
+	public static final String PREF_ENABLE_CACHE_CHAPTERS = "pref_app_settings_enable_cache_chapters";
+	public static final String PREF_ENABLE_CACHE_PAGES = "pref_app_settings_enable_cache_pages";
+
 	// For intent
 	public static final String EXTRA_BOOK_ID = "book_id";
 	public static final String EXTRA_CHAPTER_INDEX = "chapter_index";
 	public static final String EXTRA_READING_STATE = "extra_reading_state";
-	
+
 	public static final String FRAGMENT_READING_TAG = "reading";
 	public static final int SWIPE_MODE_VERTICAL = 0;
 	public static final int SWIPE_MODE_HORIZONTAL = 1;
@@ -109,38 +112,40 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				}
 			}
 		});
-		final NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager.findFragmentById(R.id.fragment_drawer);
+		final NavigationDrawerFragment mNavFragment = (NavigationDrawerFragment) mFragmentManager
+				.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		new AsyncTask<Void, Void, Integer>() {
 			protected void onPreExecute() {
 				getSupportActionBar().hide();
 			};
-			
+
 			@Override
 			protected Integer doInBackground(Void... params) {
 				// Initialize DAO instances
 				DaoUtils.initialize(MainActivity.this);
-				// If there is not favorite book, set page to HOME, otherwise, set page
+				// If there is not favorite book, set page to HOME, otherwise,
+				// set page
 				// to Favorite book
 				int initializePage = DaoUtils.getFavoriteBooks().size() == 0 ? 0 : 1;
 				return initializePage;
 			}
-			
+
 			protected void onPostExecute(Integer result) {
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 				final View splashScreen = findViewById(R.id.activity_main_splash_screen);
 				Animation anim = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_out);
 				anim.setAnimationListener(new AnimationListener() {
-					
+
 					@Override
 					public void onAnimationStart(Animation animation) {
 					}
-					
+
 					@Override
 					public void onAnimationRepeat(Animation animation) {
-						
+
 					}
-					
+
 					@Override
 					public void onAnimationEnd(Animation animation) {
 						splashScreen.setVisibility(View.GONE);
@@ -150,35 +155,37 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				splashScreen.setAnimation(anim);
 				mNavFragment.setSelection(result);
 				if (savedInstanceState != null && savedInstanceState.getBoolean(EXTRA_READING_STATE, false)) {
-					// application was killed by low memory on device, we need to restore the previous book
+					// application was killed by low memory on device, we need
+					// to restore the previous book
 					Log.i(TAG, "restoring reading state");
 					// force remove all reading fragments
 					mFragmentManager.popBackStack(FRAGMENT_READING_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 					Long bookId = savedInstanceState.getLong(EXTRA_BOOK_ID, 0);
 					final Book book = DaoUtils.getBookAndChapters(bookId);
 					if (book != null) {
-						new AlertDialog.Builder(MainActivity.this).setMessage("Do you want to continue from where you read?")
-							.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-								
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									Integer currentChapter = book.getCurrentChapter();
-									if (currentChapter == null || currentChapter < 0) {
-										currentChapter = book.getChapters().size() - 1;
+						new AlertDialog.Builder(MainActivity.this)
+								.setMessage("Do you want to continue from where you read?")
+								.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										Integer currentChapter = book.getCurrentChapter();
+										if (currentChapter == null || currentChapter < 0) {
+											currentChapter = book.getChapters().size() - 1;
+										}
+										openBook(book, currentChapter);
 									}
-									openBook(book, currentChapter);
-								}
-							}).setNegativeButton("NO", new DialogInterface.OnClickListener() {
-								
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
-								}
-							}).create().show();
+								}).setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.dismiss();
+									}
+								}).create().show();
 					}
 				}
 			};
-			
+
 		}.execute();
 	}
 
@@ -186,8 +193,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent.hasExtra(EXTRA_BOOK_ID)) {
-			mReadingBookId  = intent.getLongExtra(EXTRA_BOOK_ID, -1);
-			final Book book = DaoUtils.getBookAndChapters(mReadingBookId );
+			mReadingBookId = intent.getLongExtra(EXTRA_BOOK_ID, -1);
+			final Book book = DaoUtils.getBookAndChapters(mReadingBookId);
 			int currentChapterIndex = intent.getIntExtra(EXTRA_CHAPTER_INDEX, book.getChapters().size() - 1);
 			openBook(book, currentChapterIndex);
 		}
@@ -195,6 +202,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	/**
 	 * Open book by create a ReadingFragment to show book content
+	 * 
 	 * @param book
 	 * @param currentChapterIndex
 	 */
@@ -207,14 +215,14 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			}
 			ReadingFragment fragment = new ReadingFragment();
 			fragment.setBook(book);
-			mFragmentManager.beginTransaction()
-				.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
-				.replace(R.id.content_frame, fragment)
-				.addToBackStack(FRAGMENT_READING_TAG)
-				.commit();
+			mFragmentManager
+					.beginTransaction()
+					.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left,
+							R.anim.slide_out_right).replace(R.id.content_frame, fragment)
+					.addToBackStack(FRAGMENT_READING_TAG).commit();
 		}
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -234,9 +242,9 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
+
 	}
-	
+
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
@@ -322,7 +330,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	public void onSearchItemSelected(SearchResult selectedItem) {
-		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0 && !selectedItem.bookUrl.trim().equals("0")) {
+		if (selectedItem.bookUrl != null && selectedItem.bookUrl.trim().length() > 0
+				&& !selectedItem.bookUrl.trim().equals("0")) {
 			// showBookDetails(selectedItem);
 			openBookFromSearch(selectedItem);
 		}
@@ -336,9 +345,9 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		Intent intent = new Intent(this, ReadingActivity.class);
 		intent.putExtra(ReadingActivity.EXTRA_BOOK_ID, book.getId());
 		startActivity(intent);
-		
+
 	}
-	
+
 	private void openBook(Book book) {
 		// startReadingActivity(context, book);
 		Intent intent = new Intent(this, MainActivity.class);
@@ -346,7 +355,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		intent.putExtra(ReadingActivity.EXTRA_CHAPTER_INDEX, book.getCurrentChapter());
 		startActivity(intent);
 	}
-	
+
 	@Override
 	public void onHomePageItemSelected(HomePageItem item) {
 		String hasedUrl = Utils.getMD5Hash(item.bookUrl);
@@ -356,7 +365,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 			SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
 			new LoadBookTask(result, this).execute();
 		} else {
-			//startReadingActivity(savedBook);
+			// startReadingActivity(savedBook);
 			openBook(savedBook);
 		}
 	}
@@ -374,7 +383,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onComplete(Book book) {
 		DaoUtils.saveOrUpdate(book);
 		mProgressDialog.dismiss();
-		//startReadingActivity(book);
+		// startReadingActivity(book);
 		openBook(book);
 	}
 
@@ -382,13 +391,14 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public void onError(Exception ex) {
 		mProgressDialog.dismiss();
 		ex.printStackTrace();
-		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage()).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		new AlertDialog.Builder(this).setTitle("Error").setMessage(ex.getMessage())
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).show();
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).show();
 	}
 
 	// Search...
@@ -396,8 +406,10 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	public boolean onMenuItemActionExpand(MenuItem item) {
 		searchFragment = new SearchFragment();
 		searchFragment.setBookSearchListener(this);
-		mFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom, R.anim.slide_out_top)
-				.replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
+		mFragmentManager
+				.beginTransaction()
+				.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom,
+						R.anim.slide_out_top).replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
 		return true;
 	}
 
