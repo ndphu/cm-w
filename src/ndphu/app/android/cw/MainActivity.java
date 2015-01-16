@@ -1,5 +1,7 @@
 package ndphu.app.android.cw;
 
+import java.util.List;
+
 import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment;
 import ndphu.app.android.cw.fragment.NavigationDrawerFragment.OnNavigationItemSelected;
@@ -15,6 +17,8 @@ import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.task.LoadBookTask;
 import ndphu.app.android.cw.task.LoadBookTask.LoadBookListener;
+import ndphu.app.android.cw.task.SearchBook;
+import ndphu.app.android.cw.task.SearchBook.SearchBookTaskListener;
 import ndphu.app.android.cw.util.Utils;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -31,7 +35,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.SearchView;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +46,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener,
 		OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener,
@@ -404,18 +412,25 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	// Search...
 	@Override
 	public boolean onMenuItemActionExpand(MenuItem item) {
-		searchFragment = new SearchFragment();
-		searchFragment.setBookSearchListener(this);
-		mFragmentManager
-				.beginTransaction()
-				.setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom, R.anim.slide_in_bottom,
-						R.anim.slide_out_top).replace(R.id.content_frame, searchFragment).addToBackStack(null).commit();
+		// searchFragment = new SearchFragment();
+		// searchFragment.setBookSearchListener(this);
+		// mFragmentManager
+		// .beginTransaction()
+		// .setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_bottom,
+		// R.anim.slide_in_bottom,
+		// R.anim.slide_out_top).replace(R.id.content_frame,
+		// searchFragment).addToBackStack(null).commit();
+		mSearchView = (SearchView) item.getActionView();
 		return true;
 	}
 
 	@Override
 	public boolean onMenuItemActionCollapse(MenuItem item) {
-		mFragmentManager.popBackStack();
+		try {
+			mFragmentManager.popBackStack();
+		} catch (Exception ex) {
+
+		}
 		return true;
 	}
 
@@ -424,7 +439,8 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		if (text.length() < 2) {
 			return false;
 		}
-		searchFragment.executeSearch(text);
+		// searchFragment.executeSearch(text);
+
 		return true;
 	}
 
@@ -433,7 +449,42 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		if (text.length() < 2) {
 			return false;
 		}
-		searchFragment.executeSearch(text);
+		// searchFragment.executeSearch(text);
+		SearchBook task = new SearchBook(text);
+		task.setSearchBookTaskListener(new SearchBookTaskListener() {
+
+			@Override
+			public void onStartSearching(String searchString) {
+
+			}
+
+			@Override
+			public void onError(Exception ex) {
+
+			}
+
+			@Override
+			public void onComplete(final List<SearchResult> result) {
+				PopupMenu menu = new PopupMenu(MainActivity.this, mSearchView);
+				for (SearchResult searchResult : result) {
+					TextView tv = new TextView(MainActivity.this);
+					tv.setText(Html.fromHtml(searchResult.bookName));
+					menu.getMenu().add(tv.getText());
+				}
+				menu.show();
+				menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+					@Override
+					public boolean onMenuItemClick(MenuItem item) {
+						int order = item.getOrder();
+						SearchResult selectedResult = result.get(order);
+						Toast.makeText(MainActivity.this, selectedResult.bookUrl, Toast.LENGTH_SHORT).show();
+						return false;
+					}
+				});
+			}
+		});
+		task.execute();
 		return true;
 	}
 }

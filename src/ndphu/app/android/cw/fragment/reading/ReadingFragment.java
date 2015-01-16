@@ -83,6 +83,11 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 	}
 
 	private void updateChapter() {
+		int chapterIdx = mBook.getCurrentChapter();
+		if (chapterIdx < 0) {
+			chapterIdx = 0;
+			mBook.setCurrentChapter(chapterIdx);
+		}
 		Long chapterId = mBook.getChapters().get(mBook.getCurrentChapter()).getId();
 		boolean enableSavePages = getActivity().getSharedPreferences(MainActivity.PREF_APP_SETTINGS,
 				Context.MODE_APPEND).getBoolean(MainActivity.PREF_ENABLE_CACHE_PAGES, true);
@@ -242,6 +247,9 @@ public class ReadingFragment extends Fragment implements OnMenuItemClickListener
 						public void onCompleted(final String url, final String destination, final long fileSize) {
 							final String hasedUrl = Utils.getMD5Hash(url);
 							CachedImage cachedImage = DaoUtils.getCachedImageByHasedUrl(hasedUrl);
+							if (cachedImage == null) {
+								cachedImage = new CachedImage();
+							}
 							cachedImage.setFilePath(destination);
 							cachedImage.setFileSize(fileSize);
 							DaoUtils.saveOrUpdate(cachedImage);
