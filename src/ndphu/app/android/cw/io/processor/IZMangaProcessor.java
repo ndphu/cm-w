@@ -69,6 +69,8 @@ public class IZMangaProcessor implements BookProcessor {
 	@Override
 	public List<SearchResult> search(String token) {
 		final List<SearchResult> result = new ArrayList<SearchResult>();
+		Log.i(TAG, "Search token: " + token);
+		long startTime = System.currentTimeMillis();
 		try {
 			String searchString = String.format(SEARCH_URL, URLEncoder.encode(token, "UTF-8"));
 			String data = IOUtils.toString(URI.create(searchString));
@@ -88,6 +90,7 @@ public class IZMangaProcessor implements BookProcessor {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		Log.i(TAG, "Completed in: " + (System.currentTimeMillis() - startTime) + "");
 		return result;
 	}
 
@@ -115,8 +118,8 @@ public class IZMangaProcessor implements BookProcessor {
 	public Book loadBook(String bookUrl, boolean complete) throws Exception {
 		Log.d(TAG, "Load book: " + bookUrl);
 		final Book book = new Book();
-        book.setBookUrl(bookUrl);
-        book.setSource(Source.IZMANGA);
+		book.setBookUrl(bookUrl);
+		book.setSource(Source.IZMANGA);
 		final StringBuilder content = new StringBuilder();
 		BasicParser.processLineByLine(bookUrl, new LineHandler() {
 

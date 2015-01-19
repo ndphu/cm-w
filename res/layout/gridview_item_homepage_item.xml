@@ -57,7 +57,7 @@
                 android:contentDescription="@string/more"
                 android:focusable="false"
                 android:padding="4dp"
-                android:src="@drawable/ic_3dot_menu_light" />
+                android:src="@drawable/ic_action_over_flow" />
 
             <ImageView
                 android:id="@+id/gridview_item_homepage_item_imageview_favorite"

@@ -47,7 +47,6 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity implements SearchView.OnQueryTextListener,
 		OnNavigationItemSelected, OnSearchItemSelected, HomeFragmentListener, LoadBookListener,
@@ -78,6 +77,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	private Menu mMenu;
 	private MenuItem mSearchMenuItem;
 	private SearchView mSearchView;
+	private PopupMenu searchPopupMenu;
 
 	// Home fragment
 	private HomeFragment mHomeFragment;
@@ -87,6 +87,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	// Favorite fragment
 	private FavoriteFragment mFavoriteFragment;
 	private long mReadingBookId = -1;
+	private SearchBook mSearchBookTask;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -436,55 +437,61 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	@Override
 	public boolean onQueryTextSubmit(String text) {
-		if (text.length() < 2) {
-			return false;
-		}
-		// searchFragment.executeSearch(text);
-
 		return true;
 	}
 
 	@Override
 	public boolean onQueryTextChange(String text) {
-		if (text.length() < 2) {
-			return false;
+		if (mSearchBookTask != null) {
+			mSearchBookTask.cancelSearch();
 		}
-		// searchFragment.executeSearch(text);
-		SearchBook task = new SearchBook(text);
-		task.setSearchBookTaskListener(new SearchBookTaskListener() {
-
-			@Override
-			public void onStartSearching(String searchString) {
-
+		if (searchPopupMenu != null) {
+			try {
+				searchPopupMenu.dismiss();
+			} catch (Exception ex) {
+				// ignore
 			}
+		}
+		if (text.length() < 3) {
+			return false;
+		} else {
+			mSearchBookTask = new SearchBook(text);
+			mSearchBookTask.setSearchBookTaskListener(new SearchBookTaskListener() {
 
-			@Override
-			public void onError(Exception ex) {
+				@Override
+				public void onStartSearching(String searchString) {
 
-			}
-
-			@Override
-			public void onComplete(final List<SearchResult> result) {
-				PopupMenu menu = new PopupMenu(MainActivity.this, mSearchView);
-				for (SearchResult searchResult : result) {
-					TextView tv = new TextView(MainActivity.this);
-					tv.setText(Html.fromHtml(searchResult.bookName));
-					menu.getMenu().add(tv.getText());
 				}
-				menu.show();
-				menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 
-					@Override
-					public boolean onMenuItemClick(MenuItem item) {
-						int order = item.getOrder();
-						SearchResult selectedResult = result.get(order);
-						Toast.makeText(MainActivity.this, selectedResult.bookUrl, Toast.LENGTH_SHORT).show();
-						return false;
+				@Override
+				public void onError(Exception ex) {
+					ex.printStackTrace();
+				}
+
+				@Override
+				public void onComplete(final List<SearchResult> result) {
+					searchPopupMenu = new PopupMenu(MainActivity.this, mSearchView);
+					for (SearchResult searchResult : result) {
+						TextView tv = new TextView(MainActivity.this);
+						tv.setText(Html.fromHtml(searchResult.bookName));
+						searchPopupMenu.getMenu().add(tv.getText());
 					}
-				});
-			}
-		});
-		task.execute();
+					searchPopupMenu.show();
+					searchPopupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
+						@Override
+						public boolean onMenuItemClick(MenuItem item) {
+							int order = item.getOrder();
+							SearchResult selectedResult = result.get(order);
+							MainActivity.this.getMenu().findItem(R.id.action_search).collapseActionView();
+							openBookFromSearch(selectedResult);
+							return false;
+						}
+					});
+				}
+			});
+			mSearchBookTask.execute();
+		}
 		return true;
 	}
 }
