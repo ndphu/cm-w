@@ -39,7 +39,7 @@
             android:contentDescription="@string/menu_button"
             android:focusable="false"
             android:padding="4dp"
-            android:src="@drawable/ic_3dot_menu_light" />
+            android:src="@drawable/ic_action_over_flow" />
 
         <ProgressBar
             android:id="@+id/listview_item_book_menu_loading_indicator"

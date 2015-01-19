@@ -37,6 +37,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 	public List<SearchResult> search(String token) {
 		final List<SearchResult> result = new ArrayList<SearchResult>();
 		Log.i(TAG, "Search token: " + token);
+		long startTime = System.currentTimeMillis();
 		HttpClient client = new DefaultHttpClient();
 		HttpPost post = new HttpPost(QUICK_SEARCH);
 		HttpResponse response = null;
@@ -74,6 +75,7 @@ public class BlogTruyenProcessor implements BookProcessor {
 				e.printStackTrace();
 			}
 		}
+		Log.i(TAG, "Completed in: " + (System.currentTimeMillis() - startTime) + "");
 		return result;
 	}
 
@@ -93,7 +95,8 @@ public class BlogTruyenProcessor implements BookProcessor {
 				if (isInContentPart) {
 					content.append(line);
 					String currentContent = content.toString();
-					isInContentPart = !(Utils.countString(currentContent, "<div") == Utils.countString(currentContent, "</div>"));
+					isInContentPart = !(Utils.countString(currentContent, "<div") == Utils.countString(currentContent,
+							"</div>"));
 					return false;
 				}
 				if (line.startsWith("<title>")) {

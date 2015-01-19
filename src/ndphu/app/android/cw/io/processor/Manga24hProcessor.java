@@ -124,8 +124,9 @@ public class Manga24hProcessor implements BookProcessor {
 
 	@Override
 	public List<SearchResult> search(String token) {
-
 		List<SearchResult> result = new ArrayList<SearchResult>();
+		Log.i(TAG, "Search token: " + token);
+		long startTime = System.currentTimeMillis();
 		try {
 			String url = String.format(SEARCH_URL_TEMPLATE, URLEncoder.encode(token, "UTF-8"));
 			byte[] rawDataFromURL = Utils.getRawDataFromURL(url);
@@ -148,6 +149,7 @@ public class Manga24hProcessor implements BookProcessor {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
+		Log.i(TAG, "Completed in: " + (System.currentTimeMillis() - startTime) + "");
 		return result;
 	}
 

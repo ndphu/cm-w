@@ -1,6 +1,5 @@
 package ndphu.app.android.cw.task;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import android.os.AsyncTask;
 public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 
 	private String mSearchString;
-	private WeakReference<SearchBookTaskListener> mListener;
+	private SearchBookTaskListener mListener;
 	private List<BookProcessor> mBookProcessors;
 
 	public interface SearchBookTaskListener {
@@ -26,7 +25,7 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	}
 
 	public void setSearchBookTaskListener(SearchBookTaskListener listener) {
-		mListener = new WeakReference<SearchBookTaskListener>(listener);
+		mListener = listener;
 	}
 
 	public SearchBook(String searchString) {
@@ -40,8 +39,11 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		if (mListener != null && mListener.get() != null) {
-			mListener.get().onStartSearching(this.mSearchString);
+		if (isCancelled()) {
+			return;
+		}
+		if (mListener != null) {
+			mListener.onStartSearching(this.mSearchString);
 		}
 	}
 
@@ -49,6 +51,9 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	protected List<SearchResult> doInBackground(Void... params) {
 		List<SearchResult> result = new ArrayList<SearchResult>();
 		for (BookProcessor processor : mBookProcessors) {
+			if (isCancelled()) {
+				return null;
+			}
 			List<SearchResult> bookResult = processor.search(this.mSearchString);
 			result.addAll(bookResult);
 		}
@@ -58,8 +63,17 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	@Override
 	protected void onPostExecute(List<SearchResult> result) {
 		super.onPostExecute(result);
-		if (mListener != null && mListener.get() != null) {
-			mListener.get().onComplete(result);
+		if (isCancelled()) {
+			return;
+		}
+		if (mListener != null) {
+			mListener.onComplete(result);
 		}
 	}
+
+	public void cancelSearch() {
+		this.cancel(true);
+
+	}
+
 }
