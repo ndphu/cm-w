@@ -274,16 +274,16 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 	private void refresh() {
 		// Init cache dir
 		mCacheDir = new File(getExternalCacheDir().getAbsolutePath() + "/" + Utils.getMD5Hash(mCurrentChapter.getUrl()));
-		new InitCacheTask().execute(mCacheDir);
+		new InitCacheTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mCacheDir);
 		// Execute task
 		mCurrentChapter = DaoUtils.getChapterById(mCurrentChapter.getId());
 		if (mCurrentChapter.getPages().size() == 0) {
-			new LoadChapterDataTask().execute();
+			new LoadChapterDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			Log.i(TAG, "chapter found, reload");
 			mViewPager.setAdapter(mPageAdapter);
 			mViewPager.setOnPageChangeListener(mPageChangeListener);
-			new PageLoaderTask().execute();
+			new PageLoaderTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 	}
 
@@ -321,7 +321,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 		}
 		TouchImageView viewToBeUpdated = (TouchImageView) mViewPager.findViewWithTag(viewTag);
 		if (viewToBeUpdated != null) {
-			new ImageLoader().execute(getBitmapFileFromCache(viewTag), viewTag, new WeakReference<TouchImageView>(
+			new ImageLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, getBitmapFileFromCache(viewTag), viewTag, new WeakReference<TouchImageView>(
 					viewToBeUpdated));
 		}
 	}
@@ -492,7 +492,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				} else if (result instanceof List) {
 					mViewPager.setAdapter(mPageAdapter);
 					mViewPager.setOnPageChangeListener(mPageChangeListener);
-					new PageLoaderTask().execute();
+					new PageLoaderTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 			}
 		}
@@ -680,7 +680,7 @@ public class ReadingActivity extends ActionBarActivity implements LoadingProgres
 				return null;
 			}
 
-		}.execute();
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 }

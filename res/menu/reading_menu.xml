@@ -5,19 +5,31 @@
 
     <group>
         <item
+            android:id="@+id/action_go_to_newest"
+            android:icon="@drawable/ic_action_up"
+            android:title="@string/go_to_newest_chapter"
+            app:showAsAction="always"/>
+        <item
+            android:id="@+id/action_go_to_oldest"
+            android:icon="@drawable/ic_action_down"
+            android:title="@string/go_to_oldest_chapter"
+            app:showAsAction="always"/>
+    </group>
+    <group>
+        <item
             android:id="@+id/action_add_to_favorite"
             android:icon="@drawable/ic_favorite"
-            android:title="@string/add_to_favirite_books"
-            app:showAsAction="ifRoom"/>
+            android:title="@string/add_to_favorite_books"
+            app:showAsAction="always"/>
     </group>
     <group>
         <item
             android:id="@+id/action_show_info"
             android:icon="@drawable/ic_action_show_info"
-            android:title="@string/add_to_favirite_books"
+            android:title="@string/add_to_favorite_books"
             app:showAsAction="ifRoom"/>
     </group>
-    <group >
+    <group>
         <item
             android:id="@+id/action_download_book"
             android:icon="@drawable/ic_action_download_book"

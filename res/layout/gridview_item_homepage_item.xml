@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     app:cardCornerRadius="2dp"
-    android:foreground="@drawable/listview_selectable_foreground"    app:cardElevation="1dp">
+    android:foreground="@drawable/listview_selectable_foreground"    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="fill_parent"

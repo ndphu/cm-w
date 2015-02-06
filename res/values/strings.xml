@@ -12,7 +12,7 @@
     <string name="cancel_current_progress">cancel current progress</string>
     <string name="go_to_the_previous_chapter">Go to the previous chapter</string>
     <string name="go_to_the_next_chapter">Go to the next chapter</string>
-    <string name="add_to_favirite_books">Add to favirite books</string>
+    <string name="add_to_favorite_books">Add to favorite books</string>
     <string name="action_select_category">Select category</string>
     <string name="close">Close</string>
     <string name="show_chapters">Show Chapters</string>
@@ -43,5 +43,7 @@
     <string name="loading">LOADING</string>
     <string name="load_next_chapter_completed">Next chapter is ready</string>
     <string name="perparing_next_chapter">Perparing next chapter...</string>
+    <string name="go_to_newest_chapter">Go to newest chapter</string>
+    <string name="go_to_oldest_chapter">Go to oldest chapter</string>
 
 </resources>
