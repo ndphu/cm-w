@@ -1,13 +1,8 @@
 package ndphu.app.android.cw.adapter;
 
-import java.util.List;
-
 import ndphu.app.android.cw.R;
-import ndphu.app.android.cw.dao.BookDao;
-import ndphu.app.android.cw.dao.ChapterDao;
 import ndphu.app.android.cw.dao.DaoUtils;
 import ndphu.app.android.cw.model.Book;
-import ndphu.app.android.cw.model.Chapter;
 import ndphu.app.android.cw.model.HomePageItem;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.task.LoadBookTask;
@@ -19,7 +14,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.PopupMenu.OnMenuItemClickListener;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,7 +111,7 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 								case R.id.action_add_favorite: {
 									if (book == null) {
 										SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
-										new LoadBookTask(result, HomePageItemAdapter.this).execute();
+										new LoadBookTask(result, HomePageItemAdapter.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 									} else {
 										book.setFavorite(true);
 										DaoUtils.updateBook(book);
@@ -140,7 +134,7 @@ public class HomePageItemAdapter extends ArrayAdapter<HomePageItem> implements L
 					}
 				});
 			}
-		}.execute();
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	public class ViewHolder {

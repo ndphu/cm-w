@@ -21,24 +21,24 @@ public class BookRecyclerAdapter extends Adapter<BookViewHolder> implements Book
 	private List<Book> mBooks;
 	private Context mContext;
 	private RefreshListener mListener;
-	
+
 	public static interface RefreshListener {
 		public void onRefreshStart();
-		
+
 		public void onRefreshEnd();
 	}
-	
+
 	public BookRecyclerAdapter(Context context) {
 		mContext = context;
 		mBooks = new ArrayList<Book>();
 	}
-	
+
 	public void setRefreshListener(RefreshListener listener) {
 		this.mListener = listener;
 	}
 
 	public void refresh() {
-		new LoadFavoriteTask().execute();
+		new LoadFavoriteTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override

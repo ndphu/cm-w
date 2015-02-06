@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			public void run() {
 				mSpinner.setOnItemSelectedListener(HomeFragment.this);
 				if (mGridAdapter.getCount() == 0) {
-					new LoadDataTask().execute();
+					new LoadDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 				}
 			}
 		});
@@ -109,7 +109,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mPage = 0;
 			mEndCategory = false;
 		}
-		new LoadDataTask().execute();
+		new LoadDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	private class LoadDataTask extends AsyncTask<Void, Void, List<HomePageItem>> {
@@ -167,7 +167,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			if (!mIsLoading && !mEndCategory) {
 				Log.i(TAG, "Loading when scrolling to end");
 				mIsLoading = true;
-				new LoadDataTask().execute();
+				new LoadDataTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		}
 	}

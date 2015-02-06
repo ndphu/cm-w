@@ -125,6 +125,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				.findFragmentById(R.id.fragment_drawer);
 		mNavFragment.setNavigationItemSelected(this);
 		new AsyncTask<Void, Void, Integer>() {
+			@Override
 			protected void onPreExecute() {
 				getSupportActionBar().hide();
 			};
@@ -140,6 +141,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				return initializePage;
 			}
 
+			@Override
 			protected void onPostExecute(Integer result) {
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 				final View splashScreen = findViewById(R.id.activity_main_splash_screen);
@@ -195,7 +197,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 				}
 			};
 
-		}.execute();
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override
@@ -211,7 +213,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 
 	/**
 	 * Open book by create a ReadingFragment to show book content
-	 * 
+	 *
 	 * @param book
 	 * @param currentChapterIndex
 	 */
@@ -347,7 +349,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 	}
 
 	public void openBookFromSearch(SearchResult selectedItem) {
-		new LoadBookTask(selectedItem, this).execute();
+		new LoadBookTask(selectedItem, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	public void startReadingActivity(Book book) {
@@ -372,7 +374,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 		Book savedBook = DaoUtils.getBookByHasedUrl(hasedUrl);
 		if (savedBook == null) {
 			SearchResult result = new SearchResult(item.bookName, item.bookUrl, item.source);
-			new LoadBookTask(result, this).execute();
+			new LoadBookTask(result, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		} else {
 			// startReadingActivity(savedBook);
 			openBook(savedBook);
@@ -490,7 +492,7 @@ public class MainActivity extends ActionBarActivity implements SearchView.OnQuer
 					});
 				}
 			});
-			mSearchBookTask.execute();
+			mSearchBookTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 		}
 		return true;
 	}

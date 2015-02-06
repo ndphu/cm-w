@@ -9,7 +9,8 @@
     android:focusable="true"
     android:foreground="@drawable/listview_selectable_foreground"
     app:cardCornerRadius="2dp"
-    app:cardElevation="2dp" >
+    app:cardElevation="2dp" 
+    android:layout_margin="4dp">
 
     <RelativeLayout
         android:layout_width="fill_parent"

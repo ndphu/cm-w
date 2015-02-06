@@ -2,7 +2,6 @@ package ndphu.app.android.cw.fragment.favorite;
 
 import ndphu.app.android.cw.R;
 import ndphu.app.android.cw.fragment.favorite.BookRecyclerAdapter.RefreshListener;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;

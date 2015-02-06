@@ -9,6 +9,7 @@ import ndphu.app.android.cw.adapter.SearchResultAdapter;
 import ndphu.app.android.cw.model.SearchResult;
 import ndphu.app.android.cw.task.SearchBook;
 import ndphu.app.android.cw.task.SearchBook.SearchBookTaskListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -30,7 +31,7 @@ public class SearchFragment extends Fragment implements SearchBookTaskListener, 
 		Log.i(TAG, "Execute search: " + searchString);
 		SearchBook task = new SearchBook(searchString);
 		task.setSearchBookTaskListener(this);
-		task.execute();
+		task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override
