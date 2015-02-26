@@ -3,10 +3,8 @@ package ndphu.app.android.cw.task;
 import java.util.ArrayList;
 import java.util.List;
 
-import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
-import ndphu.app.android.cw.io.processor.IZMangaProcessor;
-import ndphu.app.android.cw.io.processor.Manga24hProcessor;
+import ndphu.app.android.cw.io.processor.TT8Processor;
 import ndphu.app.android.cw.model.SearchResult;
 import android.os.AsyncTask;
 
@@ -31,9 +29,10 @@ public class SearchBook extends AsyncTask<Void, Void, List<SearchResult>> {
 	public SearchBook(String searchString) {
 		this.mSearchString = searchString;
 		mBookProcessors = new ArrayList<BookProcessor>();
-		mBookProcessors.add(new IZMangaProcessor());
-		mBookProcessors.add(new Manga24hProcessor());
-		mBookProcessors.add(new BlogTruyenProcessor());
+		// mBookProcessors.add(new IZMangaProcessor());
+		// mBookProcessors.add(new Manga24hProcessor());
+		// mBookProcessors.add(new BlogTruyenProcessor());
+		mBookProcessors.add(new TT8Processor());
 	}
 
 	@Override
