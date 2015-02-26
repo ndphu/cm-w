@@ -41,29 +41,29 @@ public class IZMangaProcessor implements BookProcessor {
 		CATEGORY_MAP.put(Category.NEW, "all");
 		CATEGORY_MAP.put(Category.ACTION, "39");
 		CATEGORY_MAP.put(Category.ADULT, "40");
-		CATEGORY_MAP.put(Category.ADVENTURE, "41");
-		CATEGORY_MAP.put(Category.COMEDY, "45");
+		// CATEGORY_MAP.put(Category.ADVENTURE, "41");
+		// CATEGORY_MAP.put(Category.COMEDY, "45");
 		CATEGORY_MAP.put(Category.DEMONS, "47");
 		CATEGORY_MAP.put(Category.DRAMA, "49");
-		CATEGORY_MAP.put(Category.FANTASY, "51");
-		CATEGORY_MAP.put(Category.HISTORICAL, "55");
+		// CATEGORY_MAP.put(Category.FANTASY, "51");
+		// CATEGORY_MAP.put(Category.HISTORICAL, "55");
 		CATEGORY_MAP.put(Category.HORROR, "56");
-		CATEGORY_MAP.put(Category.MAGIC, "59");
-		CATEGORY_MAP.put(Category.MARTIAL_ARTS, "62");
+		// CATEGORY_MAP.put(Category.MAGIC, "59");
+		// CATEGORY_MAP.put(Category.MARTIAL_ARTS, "62");
 		CATEGORY_MAP.put(Category.MATURE, "63");
-		CATEGORY_MAP.put(Category.MUSIC, "67");
+		// CATEGORY_MAP.put(Category.MUSIC, "67");
 		CATEGORY_MAP.put(Category.MYSTERY, "68");
-		CATEGORY_MAP.put(Category.ONESHOT, "70");
+		// CATEGORY_MAP.put(Category.ONESHOT, "70");
 		CATEGORY_MAP.put(Category.ROMANCE, "73");
 		CATEGORY_MAP.put(Category.SCHOOL_LIFE, "74");
-		CATEGORY_MAP.put(Category.SPORTS, "98");
-		CATEGORY_MAP.put(Category.SUPER_POWER, "99");
-		CATEGORY_MAP.put(Category.SUPERNATURAL, "101");
-		CATEGORY_MAP.put(Category.TRAGEDY, "102");
-		CATEGORY_MAP.put(Category.VAMPIRE, "103");
-		CATEGORY_MAP.put(Category.WEBTOONS, "104");
-		CATEGORY_MAP.put(Category.COMIC, "108");
-		CATEGORY_MAP.put(Category.SCAN, "110");
+		// CATEGORY_MAP.put(Category.SPORTS, "98");
+		// CATEGORY_MAP.put(Category.SUPER_POWER, "99");
+		// CATEGORY_MAP.put(Category.SUPERNATURAL, "101");
+		// CATEGORY_MAP.put(Category.TRAGEDY, "102");
+		// CATEGORY_MAP.put(Category.VAMPIRE, "103");
+		// CATEGORY_MAP.put(Category.WEBTOONS, "104");
+		// CATEGORY_MAP.put(Category.COMIC, "108");
+		// CATEGORY_MAP.put(Category.SCAN, "110");
 	}
 
 	@Override
@@ -228,7 +228,11 @@ public class IZMangaProcessor implements BookProcessor {
 		Log.d(TAG, "Page: " + page);
 		// because the site use 1 by the first index
 		page++;
-		String requestUrl = String.format(CATEGORY_URL, CATEGORY_MAP.get(category), page);
+		String categoryId = CATEGORY_MAP.get(category);
+		if (categoryId == null) {
+			return result;
+		}
+		String requestUrl = String.format(CATEGORY_URL, categoryId, page);
 		Log.d(TAG, "reuqest url: " + requestUrl);
 		try {
 			BasicParser.processLineByLine(requestUrl, new LineHandler() {
