@@ -24,7 +24,9 @@ public enum Category {
 	SHOUNEN("Shounen"),
 	SHOUNEN_AI("Shounen Ai"),
 	YAOI("Yaoi"),
-	YURI("Yuri");
+	YURI("Yuri"),
+	OVER_16("16+"),
+	OVER_18("18+");
 	
 	private String displayName;
 

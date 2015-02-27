@@ -1,5 +1,5 @@
 package ndphu.app.android.cw.model;
 
 public enum Source {
-	MANGA24H, BLOGTRUYEN, IZMANGA
+	MANGA24H, BLOGTRUYEN, IZMANGA, TT8
 }

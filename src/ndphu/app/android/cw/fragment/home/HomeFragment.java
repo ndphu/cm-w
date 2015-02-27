@@ -28,7 +28,6 @@ import android.widget.SpinnerAdapter;
 public class HomeFragment extends Fragment implements OnItemSelectedListener, OnItemClickListener, OnScrollListener {
 
 	private static final String TAG = HomeFragment.class.getSimpleName();
-	private static final int MAX_ITEMS_PER_PAGE = 16;
 	// private ViewPager mViewPager = null;
 	//
 	// private ScreenSlidePagerAdapter mPagerAdapter;
@@ -55,7 +54,8 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		for (int i = 0; i < categories.length; ++i) {
 			mCategories[i] = categories[i].getDisplayName();
 		}
-		mSpinnerAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, mCategories);
+		mSpinnerAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
+				mCategories);
 	}
 
 	@Override
@@ -99,7 +99,6 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 		super.onViewCreated(view, savedInstanceState);
 	}
 
-
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		mCurrentCategory = Category.values()[position];
@@ -123,7 +122,9 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 		@Override
 		protected List<HomePageItem> doInBackground(Void... params) {
-			return new IZMangaHomeLoader().getByCategory(mCurrentCategory, mPage);
+			// return new IZMangaHomeLoader().getByCategory(mCurrentCategory,
+			// mPage);
+			return new TT8HomeLoader().getByCategory(mCurrentCategory, mPage);
 		}
 
 		@Override
@@ -134,7 +135,7 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 			mIsLoading = false;
 			mGridAdapter.addAll(result);
 			// mProgressDialog.dismiss();
-			if (result.size() < MAX_ITEMS_PER_PAGE) {
+			if (result.size() < new TT8HomeLoader().getMaxItemSize()) {
 				// reach all books on this category
 				mEndCategory = true;
 			}
@@ -148,9 +149,12 @@ public class HomeFragment extends Fragment implements OnItemSelectedListener, On
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		/*HomePageItem item = mGridAdapter.getItem(position);
-		SearchResult result = new SearchResult(item.mBookName, item.mBookUrl, item.mSource);
-		((MainActivity) getActivity()).showBookDetails(result);*/
+		/*
+		 * HomePageItem item = mGridAdapter.getItem(position); SearchResult
+		 * result = new SearchResult(item.mBookName, item.mBookUrl,
+		 * item.mSource); ((MainActivity)
+		 * getActivity()).showBookDetails(result);
+		 */
 		if (mHomeFragmentListenerRef != null && mHomeFragmentListenerRef.get() != null) {
 			mHomeFragmentListenerRef.get().onHomePageItemSelected(mGridAdapter.getItem(position));
 		}

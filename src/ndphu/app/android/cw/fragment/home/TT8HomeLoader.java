@@ -18,4 +18,9 @@ public class TT8HomeLoader implements HomeLoader {
 		return new TT8Processor().getHomePageItemByCategory(category, page);
 	}
 
+	@Override
+	public int getMaxItemSize() {
+		return 15;
+	}
+
 }

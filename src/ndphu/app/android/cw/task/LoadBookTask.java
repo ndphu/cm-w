@@ -6,6 +6,7 @@ import ndphu.app.android.cw.io.processor.BlogTruyenProcessor;
 import ndphu.app.android.cw.io.processor.BookProcessor;
 import ndphu.app.android.cw.io.processor.IZMangaProcessor;
 import ndphu.app.android.cw.io.processor.Manga24hProcessor;
+import ndphu.app.android.cw.io.processor.TT8Processor;
 import ndphu.app.android.cw.model.Book;
 import ndphu.app.android.cw.model.SearchResult;
 import android.os.AsyncTask;
@@ -59,6 +60,9 @@ public class LoadBookTask extends AsyncTask<Void, Void, Object> {
 				break;
 			case IZMANGA:
 				processor = new IZMangaProcessor();
+				break;
+			case TT8:
+				processor = new TT8Processor();
 				break;
 			default:
 				break;
