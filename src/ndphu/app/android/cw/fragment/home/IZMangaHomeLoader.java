@@ -18,4 +18,9 @@ public class IZMangaHomeLoader implements HomeLoader {
 		return new IZMangaProcessor().getHomePageItemByCategory(category, page);
 	}
 
+	@Override
+	public int getMaxItemSize() {
+		return 16;
+	}
+
 }

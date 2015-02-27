@@ -9,4 +9,6 @@ public interface HomeLoader {
 	public List<HomePageItem> getHomePageData();
 
 	List<HomePageItem> getByCategory(Category category, int page);
+
+	public int getMaxItemSize();
 }
